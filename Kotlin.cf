@@ -1,0 +1,143 @@
+entrypoints Prog ;
+Program.  Prog ::=  [Inst] ;
+
+-- expressions
+
+Eassign.  Exp       ::=  Exp OpAssign Exp1 ;
+Eternary. Exp1      ::=  Exp3 "?" Exp1 ":" Exp2 ;
+Eor.      Exp2      ::=  Exp2 "||" Exp3 ;
+Eand.     Exp3      ::=  Exp3 "&&" Exp4 ;
+Eeq.      Exp4      ::=  Exp4 "==" Exp5 ;
+Eneq.     Exp4      ::=  Exp4 "!=" Exp5 ;
+El.       Exp5      ::=  Exp5 "<" Exp6 ;
+Eg.       Exp5      ::=  Exp5 ">" Exp6 ;
+Ele.      Exp5      ::=  Exp5 "<=" Exp6 ;
+Ege.      Exp5      ::=  Exp5 ">=" Exp6 ;
+Eadd.     Exp6      ::=  Exp6 "+"  Exp7 ;
+Esub.     Exp6      ::=  Exp6 "-"  Exp7 ;
+Emul.     Exp7      ::=  Exp7 "*"  Exp8 ;
+Ediv.     Exp7      ::=  Exp7 "/"  Exp8 ;
+Emod.     Exp7      ::=  Exp7 "%"  Exp8 ;
+Eneg.     Exp8      ::=  "-" Exp8 ;
+Elneg.    Exp8      ::=  "!" Exp8 ;
+Einc.     Exp8      ::=  "++" Exp8 ;
+Edec.     Exp8      ::=  "--" Exp8 ;
+Etupla.   Exp9      ::=  "Tupla" "(" [Exp] ")" ;
+Eint.     Exp9      ::=  Integer ;
+Estring.  Exp9      ::=  String ;
+Etrue.    Exp9      ::=  "true" ;
+Efalse.   Exp9      ::=  "false" ;
+Enull.    Exp9      ::=  "null" ;
+Ecall.    Exp9      ::=  FunctionExp ;
+Eget.     Exp9      ::=  Ident [DimExp] ;
+Elambda.  Exp9      ::=  Lambda ;
+Ennass.   Exp10     ::=  Exp10 "!!" ;
+Ear.      Exp11     ::=  Ident ;
+
+coercions Exp 11 ;
+separator Exp "," ;
+
+Dim.      DimExp    ::=  "[" Exp "]" ;
+terminator nonempty DimExp "" ;
+rules     OpAssign  ::=  "=" | "+=" | "-=" | "*=" | "/=" ;
+
+
+-- types       
+
+Ttupla.   BaseType  ::= "Tupla""<" [Type] ">" ;
+Tbool.    BaseType  ::= "Bool" ;
+Tint.     BaseType   ::= "Int" ;
+Tstring.  BaseType  ::= "String" ;
+
+Tunit.    Type ::=  "Unit" ;
+Tnull.    Type ::=  BaseType ;
+Tnonnull. Type ::=  BaseType "?" ;
+Tfun.     Type ::=  "(" [Type] ")" "->" BaseType ;
+
+separator Type "," ;
+
+
+-- args
+
+Args.      Arg  ::=  Ident ":" Type ;
+
+separator Arg "," ;
+
+-- statements
+
+Sdec.     Stm  ::=  Dec ;
+Sexp.     Stm  ::=  Exp ";" ;
+Sblock.   Stm  ::=  "run" "{" [Stm] "}" ;
+
+Sfor.     Stm  ::=  "for" "(" Ident "in" Iterable ")" "{" [Stm] "}" ;
+Swhile.   Stm  ::=  "while" "(" Exp ")" "{" [Stm] "}" ;
+Sbreak.   Stm  ::=  "break" ";" ;
+Scont.    Stm  ::=  "continue" ";" ;
+
+Sretexp.  Stm  ::=  "return" Exp ";" ;
+Sret.     Stm  ::=  "return" ";" ;
+
+Sif.      Stm  ::=  "if" "(" Exp ")" "{" [Stm] "}" ;
+Sifelse.  Stm  ::=  "if" "(" Exp ")" "{" [Stm] "}" "else" "{" [Stm] "}" ;
+
+Sprint.   Stm  ::=  "print" "(" Exp ")" ";" ;
+Sprintln. Stm  ::=  "println" "(" Exp ")" ";" ;
+
+Snotnull. Stm  ::=  Exp "?.let" "{" Stm "}" ;
+
+terminator Stm "" ;
+
+
+
+
+-- instructions
+
+Idec.     Inst ::= Dec ;
+
+terminator Inst "" ;
+
+
+
+
+-- declaration
+
+Dfun.     Dec  ::=  FunctionDec ;
+Darray.   Dec  ::=  ArrayDec ;
+Dvar.     Dec  ::=  "var" Ident ":" Type "=" Exp ";" ;
+Dval.     Dec  ::=  "val" Ident ":" Type "=" Exp ";" ;
+Dvarnull. Dec  ::=  "var" Ident ":" Type ";" ;
+Dvalnull. Dec  ::=  "val" Ident ":" Type ";" ;
+
+
+
+-- function
+
+FunDec.   FunctionDec    ::= "fun" Ident "(" [Arg] ")" ":" Type "{" [Stm] "}" ;
+FunCall.  FunctionExp    ::= Ident "(" [Exp] ")" ;
+
+
+-- lambdas
+
+LambdaRet.     Lambda    ::=  "{"  [Arg] "->" [Stm] Exp "}" ;
+LambdaNoRet.   Lambda    ::=  "{"  [Arg] "->" [Stm] "}" ;
+
+
+-- iterable
+
+Itarray.  Iterable  ::=  Ident ;
+Itrange.  Iterable  ::=  Exp ".." Exp ;
+Itup.     Iterable  ::=  Exp "until" Exp ;
+Itdown.   Iterable  ::=  Exp "downTo" Exp ;
+Itupst.   Iterable  ::=  Exp "until" Exp "step" Exp ;
+Itdownst. Iterable  ::=  Exp "downTo" Exp "step" Exp ;
+
+
+-- array
+
+ArrDec.   ArrayDec ::=  "val" Ident "=" "Array" "(" Exp "," Exp ")" ";" ; 
+
+
+-- Comment
+
+comment "//" ;
+comment "/*" "*/" ;
