@@ -48,18 +48,14 @@ failure x = error ("Undefined case: " ++ show x)
 -- P R O G R A M --
 -- ------------- --
 
-doMain :: [Stm] -> Env -> State -> IO(Env, State)
-doMain stms e s = case stms of
-  [] -> return(e,s)
-  h:t -> do
-      (ne, ns, nv, isRet) <- transStm h e s
-      doMain t ne ns
-
 start :: Prog -> IO()
-start prog = transProg prog (E empty) (S (singleton 0 (VInt 1)))
+start prog = do
+    let e = E empty
+    let s = S (fromList [(-1, VInt 1), (-2, go)])
+    transProg prog e s
 
 transProg :: Prog -> Env -> State -> IO()
-transProg x (E em) (S sm) = case x of
+transProg x e@(E em) s@(S sm) = case x of
   Program [] -> do
       putStrLn ""
       putStrLn ""
@@ -67,28 +63,56 @@ transProg x (E em) (S sm) = case x of
       putStrLn (Data.Map.Internal.Debug.showTree em)
       putStrLn (Data.Map.Internal.Debug.showTree sm)
   Program (h:t) -> do
-      (ne, ns) <- transInst h (E em) (S sm)
+      (ne, ns) <- transInst h e s
       transProg (Program t) ne ns
 
 transInst :: Inst -> Env -> State -> IO(Env, State)
 transInst x = case x of
   Idec dec -> transDec dec
 
-doFun :: [Stm] -> Env -> State -> IO(Env, State, Value)
-doFun stms e s = do
-    (ne, ns, v, isRet) <- doStms stms e s VUnit
-    return(ne, ns, v)
 
---bedzie ustawiac flagi dla break i continue
-doStms :: [Stm] -> Env -> State -> Value -> IO(Env, State, Value, Bool)
-doStms stms e s v = case stms of
-    [] -> return(e, s, v, True)
-    h:t -> do
---        putStrLn $ show h
-        (ne, ns, nv, isRet) <- transStm h e s
-        case isRet of
-          True -> return(ne, ns, nv, isRet)
-          False -> doStms t ne ns nv
+
+
+
+-- ----------------- --
+-- ----- M A P ----- --
+-- ----------------- --
+
+assign :: Env -> State -> Ident -> Value -> State
+assign (E em) (S sm) id val = let
+    (index, _) = (em ! id)
+  in S (insert index val sm)
+
+alloc :: Env -> State -> Ident -> Bool -> (Env, State)
+alloc (E em) (S sm) ident const = let
+    VInt index = sm ! (-1)
+    ns = S (insert (-1) (VInt (index+1)) sm)
+    ne = E (insert ident (index, const) em)
+  in (ne, ns)
+
+getIdx :: State -> Integer -> Value
+getIdx (S sm) index = sm ! index
+
+getVal :: Env -> State -> Ident -> Value
+getVal (E em) s ident = let
+    (index, _) = em ! ident
+  in getIdx s index
+
+
+ret = VString "RETURN"
+bre = VString "BREAK"
+cont = VString "CONT"
+go = VString "GO"
+
+
+set :: Value -> State -> State
+set v (S sm) = S (insert (-2) v sm)
+
+get :: State -> Value
+get (S sm) = sm ! (-2)
+
+is :: Value -> State -> Bool
+is v s = v == get s
 
 
 
@@ -99,27 +123,16 @@ doStms stms e s v = case stms of
 -- ----------------------- --
 
 declare :: Env -> State -> Ident -> Value -> Bool -> IO(Env, State)
-declare (E em) (S sm) id val const = do
-    let VInt index = sm ! 0
-    let nem = insert id (index, const) em
-    let nsm = insert index val sm
-    let nnsm = insert 0 (VInt (index+1)) nsm
---    putStrLn ""
---    putStrLn ""
---    putStrLn "DECLARE CALLED"
---    putStrLn ""
---    putStrLn (Data.Map.Internal.Debug.showTree nem)
---    putStrLn (Data.Map.Internal.Debug.showTree nnsm)
---    putStrLn ""
-    return(E nem, S nnsm)
+declare e s id val const = do
+    let (ne, ns) = alloc e s id const
+    let nns = assign ne ns id val
+    return(ne, nns)
 
 declareFun :: Env -> State -> Ident -> [Arg] -> [Stm] -> Bool -> IO(Env, State)
-declareFun (E em) (S sm) id args stms const = do
-    let VInt index = sm ! 0
-    let ne = E (insert id (index, const) em)
-    let nsm = insert index (VFun args stms ne) sm
-    let nnsm = insert 0 (VInt (index+1)) nsm
-    return(ne, S nnsm)
+declareFun e s id args stms const = do
+    let (ne, ns) = alloc e s id const
+    let nns = assign ne ns id (VFun args stms ne)
+    return(ne, nns)
 
 transDec :: Dec -> Env -> State -> IO(Env, State)
 transDec x e s = case x of
@@ -141,11 +154,8 @@ transDec x e s = case x of
 transFunctionDec :: FunctionDec -> Env -> State -> IO(Env, State)
 transFunctionDec x e s = case x of
   FunDec (Ident "main") _ _ stms -> do
-      (ne, ns, v) <- doFun stms e s
-      return (e, ns)
---  FunDec (Ident "main") _ _ stms -> do
---      error "Function 'main' shloud look like:\n  fun main(): Unit { }"
---      return(e,s)
+      (_, ns, v) <- doStms stms e s
+      return (e, set go ns)
   FunDec ident args type_ stms -> declareFun e s ident args stms True
 
 
@@ -201,56 +211,75 @@ transArrayDec x = case x of
 
 
 
+
+
 -- ------------------- --
 -- S T A T E M E N T S --
 -- ------------------- --
 
-transStm :: Stm -> Env -> State -> IO(Env, State, Value, Bool)
+doStmsHelper :: [Stm] -> Env -> State -> Value -> IO(Env, State, Value)
+doStmsHelper stms e s v = case stms of
+    [] -> return(e, s, v)
+    h:t -> do
+        (ne, ns, nv) <- transStm h e s
+        case is go ns of
+          False -> return(ne, ns, nv)
+          True -> doStmsHelper t ne ns nv
+
+doStms :: [Stm] -> Env -> State -> IO(Env, State, Value)
+doStms stms e s = doStmsHelper stms e s VUnit
+
+
+
+transStm :: Stm -> Env -> State -> IO(Env, State, Value)
 transStm x e s  = case x of
   Sdec dec -> do
       (ne, se) <- transDec dec e s
-      return(ne, se, VUnit, False)
+      return(ne, se, VUnit)
   Sexp exp -> do
       (ns, v) <- transExp exp e s
-      return(e, ns, v, False)
+      return(e, ns, v)
   Sblock stms -> do
-      (_, ns, _, _) <- doStms stms e s VUnit
-      return(e, ns, VUnit, False)
+      (_, ns, v) <- doStms stms e s
+      return(e, ns, v)
   Sfor ident iterable stms -> failure x
   Swhile exp stms -> failure x
-  Sbreak -> failure x
-  Scont -> failure x
+  Sbreak -> return(e, set bre s, VUnit)
+  Scont -> return(e, set cont s, VUnit)
   Sretexp exp -> do
       (ns, v) <- transExp exp e s
-      return(e, ns, v, True)
-  Sret -> return(e, s, VUnit, True)
+      return(e, set ret ns, v)
+  Sret -> return(e, set ret s, VUnit)
   Sif exp stms -> do
       (ns, VBool v) <- transExp exp e s
       case v of
         True -> do
-            (_, nns, _, _) <- doStms stms e ns VUnit
-            return(e, nns, VUnit, False)
-        False -> return(e, s ,VUnit, False)
+            (_, nns, v) <- doStms stms e ns
+            return(e, nns, v)
+        False -> return(e, s ,VUnit)
   Sifelse exp stms1 stms2 -> do
       (ns, VBool v) <- transExp exp e s
       case v of
         True -> do
-            (_, nns, _, _) <- doStms stms1 e ns VUnit
-            return(e, nns, VUnit, False)
+            (_, nns, v) <- doStms stms1 e ns
+            return(e, nns, v)
         False -> do
-            (_, nns, _, _) <- doStms stms2 e ns VUnit
-            return(e, nns, VUnit, False)
+            (_, nns, v) <- doStms stms2 e ns
+            return(e, nns, v)
   Sprint exp -> do
       (ns, x) <- transExp exp e s
       case x of
         VInt v -> putStr (show v)
         VString v -> putStr (show v)
         VBool v -> putStr (show v)
-      return(e, ns, VUnit, False)
+      return(e, ns, VUnit)
   Sprintln exp -> do
-      (ne, ns, v, isRet) <- transStm (Sprint exp) e s
-      putStrLn ""
-      return(ne, ns, v, isRet)
+      (ns, x) <- transExp exp e s
+      case x of
+        VInt v -> putStrLn (show v)
+        VString v -> putStrLn (show v)
+        VBool v -> putStrLn (show v)
+      return(e, ns, VUnit)
   Snotnull exp stm -> failure x
 
 
@@ -270,13 +299,12 @@ addArgsHelper args exps eToAdd eToEval s = case (args, exps) of
         addArgsHelper at et ne eToEval nns
 
 transFunctionExp :: FunctionExp -> Env -> State -> IO(State, Value)
-transFunctionExp x e@(E em) s@(S sm) = case x of
+transFunctionExp x e s = case x of
   FunCall ident exps -> do
-      let (index, const) = em ! ident
-      let VFun args stms ne = sm ! index
+      let VFun args stms ne = getVal e s ident
       (nne, ns) <- addArgsHelper args exps ne e s
-      (_, nns, v) <- doFun stms nne ns
-      return(nns, v)
+      (_, nns, v) <- doStms stms nne ns
+      return(set go nns, v)
 
 transEtuplaHelper :: [Exp] -> Env -> State -> IO(State, [Value])
 transEtuplaHelper exps e s = case exps of
@@ -300,12 +328,11 @@ transBoolHelper exp1 exp2 f e s = do
 
 
 transExp :: Exp -> Env -> State -> IO(State, Value)
-transExp x e@(E em) s@(S sm) = case x of
+transExp x e s = case x of
   Eassign (Ear ident) opassign exp -> do
       (ns, val) <- transExp exp e s
-      let (index, const) = em ! ident
-      let nsm = insert index val sm
-      return(S nsm, val)
+      let nns = assign e ns ident val
+      return(nns, val)
   Eternary exp1 exp2 exp3 -> failure x
   Eor exp1 exp2 -> do
       (ns, VBool a) <- transExp exp1 e s
@@ -349,7 +376,4 @@ transExp x e@(E em) s@(S sm) = case x of
   Eget ident dimexps -> failure x
   Elambda lambda -> failure x
   Ennass exp -> failure x
-  Ear ident -> do
-      let (index, c) = em ! ident
-      let v =  sm ! index
-      return(s, v)
+  Ear ident -> return(s, getVal e s ident)

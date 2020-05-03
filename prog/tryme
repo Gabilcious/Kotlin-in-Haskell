@@ -1,24 +1,23 @@
 // Return w ifie - flaga w State (1) oraz wartosc reta (2):
-//    -1 - return
-//    -2 - continue
-//    -3 - break
-// czy boole?
+//    -1 - memory
+//    -2 - ret | continue | break | go
+//    -3 - ...
 
 // wywolywanie funkcji - ewaluate vlaue zanim zmienisz env
 // czy transExp wgl zmienia env? - nie powinno
 // Funkcja zmienia env podczas deklaracji swoj
 
 
-fun foo(d: Int) : Unit {
-  println (d);
-  if (d > 0) {
-    foo(d-1);
+fun fib(d: Int) : Int {
+  if (d == 1 || d == 2) {
+    return 1;
   }
-  println (d);
+  return fib(d-1) + fib(d-2);
 }
 
 fun main() : Unit {
-  foo(10);
+  run {
+    	return;
+	}
+  println (fib(8));
 }
-
-fun foo() : Int { }
