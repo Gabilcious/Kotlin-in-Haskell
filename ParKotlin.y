@@ -123,24 +123,28 @@ Exp7 : Exp7 '*' Exp8 { AbsKotlin.Emul $1 $3 }
 Exp8 :: { Exp }
 Exp8 : '-' Exp8 { AbsKotlin.Eneg $2 }
      | '!' Exp8 { AbsKotlin.Elneg $2 }
-     | '++' Exp8 { AbsKotlin.Einc $2 }
-     | '--' Exp8 { AbsKotlin.Edec $2 }
+     | '++' Exp11 { AbsKotlin.Einc $2 }
+     | '--' Exp11 { AbsKotlin.Edec $2 }
      | Exp9 { $1 }
 Exp9 :: { Exp }
-Exp9 : 'Tupla' '(' ListExp ')' { AbsKotlin.Etupla $3 }
-     | Integer { AbsKotlin.Eint $1 }
-     | String { AbsKotlin.Estring $1 }
-     | 'true' { AbsKotlin.Etrue }
-     | 'false' { AbsKotlin.Efalse }
-     | 'null' { AbsKotlin.Enull }
-     | FunctionExp { AbsKotlin.Ecall $1 }
-     | Ident ListDimExp { AbsKotlin.Eget $1 $2 }
-     | Lambda { AbsKotlin.Elambda $1 }
+Exp9 : Exp11 '++' { AbsKotlin.EPinc $1 }
+     | Exp11 '--' { AbsKotlin.EPdec $1 }
      | Exp10 { $1 }
 Exp10 :: { Exp }
-Exp10 : Exp10 '!!' { AbsKotlin.Ennass $1 } | Exp11 { $1 }
+Exp10 : 'Tupla' '(' ListExp ')' { AbsKotlin.Etupla $3 }
+      | Integer { AbsKotlin.Eint $1 }
+      | String { AbsKotlin.Estring $1 }
+      | 'true' { AbsKotlin.Etrue }
+      | 'false' { AbsKotlin.Efalse }
+      | 'null' { AbsKotlin.Enull }
+      | FunctionExp { AbsKotlin.Ecall $1 }
+      | Ident ListDimExp { AbsKotlin.Eget $1 $2 }
+      | Lambda { AbsKotlin.Elambda $1 }
+      | Exp11 { $1 }
 Exp11 :: { Exp }
-Exp11 : Ident { AbsKotlin.Ear $1 } | '(' Exp ')' { $2 }
+Exp11 : Exp11 '!!' { AbsKotlin.Ennass $1 } | Exp12 { $1 }
+Exp12 :: { Exp }
+Exp12 : Ident { AbsKotlin.Evar $1 } | '(' Exp ')' { $2 }
 ListExp :: { [Exp] }
 ListExp : {- empty -} { [] }
         | Exp { (:[]) $1 }
@@ -162,8 +166,8 @@ BaseType : 'Tupla' '<' ListType '>' { AbsKotlin.Ttupla $3 }
          | 'String' { AbsKotlin.Tstring }
 Type :: { Type }
 Type : 'Unit' { AbsKotlin.Tunit }
-     | BaseType { AbsKotlin.Tnull $1 }
-     | BaseType '?' { AbsKotlin.Tnonnull $1 }
+     | BaseType '?' { AbsKotlin.Tnull $1 }
+     | BaseType { AbsKotlin.Tnonnull $1 }
      | '(' ListType ')' '->' BaseType { AbsKotlin.Tfun $2 $5 }
 ListType :: { [Type] }
 ListType : {- empty -} { [] }

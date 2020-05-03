@@ -114,19 +114,21 @@ instance Print AbsKotlin.Exp where
     AbsKotlin.Emod exp1 exp2 -> prPrec i 7 (concatD [prt 7 exp1, doc (showString "%"), prt 8 exp2])
     AbsKotlin.Eneg exp -> prPrec i 8 (concatD [doc (showString "-"), prt 8 exp])
     AbsKotlin.Elneg exp -> prPrec i 8 (concatD [doc (showString "!"), prt 8 exp])
-    AbsKotlin.Einc exp -> prPrec i 8 (concatD [doc (showString "++"), prt 8 exp])
-    AbsKotlin.Edec exp -> prPrec i 8 (concatD [doc (showString "--"), prt 8 exp])
-    AbsKotlin.Etupla exps -> prPrec i 9 (concatD [doc (showString "Tupla"), doc (showString "("), prt 0 exps, doc (showString ")")])
-    AbsKotlin.Eint n -> prPrec i 9 (concatD [prt 0 n])
-    AbsKotlin.Estring str -> prPrec i 9 (concatD [prt 0 str])
-    AbsKotlin.Etrue -> prPrec i 9 (concatD [doc (showString "true")])
-    AbsKotlin.Efalse -> prPrec i 9 (concatD [doc (showString "false")])
-    AbsKotlin.Enull -> prPrec i 9 (concatD [doc (showString "null")])
-    AbsKotlin.Ecall functionexp -> prPrec i 9 (concatD [prt 0 functionexp])
-    AbsKotlin.Eget id dimexps -> prPrec i 9 (concatD [prt 0 id, prt 0 dimexps])
-    AbsKotlin.Elambda lambda -> prPrec i 9 (concatD [prt 0 lambda])
-    AbsKotlin.Ennass exp -> prPrec i 10 (concatD [prt 10 exp, doc (showString "!!")])
-    AbsKotlin.Ear id -> prPrec i 11 (concatD [prt 0 id])
+    AbsKotlin.Einc exp -> prPrec i 8 (concatD [doc (showString "++"), prt 11 exp])
+    AbsKotlin.Edec exp -> prPrec i 8 (concatD [doc (showString "--"), prt 11 exp])
+    AbsKotlin.EPinc exp -> prPrec i 9 (concatD [prt 11 exp, doc (showString "++")])
+    AbsKotlin.EPdec exp -> prPrec i 9 (concatD [prt 11 exp, doc (showString "--")])
+    AbsKotlin.Etupla exps -> prPrec i 10 (concatD [doc (showString "Tupla"), doc (showString "("), prt 0 exps, doc (showString ")")])
+    AbsKotlin.Eint n -> prPrec i 10 (concatD [prt 0 n])
+    AbsKotlin.Estring str -> prPrec i 10 (concatD [prt 0 str])
+    AbsKotlin.Etrue -> prPrec i 10 (concatD [doc (showString "true")])
+    AbsKotlin.Efalse -> prPrec i 10 (concatD [doc (showString "false")])
+    AbsKotlin.Enull -> prPrec i 10 (concatD [doc (showString "null")])
+    AbsKotlin.Ecall functionexp -> prPrec i 10 (concatD [prt 0 functionexp])
+    AbsKotlin.Eget id dimexps -> prPrec i 10 (concatD [prt 0 id, prt 0 dimexps])
+    AbsKotlin.Elambda lambda -> prPrec i 10 (concatD [prt 0 lambda])
+    AbsKotlin.Ennass exp -> prPrec i 11 (concatD [prt 11 exp, doc (showString "!!")])
+    AbsKotlin.Evar id -> prPrec i 12 (concatD [prt 0 id])
   prtList _ [] = concatD []
   prtList _ [x] = concatD [prt 0 x]
   prtList _ (x:xs) = concatD [prt 0 x, doc (showString ","), prt 0 xs]
@@ -161,8 +163,8 @@ instance Print AbsKotlin.BaseType where
 instance Print AbsKotlin.Type where
   prt i e = case e of
     AbsKotlin.Tunit -> prPrec i 0 (concatD [doc (showString "Unit")])
-    AbsKotlin.Tnull basetype -> prPrec i 0 (concatD [prt 0 basetype])
-    AbsKotlin.Tnonnull basetype -> prPrec i 0 (concatD [prt 0 basetype, doc (showString "?")])
+    AbsKotlin.Tnull basetype -> prPrec i 0 (concatD [prt 0 basetype, doc (showString "?")])
+    AbsKotlin.Tnonnull basetype -> prPrec i 0 (concatD [prt 0 basetype])
     AbsKotlin.Tfun types basetype -> prPrec i 0 (concatD [doc (showString "("), prt 0 types, doc (showString ")"), doc (showString "->"), prt 0 basetype])
   prtList _ [] = concatD []
   prtList _ [x] = concatD [prt 0 x]

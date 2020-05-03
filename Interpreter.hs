@@ -335,7 +335,7 @@ transBoolHelper exp1 exp2 f e s = do
 
 transExp :: Exp -> Env -> State -> IO(State, Value)
 transExp x e s = case x of
-  Eassign (Ear ident) opassign exp -> do
+  Eassign (Evar ident) opassign exp -> do
       (ns, val) <- transExp exp e s
       let nns = assign e ns ident val
       return(nns, val)
@@ -370,14 +370,22 @@ transExp x e s = case x of
   Elneg exp -> do
       (ns, VBool a) <- transExp exp e s
       return(ns, VBool (not a))
-  Einc (Ear ident) -> do
+  Einc (Evar ident) -> do
       let VInt v = getVal e s ident
       let ns = assign e s ident (VInt (v+1))
       return(ns, VInt (v+1))
-  Edec (Ear ident) -> do
+  Edec (Evar ident) -> do
       let VInt v = getVal e s ident
       let ns = assign e s ident (VInt (v-1))
       return(ns, VInt (v-1))
+  EPinc (Evar ident) -> do
+      let VInt v = getVal e s ident
+      let ns = assign e s ident (VInt (v-1))
+      return(ns, VInt v)
+  EPdec (Evar ident) -> do
+      let VInt v = getVal e s ident
+      let ns = assign e s ident (VInt (v-1))
+      return(ns, VInt v)
   Etupla exps -> do
       (ns, vs) <- transEtuplaHelper exps e s
       return(ns, VTupla (reverse vs))
@@ -389,5 +397,5 @@ transExp x e s = case x of
   Ecall functionexp -> transFunctionExp functionexp e s
   Eget ident dimexps -> failure x
   Elambda lambda -> failure x
-  Ennass exp -> failure x
-  Ear ident -> return(s, getVal e s ident)
+  Ennass exp -> failure x -- wszędzie gdzie zakladam Evar, dodac obsluge
+  Evar ident -> return(s, getVal e s ident)

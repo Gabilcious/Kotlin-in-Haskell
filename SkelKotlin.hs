@@ -36,6 +36,8 @@ transExp x = case x of
   Elneg exp -> failure x
   Einc exp -> failure x
   Edec exp -> failure x
+  EPinc exp -> failure x
+  EPdec exp -> failure x
   Etupla exps -> failure x
   Eint integer -> failure x
   Estring string -> failure x
@@ -46,7 +48,7 @@ transExp x = case x of
   Eget ident dimexps -> failure x
   Elambda lambda -> failure x
   Ennass exp -> failure x
-  Ear ident -> failure x
+  Evar ident -> failure x
 transDimExp :: DimExp -> Result
 transDimExp x = case x of
   Dim exp -> failure x

@@ -20,21 +20,23 @@ Ediv.     Exp7      ::=  Exp7 "/"  Exp8 ;
 Emod.     Exp7      ::=  Exp7 "%"  Exp8 ;
 Eneg.     Exp8      ::=  "-" Exp8 ;
 Elneg.    Exp8      ::=  "!" Exp8 ;
-Einc.     Exp8      ::=  "++" Exp8 ;
-Edec.     Exp8      ::=  "--" Exp8 ;
-Etupla.   Exp9      ::=  "Tupla" "(" [Exp] ")" ;
-Eint.     Exp9      ::=  Integer ;
-Estring.  Exp9      ::=  String ;
-Etrue.    Exp9      ::=  "true" ;
-Efalse.   Exp9      ::=  "false" ;
-Enull.    Exp9      ::=  "null" ;
-Ecall.    Exp9      ::=  FunctionExp ;
-Eget.     Exp9      ::=  Ident [DimExp] ;
-Elambda.  Exp9      ::=  Lambda ;
-Ennass.   Exp10     ::=  Exp10 "!!" ;
-Ear.      Exp11     ::=  Ident ;
+Einc.     Exp8      ::=  "++" Exp11 ;
+Edec.     Exp8      ::=  "--" Exp11 ;
+EPinc.    Exp9      ::=  Exp11 "++" ;
+EPdec.    Exp9      ::=  Exp11 "--" ;
+Etupla.   Exp10     ::=  "Tupla" "(" [Exp] ")" ;
+Eint.     Exp10     ::=  Integer ;
+Estring.  Exp10     ::=  String ;
+Etrue.    Exp10     ::=  "true" ;
+Efalse.   Exp10     ::=  "false" ;
+Enull.    Exp10     ::=  "null" ;
+Ecall.    Exp10     ::=  FunctionExp ;
+Eget.     Exp10     ::=  Ident [DimExp] ;
+Elambda.  Exp10     ::=  Lambda ;
+Ennass.   Exp11     ::=  Exp11 "!!" ;
+Evar.     Exp12     ::=  Ident ;
 
-coercions Exp 11 ;
+coercions Exp 12 ;
 separator Exp "," ;
 
 Dim.      DimExp    ::=  "[" Exp "]" ;
@@ -50,8 +52,8 @@ Tint.     BaseType   ::= "Int" ;
 Tstring.  BaseType  ::= "String" ;
 
 Tunit.    Type ::=  "Unit" ;
-Tnull.    Type ::=  BaseType ;
-Tnonnull. Type ::=  BaseType "?" ;
+Tnull.    Type ::=  BaseType "?" ;
+Tnonnull. Type ::=  BaseType ;
 Tfun.     Type ::=  "(" [Type] ")" "->" BaseType ;
 
 separator Type "," ;

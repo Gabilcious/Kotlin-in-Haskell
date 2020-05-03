@@ -29,6 +29,8 @@ data Exp
     | Elneg Exp
     | Einc Exp
     | Edec Exp
+    | EPinc Exp
+    | EPdec Exp
     | Etupla [Exp]
     | Eint Integer
     | Estring String
@@ -39,7 +41,7 @@ data Exp
     | Eget Ident [DimExp]
     | Elambda Lambda
     | Ennass Exp
-    | Ear Ident
+    | Evar Ident
   deriving (Eq, Ord, Show, Read)
 
 data DimExp = Dim Exp

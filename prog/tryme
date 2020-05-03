@@ -10,7 +10,7 @@
 
 fun main() : Unit {
         var i: Int = 12;
-    	while (--i > 0) {
+    	while (i-- > 0) {
     	  println (i);
     	}
   println ("DONE");
