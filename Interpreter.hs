@@ -243,7 +243,13 @@ transStm x e s  = case x of
       (_, ns, v) <- doStms stms e s
       return(e, ns, v)
   Sfor ident iterable stms -> failure x
-  Swhile exp stms -> failure x
+  Swhile exp stms -> do
+      (_, ns, v) <- transStm (Sifelse exp stms [Sbreak]) e s
+      case get ns of
+        x | x == ret -> return(e, ns, v)
+          | x == bre -> return(e, set go ns, v)
+          | x == cont -> transStm (Swhile exp stms) e (set go ns)
+        _ -> transStm (Swhile exp stms) e ns
   Sbreak -> return(e, set bre s, VUnit)
   Scont -> return(e, set cont s, VUnit)
   Sretexp exp -> do
@@ -359,11 +365,19 @@ transExp x e s = case x of
         (VInt va, VInt vb) -> return(nns, VInt (div va vb))
   Emod exp1 exp2 -> transIntHelper exp1 exp2 mod e s
   Eneg exp -> do
+      (ns, VInt a) <- transExp exp e s
+      return(ns, VInt (- a))
+  Elneg exp -> do
       (ns, VBool a) <- transExp exp e s
       return(ns, VBool (not a))
-  Elneg exp -> failure x
-  Einc exp -> failure x
-  Edec exp -> failure x
+  Einc (Ear ident) -> do
+      let VInt v = getVal e s ident
+      let ns = assign e s ident (VInt (v+1))
+      return(ns, VInt (v+1))
+  Edec (Ear ident) -> do
+      let VInt v = getVal e s ident
+      let ns = assign e s ident (VInt (v-1))
+      return(ns, VInt (v-1))
   Etupla exps -> do
       (ns, vs) <- transEtuplaHelper exps e s
       return(ns, VTupla (reverse vs))
