@@ -96,7 +96,7 @@ Grammar
 	Stm -> 'if' '(' Exp ')' '{' ListStm '}' 'else' '{' ListStm '}'   (87)
 	Stm -> 'print' '(' Exp ')' ';'                     (88)
 	Stm -> 'println' '(' Exp ')' ';'                   (89)
-	Stm -> Exp '?.let' '{' Stm '}'                     (90)
+	Stm -> Exp '?.let' '{' ListStm '}'                 (90)
 	ListStm ->                                         (91)
 	ListStm -> ListStm Stm                             (92)
 	Inst -> Dec                                        (93)
@@ -4133,7 +4133,7 @@ State 160
 
 	Exp -> Exp . OpAssign Exp1                          (rule 5)
 	Stm -> Exp . ';'                                    (rule 78)
-	Stm -> Exp . '?.let' '{' Stm '}'                    (rule 90)
+	Stm -> Exp . '?.let' '{' ListStm '}'                (rule 90)
 
 	'%='           shift, and enter state 83
 	'*='           shift, and enter state 84
@@ -4738,62 +4738,43 @@ State 185
 
 State 186
 
-	Stm -> Exp '?.let' . '{' Stm '}'                    (rule 90)
+	Stm -> Exp '?.let' . '{' ListStm '}'                (rule 90)
 
 	'{'            shift, and enter state 187
 
 
 State 187
 
-	Stm -> Exp '?.let' '{' . Stm '}'                    (rule 90)
+	Stm -> Exp '?.let' '{' . ListStm '}'                (rule 90)
 
-	'!'            shift, and enter state 62
-	'('            shift, and enter state 63
-	'++'           shift, and enter state 64
-	'-'            shift, and enter state 65
-	'--'           shift, and enter state 66
-	'Tupla'        shift, and enter state 67
-	'break'        shift, and enter state 163
-	'continue'     shift, and enter state 164
-	'false'        shift, and enter state 68
-	'for'          shift, and enter state 165
-	'fun'          shift, and enter state 9
-	'if'           shift, and enter state 166
-	'null'         shift, and enter state 69
-	'print'        shift, and enter state 167
-	'println'      shift, and enter state 168
-	'return'       shift, and enter state 169
-	'run'          shift, and enter state 170
-	'true'         shift, and enter state 70
-	'val'          shift, and enter state 10
-	'var'          shift, and enter state 11
-	'while'        shift, and enter state 171
-	'{'            shift, and enter state 71
-	L_integ        shift, and enter state 2
-	L_quoted       shift, and enter state 72
-	L_ident        shift, and enter state 13
+	'!'            reduce using rule 91
+	'('            reduce using rule 91
+	'++'           reduce using rule 91
+	'-'            reduce using rule 91
+	'--'           reduce using rule 91
+	'Tupla'        reduce using rule 91
+	'break'        reduce using rule 91
+	'continue'     reduce using rule 91
+	'false'        reduce using rule 91
+	'for'          reduce using rule 91
+	'fun'          reduce using rule 91
+	'if'           reduce using rule 91
+	'null'         reduce using rule 91
+	'print'        reduce using rule 91
+	'println'      reduce using rule 91
+	'return'       reduce using rule 91
+	'run'          reduce using rule 91
+	'true'         reduce using rule 91
+	'val'          reduce using rule 91
+	'var'          reduce using rule 91
+	'while'        reduce using rule 91
+	'{'            reduce using rule 91
+	'}'            reduce using rule 91
+	L_integ        reduce using rule 91
+	L_quoted       reduce using rule 91
+	L_ident        reduce using rule 91
 
-	Integer        goto state 45
-	String         goto state 46
-	Ident          goto state 47
-	Exp            goto state 160
-	Exp1           goto state 49
-	Exp2           goto state 50
-	Exp3           goto state 51
-	Exp4           goto state 52
-	Exp5           goto state 53
-	Exp6           goto state 54
-	Exp7           goto state 55
-	Exp8           goto state 56
-	Exp9           goto state 57
-	Exp10          goto state 58
-	Exp11          goto state 59
-	Exp12          goto state 60
-	Stm            goto state 201
-	Dec            goto state 162
-	FunctionDec    goto state 7
-	FunctionExp    goto state 61
-	ArrayDec       goto state 8
+	ListStm        goto state 201
 
 State 188
 
@@ -5049,14 +5030,61 @@ State 200
 
 State 201
 
-	Stm -> Exp '?.let' '{' Stm . '}'                    (rule 90)
+	Stm -> Exp '?.let' '{' ListStm . '}'                (rule 90)
+	ListStm -> ListStm . Stm                            (rule 92)
 
+	'!'            shift, and enter state 62
+	'('            shift, and enter state 63
+	'++'           shift, and enter state 64
+	'-'            shift, and enter state 65
+	'--'           shift, and enter state 66
+	'Tupla'        shift, and enter state 67
+	'break'        shift, and enter state 163
+	'continue'     shift, and enter state 164
+	'false'        shift, and enter state 68
+	'for'          shift, and enter state 165
+	'fun'          shift, and enter state 9
+	'if'           shift, and enter state 166
+	'null'         shift, and enter state 69
+	'print'        shift, and enter state 167
+	'println'      shift, and enter state 168
+	'return'       shift, and enter state 169
+	'run'          shift, and enter state 170
+	'true'         shift, and enter state 70
+	'val'          shift, and enter state 10
+	'var'          shift, and enter state 11
+	'while'        shift, and enter state 171
+	'{'            shift, and enter state 71
 	'}'            shift, and enter state 202
+	L_integ        shift, and enter state 2
+	L_quoted       shift, and enter state 72
+	L_ident        shift, and enter state 13
 
+	Integer        goto state 45
+	String         goto state 46
+	Ident          goto state 47
+	Exp            goto state 160
+	Exp1           goto state 49
+	Exp2           goto state 50
+	Exp3           goto state 51
+	Exp4           goto state 52
+	Exp5           goto state 53
+	Exp6           goto state 54
+	Exp7           goto state 55
+	Exp8           goto state 56
+	Exp9           goto state 57
+	Exp10          goto state 58
+	Exp11          goto state 59
+	Exp12          goto state 60
+	Stm            goto state 161
+	Dec            goto state 162
+	FunctionDec    goto state 7
+	FunctionExp    goto state 61
+	ArrayDec       goto state 8
 
 State 202
 
-	Stm -> Exp '?.let' '{' Stm '}' .                    (rule 90)
+	Stm -> Exp '?.let' '{' ListStm '}' .                (rule 90)
 
 	'!'            reduce using rule 90
 	'('            reduce using rule 90

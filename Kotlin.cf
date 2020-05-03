@@ -85,7 +85,7 @@ Sifelse.  Stm  ::=  "if" "(" Exp ")" "{" [Stm] "}" "else" "{" [Stm] "}" ;
 Sprint.   Stm  ::=  "print" "(" Exp ")" ";" ;
 Sprintln. Stm  ::=  "println" "(" Exp ")" ";" ;
 
-Snotnull. Stm  ::=  Exp "?.let" "{" Stm "}" ;
+Snotnull. Stm  ::=  Exp "?.let" "{" [Stm] "}" ;
 
 terminator Stm "" ;
 

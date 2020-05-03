@@ -195,7 +195,7 @@ Stm : Dec { AbsKotlin.Sdec $1 }
     | 'if' '(' Exp ')' '{' ListStm '}' 'else' '{' ListStm '}' { AbsKotlin.Sifelse $3 (reverse $6) (reverse $10) }
     | 'print' '(' Exp ')' ';' { AbsKotlin.Sprint $3 }
     | 'println' '(' Exp ')' ';' { AbsKotlin.Sprintln $3 }
-    | Exp '?.let' '{' Stm '}' { AbsKotlin.Snotnull $1 $4 }
+    | Exp '?.let' '{' ListStm '}' { AbsKotlin.Snotnull $1 (reverse $4) }
 ListStm :: { [Stm] }
 ListStm : {- empty -} { [] } | ListStm Stm { flip (:) $1 $2 }
 Inst :: { Inst }

@@ -262,6 +262,7 @@ transStm x e s  = case x of
         VInt v -> putStr (show v)
         VString v -> putStr v
         VBool v -> putStr (show v)
+        VNull -> putStrLn "null"
       return(e, ns, VUnit)
   Sprintln exp -> do
       (ns, x) <- transExp exp e s
@@ -269,8 +270,13 @@ transStm x e s  = case x of
         VInt v -> putStrLn (show v)
         VString v -> putStrLn v
         VBool v -> putStrLn (show v)
+        VNull -> putStrLn "null"
       return(e, ns, VUnit)
-  Snotnull exp stm -> failure x
+  Snotnull exp stms -> do
+      (ns, v) <- transExp exp e s
+      case v of
+        VNull -> return(e, ns, VUnit)
+        _ -> transStm (Sblock stms) e s
 
 
 
@@ -343,7 +349,11 @@ transExp x e s = case x of
       (ns, val) <- transHelper exp1 exp2 (transOpAssign opassign) e s
       let nns = assign e ns ident val
       return(nns, val)
-  Eternary exp1 exp2 exp3 -> failure x
+  Eternary exp1 exp2 exp3 -> do
+      (ns, VBool b) <- transExp exp1 e s
+      case b of
+        True -> transExp exp2 e s
+        False -> transExp exp3 e s
   Eor exp1 exp2 -> do
       (ns, VBool a) <- transExp exp1 e s
       (nns, VBool b) <- transExp exp2 e ns
@@ -379,7 +389,7 @@ transExp x e s = case x of
       return(ns, VInt (v-1))
   EPinc (Evar ident) -> do
       let VInt v = getVal e s ident
-      let ns = assign e s ident (VInt (v-1))
+      let ns = assign e s ident (VInt (v+1))
       return(ns, VInt v)
   EPdec (Evar ident) -> do
       let VInt v = getVal e s ident
@@ -387,7 +397,7 @@ transExp x e s = case x of
       return(ns, VInt v)
   Etupla exps -> do
       (ns, vs) <- transEtuplaHelper exps e s
-      return(ns, VTupla (reverse vs))
+      return(ns, VTupla vs)
   Eint integer -> return(s, VInt integer)
   Estring string -> return(s, VString string)
   Etrue -> return(s, VBool True)

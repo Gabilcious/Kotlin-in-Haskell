@@ -80,7 +80,7 @@ data Stm
     | Sifelse Exp [Stm] [Stm]
     | Sprint Exp
     | Sprintln Exp
-    | Snotnull Exp Stm
+    | Snotnull Exp [Stm]
   deriving (Eq, Ord, Show, Read)
 
 data Inst = Idec Dec

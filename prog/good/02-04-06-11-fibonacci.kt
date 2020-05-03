@@ -6,5 +6,5 @@ fun fib(d: Int) : Int {
 }
 
 fun main() : Unit {
-    print ( fib (3) );
+    print ( fib (9) ); // 34
 }

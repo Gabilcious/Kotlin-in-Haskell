@@ -10,8 +10,8 @@ fun main() : Unit {
             }
             println("Error?");
         }
-        i
+        i;
     };
     
-    println(sqr(16));
+    println(sqr(16));  // 4
 }

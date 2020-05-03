@@ -6,10 +6,11 @@ fun main() : Unit {
 
     x?.let {    // x: Int
         f(x);
+        println ("Reachable");
     }
     y?.let {
         f(y);
-        // Unreachable code because y is null.
+        println ("Unreachable");
     }
 
     f(x!!);

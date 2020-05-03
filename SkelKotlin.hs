@@ -90,7 +90,7 @@ transStm x = case x of
   Sifelse exp stms1 stms2 -> failure x
   Sprint exp -> failure x
   Sprintln exp -> failure x
-  Snotnull exp stm -> failure x
+  Snotnull exp stms -> failure x
 transInst :: Inst -> Result
 transInst x = case x of
   Idec dec -> failure x

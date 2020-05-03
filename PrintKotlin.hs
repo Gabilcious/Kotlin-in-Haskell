@@ -199,7 +199,7 @@ instance Print AbsKotlin.Stm where
     AbsKotlin.Sifelse exp stms1 stms2 -> prPrec i 0 (concatD [doc (showString "if"), doc (showString "("), prt 0 exp, doc (showString ")"), doc (showString "{"), prt 0 stms1, doc (showString "}"), doc (showString "else"), doc (showString "{"), prt 0 stms2, doc (showString "}")])
     AbsKotlin.Sprint exp -> prPrec i 0 (concatD [doc (showString "print"), doc (showString "("), prt 0 exp, doc (showString ")"), doc (showString ";")])
     AbsKotlin.Sprintln exp -> prPrec i 0 (concatD [doc (showString "println"), doc (showString "("), prt 0 exp, doc (showString ")"), doc (showString ";")])
-    AbsKotlin.Snotnull exp stm -> prPrec i 0 (concatD [prt 0 exp, doc (showString "?.let"), doc (showString "{"), prt 0 stm, doc (showString "}")])
+    AbsKotlin.Snotnull exp stms -> prPrec i 0 (concatD [prt 0 exp, doc (showString "?.let"), doc (showString "{"), prt 0 stms, doc (showString "}")])
   prtList _ [] = concatD []
   prtList _ (x:xs) = concatD [prt 0 x, prt 0 xs]
 
