@@ -41,7 +41,7 @@ separator Exp "," ;
 
 Dim.      DimExp    ::=  "[" Exp "]" ;
 terminator nonempty DimExp "" ;
-rules     OpAssign  ::=  "=" | "+=" | "-=" | "*=" | "/=" ;
+rules     OpAssign  ::=  "=" | "+=" | "-=" | "*=" | "/=" | "%=" ;
 
 
 -- types       

@@ -47,8 +47,8 @@ The symbols used in Kotlin are the following:
   | ++ | -- | ( | )
   | !! | , | [ | ]
   | = | += | -= | *=
-  | /= | -> | ; | {
-  | } | ?.let | .. |
+  | /= | %= | -> | ;
+  | { | } | ?.let | ..
 
 ===Comments===
 Single-line comments begin with //.Multiple-line comments are  enclosed with /* and */.
@@ -116,6 +116,7 @@ All other symbols are terminals.
   |  |  **|**  | ``-=``
   |  |  **|**  | ``*=``
   |  |  **|**  | ``/=``
+  |  |  **|**  | ``%=``
   | //BaseType// | -> | ``Tupla`` ``<`` //[Type]// ``>``
   |  |  **|**  | ``Bool``
   |  |  **|**  | ``Int``

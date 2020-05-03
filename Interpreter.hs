@@ -168,31 +168,6 @@ transFunctionDec x e s = case x of
 transDimExp :: DimExp -> IO()
 transDimExp x = case x of
   Dim exp -> failure x
-transOpAssign :: OpAssign -> IO()
-transOpAssign x = case x of
-  OpAssign1 -> failure x
-  OpAssign2 -> failure x
-  OpAssign3 -> failure x
-  OpAssign4 -> failure x
-  OpAssign5 -> failure x
-transBaseType :: BaseType -> IO()
-transBaseType x = case x of
-  Ttupla types -> failure x
-  Tbool -> failure x
-  Tint -> failure x
-  Tstring -> failure x
-transType :: Type -> IO()
-transType x = case x of
-  Tunit -> failure x
-  Tnull basetype -> failure x
-  Tnonnull basetype -> failure x
-  Tfun types basetype -> failure x
-transArg :: Arg -> IO()
-transArg x = case x of
-  Args ident type_ -> failure x
-transIdent :: Ident -> Result
-transIdent x = case x of
-  Ident string -> failure x
 transLambda :: Lambda -> IO()
 transLambda x = case x of
   LambdaRet args stms exp -> failure x
@@ -320,11 +295,11 @@ transEtuplaHelper exps e s = case exps of
       (nns, nvs) <- transEtuplaHelper t e ns
       return(nns, nv:nvs)
 
-transIntHelper :: Exp -> Exp -> (Integer -> Integer -> Integer) -> Env -> State -> IO(State, Value)
-transIntHelper exp1 exp2 f e s = do
-    (ns, VInt a) <- transExp exp1 e s
-    (nns, VInt b) <- transExp exp2 e ns
-    return(nns, VInt (f a b))
+transHelper :: Exp -> Exp -> (Value -> Value -> Value) -> Env -> State -> IO(State, Value)
+transHelper exp1 exp2 f e s = do
+    (ns, a) <- transExp exp1 e s
+    (nns, b) <- transExp exp2 e ns
+    return(nns, f a b)
 
 transBoolHelper :: Exp -> Exp -> (Value -> Value -> Bool) -> Env -> State -> IO(State, Value)
 transBoolHelper exp1 exp2 f e s = do
@@ -335,8 +310,8 @@ transBoolHelper exp1 exp2 f e s = do
 
 transExp :: Exp -> Env -> State -> IO(State, Value)
 transExp x e s = case x of
-  Eassign (Evar ident) opassign exp -> do
-      (ns, val) <- transExp exp e s
+  Eassign exp1@(Evar ident) opassign exp2 -> do
+      (ns, val) <- transHelper exp1 exp2 (transOpAssign opassign) e s
       let nns = assign e ns ident val
       return(nns, val)
   Eternary exp1 exp2 exp3 -> failure x
@@ -354,16 +329,11 @@ transExp x e s = case x of
   Eg exp1 exp2 -> transBoolHelper exp1 exp2 (>) e s
   Ele exp1 exp2 -> transBoolHelper exp1 exp2 (<=) e s
   Ege exp1 exp2 -> transBoolHelper exp1 exp2 (>=) e s
-  Eadd exp1 exp2 -> transIntHelper exp1 exp2 (+) e s
-  Esub exp1 exp2 -> transIntHelper exp1 exp2 (-) e s
-  Emul exp1 exp2 -> transIntHelper exp1 exp2 (*) e s
-  Ediv exp1 exp2 -> do
-      (ns, a) <- transExp exp1 e s
-      (nns, b) <- transExp exp2 e ns
-      case (a, b) of
-        (_, VInt 0) -> error "Cannot divide by 0"
-        (VInt va, VInt vb) -> return(nns, VInt (div va vb))
-  Emod exp1 exp2 -> transIntHelper exp1 exp2 mod e s
+  Eadd exp1 exp2 -> transHelper exp1 exp2 (transOpAssign OpAssign2) e s
+  Esub exp1 exp2 -> transHelper exp1 exp2 (transOpAssign OpAssign3) e s
+  Emul exp1 exp2 -> transHelper exp1 exp2 (transOpAssign OpAssign4) e s
+  Ediv exp1 exp2 -> transHelper exp1 exp2 (transOpAssign OpAssign5) e s
+  Emod exp1 exp2 -> transHelper exp1 exp2 (transOpAssign OpAssign6) e s
   Eneg exp -> do
       (ns, VInt a) <- transExp exp e s
       return(ns, VInt (- a))
@@ -399,3 +369,19 @@ transExp x e s = case x of
   Elambda lambda -> failure x
   Ennass exp -> failure x -- wszędzie gdzie zakladam Evar, dodac obsluge
   Evar ident -> return(s, getVal e s ident)
+
+transOpAssign :: OpAssign -> Value -> Value -> Value
+transOpAssign x a b = case x of
+  OpAssign1 -> b
+  OpAssign2 -> case (a, b) of
+    (VInt va, VInt vb) -> VInt (va + vb)
+    (VString va, VString vb) -> VString (va ++ vb)
+  OpAssign3 -> case (a, b) of
+    (VInt va, VInt vb) -> VInt (va - vb)
+  OpAssign4 -> case (a, b) of
+    (VInt va, VInt vb) -> VInt (va * vb)
+  OpAssign5 -> case (a, b) of
+    (VInt va, VInt 0) -> error "Cannot divide by 0"
+    (VInt va, VInt vb) -> VInt (div va  vb)
+  OpAssign6 -> case (a, b) of
+    (VInt va, VInt vb) -> VInt (mod va vb)

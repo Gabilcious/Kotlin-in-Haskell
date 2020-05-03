@@ -59,6 +59,7 @@ transOpAssign x = case x of
   OpAssign3 -> failure x
   OpAssign4 -> failure x
   OpAssign5 -> failure x
+  OpAssign6 -> failure x
 transBaseType :: BaseType -> Result
 transBaseType x = case x of
   Ttupla types -> failure x

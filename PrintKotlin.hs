@@ -152,6 +152,7 @@ instance Print AbsKotlin.OpAssign where
     AbsKotlin.OpAssign3 -> prPrec i 0 (concatD [doc (showString "-=")])
     AbsKotlin.OpAssign4 -> prPrec i 0 (concatD [doc (showString "*=")])
     AbsKotlin.OpAssign5 -> prPrec i 0 (concatD [doc (showString "/=")])
+    AbsKotlin.OpAssign6 -> prPrec i 0 (concatD [doc (showString "%=")])
 
 instance Print AbsKotlin.BaseType where
   prt i e = case e of

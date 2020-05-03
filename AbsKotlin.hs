@@ -48,7 +48,12 @@ data DimExp = Dim Exp
   deriving (Eq, Ord, Show, Read)
 
 data OpAssign
-    = OpAssign1 | OpAssign2 | OpAssign3 | OpAssign4 | OpAssign5
+    = OpAssign1
+    | OpAssign2
+    | OpAssign3
+    | OpAssign4
+    | OpAssign5
+    | OpAssign6
   deriving (Eq, Ord, Show, Read)
 
 data BaseType = Ttupla [Type] | Tbool | Tint | Tstring

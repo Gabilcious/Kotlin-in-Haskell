@@ -17,63 +17,64 @@ import ErrM
   '!!' { PT _ (TS _ 2) }
   '!=' { PT _ (TS _ 3) }
   '%' { PT _ (TS _ 4) }
-  '&&' { PT _ (TS _ 5) }
-  '(' { PT _ (TS _ 6) }
-  ')' { PT _ (TS _ 7) }
-  '*' { PT _ (TS _ 8) }
-  '*=' { PT _ (TS _ 9) }
-  '+' { PT _ (TS _ 10) }
-  '++' { PT _ (TS _ 11) }
-  '+=' { PT _ (TS _ 12) }
-  ',' { PT _ (TS _ 13) }
-  '-' { PT _ (TS _ 14) }
-  '--' { PT _ (TS _ 15) }
-  '-=' { PT _ (TS _ 16) }
-  '->' { PT _ (TS _ 17) }
-  '..' { PT _ (TS _ 18) }
-  '/' { PT _ (TS _ 19) }
-  '/=' { PT _ (TS _ 20) }
-  ':' { PT _ (TS _ 21) }
-  ';' { PT _ (TS _ 22) }
-  '<' { PT _ (TS _ 23) }
-  '<=' { PT _ (TS _ 24) }
-  '=' { PT _ (TS _ 25) }
-  '==' { PT _ (TS _ 26) }
-  '>' { PT _ (TS _ 27) }
-  '>=' { PT _ (TS _ 28) }
-  '?' { PT _ (TS _ 29) }
-  '?.let' { PT _ (TS _ 30) }
-  'Array' { PT _ (TS _ 31) }
-  'Bool' { PT _ (TS _ 32) }
-  'Int' { PT _ (TS _ 33) }
-  'String' { PT _ (TS _ 34) }
-  'Tupla' { PT _ (TS _ 35) }
-  'Unit' { PT _ (TS _ 36) }
-  '[' { PT _ (TS _ 37) }
-  ']' { PT _ (TS _ 38) }
-  'break' { PT _ (TS _ 39) }
-  'continue' { PT _ (TS _ 40) }
-  'downTo' { PT _ (TS _ 41) }
-  'else' { PT _ (TS _ 42) }
-  'false' { PT _ (TS _ 43) }
-  'for' { PT _ (TS _ 44) }
-  'fun' { PT _ (TS _ 45) }
-  'if' { PT _ (TS _ 46) }
-  'in' { PT _ (TS _ 47) }
-  'null' { PT _ (TS _ 48) }
-  'print' { PT _ (TS _ 49) }
-  'println' { PT _ (TS _ 50) }
-  'return' { PT _ (TS _ 51) }
-  'run' { PT _ (TS _ 52) }
-  'step' { PT _ (TS _ 53) }
-  'true' { PT _ (TS _ 54) }
-  'until' { PT _ (TS _ 55) }
-  'val' { PT _ (TS _ 56) }
-  'var' { PT _ (TS _ 57) }
-  'while' { PT _ (TS _ 58) }
-  '{' { PT _ (TS _ 59) }
-  '||' { PT _ (TS _ 60) }
-  '}' { PT _ (TS _ 61) }
+  '%=' { PT _ (TS _ 5) }
+  '&&' { PT _ (TS _ 6) }
+  '(' { PT _ (TS _ 7) }
+  ')' { PT _ (TS _ 8) }
+  '*' { PT _ (TS _ 9) }
+  '*=' { PT _ (TS _ 10) }
+  '+' { PT _ (TS _ 11) }
+  '++' { PT _ (TS _ 12) }
+  '+=' { PT _ (TS _ 13) }
+  ',' { PT _ (TS _ 14) }
+  '-' { PT _ (TS _ 15) }
+  '--' { PT _ (TS _ 16) }
+  '-=' { PT _ (TS _ 17) }
+  '->' { PT _ (TS _ 18) }
+  '..' { PT _ (TS _ 19) }
+  '/' { PT _ (TS _ 20) }
+  '/=' { PT _ (TS _ 21) }
+  ':' { PT _ (TS _ 22) }
+  ';' { PT _ (TS _ 23) }
+  '<' { PT _ (TS _ 24) }
+  '<=' { PT _ (TS _ 25) }
+  '=' { PT _ (TS _ 26) }
+  '==' { PT _ (TS _ 27) }
+  '>' { PT _ (TS _ 28) }
+  '>=' { PT _ (TS _ 29) }
+  '?' { PT _ (TS _ 30) }
+  '?.let' { PT _ (TS _ 31) }
+  'Array' { PT _ (TS _ 32) }
+  'Bool' { PT _ (TS _ 33) }
+  'Int' { PT _ (TS _ 34) }
+  'String' { PT _ (TS _ 35) }
+  'Tupla' { PT _ (TS _ 36) }
+  'Unit' { PT _ (TS _ 37) }
+  '[' { PT _ (TS _ 38) }
+  ']' { PT _ (TS _ 39) }
+  'break' { PT _ (TS _ 40) }
+  'continue' { PT _ (TS _ 41) }
+  'downTo' { PT _ (TS _ 42) }
+  'else' { PT _ (TS _ 43) }
+  'false' { PT _ (TS _ 44) }
+  'for' { PT _ (TS _ 45) }
+  'fun' { PT _ (TS _ 46) }
+  'if' { PT _ (TS _ 47) }
+  'in' { PT _ (TS _ 48) }
+  'null' { PT _ (TS _ 49) }
+  'print' { PT _ (TS _ 50) }
+  'println' { PT _ (TS _ 51) }
+  'return' { PT _ (TS _ 52) }
+  'run' { PT _ (TS _ 53) }
+  'step' { PT _ (TS _ 54) }
+  'true' { PT _ (TS _ 55) }
+  'until' { PT _ (TS _ 56) }
+  'val' { PT _ (TS _ 57) }
+  'var' { PT _ (TS _ 58) }
+  'while' { PT _ (TS _ 59) }
+  '{' { PT _ (TS _ 60) }
+  '||' { PT _ (TS _ 61) }
+  '}' { PT _ (TS _ 62) }
   L_integ  { PT _ (TI $$) }
   L_quoted { PT _ (TL $$) }
   L_ident  { PT _ (TV $$) }
@@ -159,6 +160,7 @@ OpAssign : '=' { AbsKotlin.OpAssign1 }
          | '-=' { AbsKotlin.OpAssign3 }
          | '*=' { AbsKotlin.OpAssign4 }
          | '/=' { AbsKotlin.OpAssign5 }
+         | '%=' { AbsKotlin.OpAssign6 }
 BaseType :: { BaseType }
 BaseType : 'Tupla' '<' ListType '>' { AbsKotlin.Ttupla $3 }
          | 'Bool' { AbsKotlin.Tbool }
