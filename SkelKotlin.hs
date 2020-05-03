@@ -46,7 +46,7 @@ transExp x = case x of
   Enull -> failure x
   Ecall functionexp -> failure x
   Eget ident dimexps -> failure x
-  Elambda lambda -> failure x
+  Elambda args stms -> failure x
   Ennass exp -> failure x
   Evar ident -> failure x
 transDimExp :: DimExp -> Result
@@ -108,10 +108,6 @@ transFunctionDec x = case x of
 transFunctionExp :: FunctionExp -> Result
 transFunctionExp x = case x of
   FunCall ident exps -> failure x
-transLambda :: Lambda -> Result
-transLambda x = case x of
-  LambdaRet args stms exp -> failure x
-  LambdaNoRet args stms -> failure x
 transIterable :: Iterable -> Result
 transIterable x = case x of
   Itarray ident -> failure x

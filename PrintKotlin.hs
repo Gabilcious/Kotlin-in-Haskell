@@ -126,7 +126,7 @@ instance Print AbsKotlin.Exp where
     AbsKotlin.Enull -> prPrec i 10 (concatD [doc (showString "null")])
     AbsKotlin.Ecall functionexp -> prPrec i 10 (concatD [prt 0 functionexp])
     AbsKotlin.Eget id dimexps -> prPrec i 10 (concatD [prt 0 id, prt 0 dimexps])
-    AbsKotlin.Elambda lambda -> prPrec i 10 (concatD [prt 0 lambda])
+    AbsKotlin.Elambda args stms -> prPrec i 10 (concatD [doc (showString "{"), prt 0 args, doc (showString "->"), prt 0 stms, doc (showString "}")])
     AbsKotlin.Ennass exp -> prPrec i 11 (concatD [prt 11 exp, doc (showString "!!")])
     AbsKotlin.Evar id -> prPrec i 12 (concatD [prt 0 id])
   prtList _ [] = concatD []
@@ -231,11 +231,6 @@ instance Print AbsKotlin.FunctionDec where
 instance Print AbsKotlin.FunctionExp where
   prt i e = case e of
     AbsKotlin.FunCall id exps -> prPrec i 0 (concatD [prt 0 id, doc (showString "("), prt 0 exps, doc (showString ")")])
-
-instance Print AbsKotlin.Lambda where
-  prt i e = case e of
-    AbsKotlin.LambdaRet args stms exp -> prPrec i 0 (concatD [doc (showString "{"), prt 0 args, doc (showString "->"), prt 0 stms, prt 0 exp, doc (showString "}")])
-    AbsKotlin.LambdaNoRet args stms -> prPrec i 0 (concatD [doc (showString "{"), prt 0 args, doc (showString "->"), prt 0 stms, doc (showString "}")])
 
 instance Print AbsKotlin.Iterable where
   prt i e = case e of

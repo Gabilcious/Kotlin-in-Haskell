@@ -137,7 +137,7 @@ declareFun e s id args stms const = do
 transDec :: Dec -> Env -> State -> IO(Env, State)
 transDec x e s = case x of
   Dfun functiondec -> transFunctionDec functiondec e s
-  Darray arraydec -> failure x
+  Darray arraydec -> transArrayDec arraydec e s
   Dvar ident type_ exp -> do
       (ns, val) <- transExp exp e s
       declare e ns ident val False
@@ -158,21 +158,33 @@ transFunctionDec x e s = case x of
       return (e, set go ns)
   FunDec ident args type_ stms -> declareFun e s ident args stms True
 
+transArrayDecHelper :: Env -> State -> [Stm] -> Ident -> Integer -> Integer -> [Value] -> IO(State, [Value])
+transArrayDecHelper e s stms it size expected vals = case size < expected of
+    True -> do
+      (ne, ns) <- declare e s it (VInt size) False
+      (nne, nns, v) <- doStms stms ne ns
+      transArrayDecHelper nne (set go nns) stms it (size+1) expected (v:vals)
+    False -> return(s, reverse vals)
+
+transArrayDec :: ArrayDec -> Env -> State -> IO(Env, State)
+transArrayDec x e s = case x of
+  ArrDec ident (Eint size) exp -> do
+      (ns, VFun [Args it _] stms eFun) <- transExp exp e s
+      (nns, list) <- transArrayDecHelper e ns stms it 0 size []
+      declare e nns ident (VArray list) True
+
 
 
 
 -- --------------- --
--- ---- I D K ---- --
+-- I T E R A B L E --
 -- --------------- --
 
-transDimExp :: DimExp -> IO()
-transDimExp x = case x of
-  Dim exp -> failure x
-transLambda :: Lambda -> IO()
-transLambda x = case x of
-  LambdaRet args stms exp -> failure x
-  LambdaNoRet args stms -> failure x
-transIterable :: Iterable -> IO()
+--doArrayList :: Env -> State -> Integer -> Integer -> Value -> [Value]
+--doIterable e s size expected f = failure x
+
+
+transIterable :: Iterable -> [Value]
 transIterable x = case x of
   Itarray ident -> failure x
   Itrange exp1 exp2 -> failure x
@@ -180,9 +192,6 @@ transIterable x = case x of
   Itdown exp1 exp2 -> failure x
   Itupst exp1 exp2 exp3 -> failure x
   Itdownst exp1 exp2 exp3 -> failure x
-transArrayDec :: ArrayDec -> IO()
-transArrayDec x = case x of
-  ArrDec ident exp1 exp2 -> failure x
 
 
 
@@ -251,14 +260,14 @@ transStm x e s  = case x of
       (ns, x) <- transExp exp e s
       case x of
         VInt v -> putStr (show v)
-        VString v -> putStr (show v)
+        VString v -> putStr v
         VBool v -> putStr (show v)
       return(e, ns, VUnit)
   Sprintln exp -> do
       (ns, x) <- transExp exp e s
       case x of
         VInt v -> putStrLn (show v)
-        VString v -> putStrLn (show v)
+        VString v -> putStrLn v
         VBool v -> putStrLn (show v)
       return(e, ns, VUnit)
   Snotnull exp stm -> failure x
@@ -286,6 +295,26 @@ transFunctionExp x e s = case x of
       (nne, ns) <- addArgsHelper args exps ne e s
       (_, nns, v) <- doStms stms nne ns
       return(set go nns, v)
+
+
+transDimExp :: DimExp -> Env -> State -> IO(State, Value)
+transDimExp x e s = case x of
+  Dim exp -> transExp exp e s
+
+transGetExpHelper :: Value -> [DimExp] -> Env -> State -> IO(State, Value)
+transGetExpHelper v dims e s = case (v,dims) of
+    (_, []) -> return(s,v)
+    (VArray list, h:t) -> do
+      (ns, VInt idx) <- transDimExp h e s
+      case fromIntegral idx  of
+        index | index < 0 -> error "Negative index"
+              | index >= length list -> error "Array Index Out of Bound"
+              | otherwise -> transGetExpHelper (list !! index) t e ns
+
+transGetExp :: Ident -> [DimExp] -> Env -> State -> IO(State, Value)
+transGetExp ident dimexps e s = transGetExpHelper (getVal e s ident) dimexps e s
+
+
 
 transEtuplaHelper :: [Exp] -> Env -> State -> IO(State, [Value])
 transEtuplaHelper exps e s = case exps of
@@ -365,8 +394,8 @@ transExp x e s = case x of
   Efalse -> return(s, VBool False)
   Enull -> return(s, VNull)
   Ecall functionexp -> transFunctionExp functionexp e s
-  Eget ident dimexps -> failure x
-  Elambda lambda -> failure x
+  Eget ident dimexps -> transGetExp ident dimexps e s
+  Elambda args stms -> return(s, VFun args stms e)
   Ennass exp -> failure x -- wszędzie gdzie zakladam Evar, dodac obsluge
   Evar ident -> return(s, getVal e s ident)
 

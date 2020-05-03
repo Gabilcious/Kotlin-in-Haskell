@@ -39,7 +39,7 @@ data Exp
     | Enull
     | Ecall FunctionExp
     | Eget Ident [DimExp]
-    | Elambda Lambda
+    | Elambda [Arg] [Stm]
     | Ennass Exp
     | Evar Ident
   deriving (Eq, Ord, Show, Read)
@@ -99,9 +99,6 @@ data FunctionDec = FunDec Ident [Arg] Type [Stm]
   deriving (Eq, Ord, Show, Read)
 
 data FunctionExp = FunCall Ident [Exp]
-  deriving (Eq, Ord, Show, Read)
-
-data Lambda = LambdaRet [Arg] [Stm] Exp | LambdaNoRet [Arg] [Stm]
   deriving (Eq, Ord, Show, Read)
 
 data Iterable

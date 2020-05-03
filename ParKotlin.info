@@ -50,7 +50,7 @@ Grammar
 	Exp10 -> 'null'                                    (41)
 	Exp10 -> FunctionExp                               (42)
 	Exp10 -> Ident ListDimExp                          (43)
-	Exp10 -> Lambda                                    (44)
+	Exp10 -> '{' ListArg '->' ListStm '}'              (44)
 	Exp10 -> Exp11                                     (45)
 	Exp11 -> Exp11 '!!'                                (46)
 	Exp11 -> Exp12                                     (47)
@@ -110,15 +110,13 @@ Grammar
 	Dec -> 'val' Ident ':' Type ';'                    (101)
 	FunctionDec -> 'fun' Ident '(' ListArg ')' ':' Type '{' ListStm '}'   (102)
 	FunctionExp -> Ident '(' ListExp ')'               (103)
-	Lambda -> '{' ListArg '->' ListStm Exp '}'         (104)
-	Lambda -> '{' ListArg '->' ListStm '}'             (105)
-	Iterable -> Ident                                  (106)
-	Iterable -> Exp '..' Exp                           (107)
-	Iterable -> Exp 'until' Exp                        (108)
-	Iterable -> Exp 'downTo' Exp                       (109)
-	Iterable -> Exp 'until' Exp 'step' Exp             (110)
-	Iterable -> Exp 'downTo' Exp 'step' Exp            (111)
-	ArrayDec -> 'val' Ident '=' 'Array' '(' Exp ',' Exp ')' ';'   (112)
+	Iterable -> Ident                                  (104)
+	Iterable -> Exp '..' Exp                           (105)
+	Iterable -> Exp 'until' Exp                        (106)
+	Iterable -> Exp 'downTo' Exp                       (107)
+	Iterable -> Exp 'until' Exp 'step' Exp             (108)
+	Iterable -> Exp 'downTo' Exp 'step' Exp            (109)
+	ArrayDec -> 'val' Ident '=' 'Array' '(' Exp ',' Exp ')' ';'   (110)
 
 -----------------------------------------------------------------------------
 Terminals
@@ -226,9 +224,8 @@ Non-terminals
 	Dec             rules 96, 97, 98, 99, 100, 101
 	FunctionDec     rule  102
 	FunctionExp     rule  103
-	Lambda          rules 104, 105
-	Iterable        rules 106, 107, 108, 109, 110, 111
-	ArrayDec        rule  112
+	Iterable        rules 104, 105, 106, 107, 108, 109
+	ArrayDec        rule  110
 
 -----------------------------------------------------------------------------
 States
@@ -284,7 +281,6 @@ State 2
 	'step'         reduce using rule 1
 	'until'        reduce using rule 1
 	'||'           reduce using rule 1
-	'}'            reduce using rule 1
 
 
 State 3
@@ -407,7 +403,7 @@ State 10
 
 	Dec -> 'val' . Ident ':' Type '=' Exp ';'           (rule 99)
 	Dec -> 'val' . Ident ':' Type ';'                   (rule 101)
-	ArrayDec -> 'val' . Ident '=' 'Array' '(' Exp ',' Exp ')' ';'    (rule 112)
+	ArrayDec -> 'val' . Ident '=' 'Array' '(' Exp ',' Exp ')' ';'    (rule 110)
 
 	L_ident        shift, and enter state 13
 
@@ -470,14 +466,13 @@ State 13
 	'step'         reduce using rule 3
 	'until'        reduce using rule 3
 	'||'           reduce using rule 3
-	'}'            reduce using rule 3
 
 
 State 14
 
 	Dec -> 'val' Ident . ':' Type '=' Exp ';'           (rule 99)
 	Dec -> 'val' Ident . ':' Type ';'                   (rule 101)
-	ArrayDec -> 'val' Ident . '=' 'Array' '(' Exp ',' Exp ')' ';'    (rule 112)
+	ArrayDec -> 'val' Ident . '=' 'Array' '(' Exp ',' Exp ')' ';'    (rule 110)
 
 	':'            shift, and enter state 17
 	'='            shift, and enter state 18
@@ -518,7 +513,7 @@ State 17
 
 State 18
 
-	ArrayDec -> 'val' Ident '=' . 'Array' '(' Exp ',' Exp ')' ';'    (rule 112)
+	ArrayDec -> 'val' Ident '=' . 'Array' '(' Exp ',' Exp ')' ';'    (rule 110)
 
 	'Array'        shift, and enter state 28
 
@@ -642,7 +637,7 @@ State 27
 
 State 28
 
-	ArrayDec -> 'val' Ident '=' 'Array' . '(' Exp ',' Exp ')' ';'    (rule 112)
+	ArrayDec -> 'val' Ident '=' 'Array' . '(' Exp ',' Exp ')' ';'    (rule 110)
 
 	'('            shift, and enter state 38
 
@@ -684,7 +679,7 @@ State 33
 
 	FunctionDec -> 'fun' Ident '(' ListArg ')' . ':' Type '{' ListStm '}'    (rule 102)
 
-	':'            shift, and enter state 81
+	':'            shift, and enter state 80
 
 
 State 34
@@ -697,7 +692,7 @@ State 34
 
 	Ident          goto state 30
 	Arg            goto state 31
-	ListArg        goto state 80
+	ListArg        goto state 79
 
 State 35
 
@@ -711,7 +706,7 @@ State 35
 	'Unit'         shift, and enter state 27
 
 	BaseType       goto state 20
-	Type           goto state 79
+	Type           goto state 78
 
 State 36
 
@@ -750,55 +745,18 @@ State 37
 
 	Dec -> 'val' Ident ':' Type '=' . Exp ';'           (rule 99)
 
-	'!'            shift, and enter state 63
-	'('            shift, and enter state 64
-	'++'           shift, and enter state 65
-	'-'            shift, and enter state 66
-	'--'           shift, and enter state 67
-	'Tupla'        shift, and enter state 68
-	'false'        shift, and enter state 69
-	'null'         shift, and enter state 70
-	'true'         shift, and enter state 71
-	'{'            shift, and enter state 72
+	'!'            shift, and enter state 62
+	'('            shift, and enter state 63
+	'++'           shift, and enter state 64
+	'-'            shift, and enter state 65
+	'--'           shift, and enter state 66
+	'Tupla'        shift, and enter state 67
+	'false'        shift, and enter state 68
+	'null'         shift, and enter state 69
+	'true'         shift, and enter state 70
+	'{'            shift, and enter state 71
 	L_integ        shift, and enter state 2
-	L_quoted       shift, and enter state 73
-	L_ident        shift, and enter state 13
-
-	Integer        goto state 45
-	String         goto state 46
-	Ident          goto state 47
-	Exp            goto state 78
-	Exp1           goto state 49
-	Exp2           goto state 50
-	Exp3           goto state 51
-	Exp4           goto state 52
-	Exp5           goto state 53
-	Exp6           goto state 54
-	Exp7           goto state 55
-	Exp8           goto state 56
-	Exp9           goto state 57
-	Exp10          goto state 58
-	Exp11          goto state 59
-	Exp12          goto state 60
-	FunctionExp    goto state 61
-	Lambda         goto state 62
-
-State 38
-
-	ArrayDec -> 'val' Ident '=' 'Array' '(' . Exp ',' Exp ')' ';'    (rule 112)
-
-	'!'            shift, and enter state 63
-	'('            shift, and enter state 64
-	'++'           shift, and enter state 65
-	'-'            shift, and enter state 66
-	'--'           shift, and enter state 67
-	'Tupla'        shift, and enter state 68
-	'false'        shift, and enter state 69
-	'null'         shift, and enter state 70
-	'true'         shift, and enter state 71
-	'{'            shift, and enter state 72
-	L_integ        shift, and enter state 2
-	L_quoted       shift, and enter state 73
+	L_quoted       shift, and enter state 72
 	L_ident        shift, and enter state 13
 
 	Integer        goto state 45
@@ -818,7 +776,42 @@ State 38
 	Exp11          goto state 59
 	Exp12          goto state 60
 	FunctionExp    goto state 61
-	Lambda         goto state 62
+
+State 38
+
+	ArrayDec -> 'val' Ident '=' 'Array' '(' . Exp ',' Exp ')' ';'    (rule 110)
+
+	'!'            shift, and enter state 62
+	'('            shift, and enter state 63
+	'++'           shift, and enter state 64
+	'-'            shift, and enter state 65
+	'--'           shift, and enter state 66
+	'Tupla'        shift, and enter state 67
+	'false'        shift, and enter state 68
+	'null'         shift, and enter state 69
+	'true'         shift, and enter state 70
+	'{'            shift, and enter state 71
+	L_integ        shift, and enter state 2
+	L_quoted       shift, and enter state 72
+	L_ident        shift, and enter state 13
+
+	Integer        goto state 45
+	String         goto state 46
+	Ident          goto state 47
+	Exp            goto state 76
+	Exp1           goto state 49
+	Exp2           goto state 50
+	Exp3           goto state 51
+	Exp4           goto state 52
+	Exp5           goto state 53
+	Exp6           goto state 54
+	Exp7           goto state 55
+	Exp8           goto state 56
+	Exp9           goto state 57
+	Exp10          goto state 58
+	Exp11          goto state 59
+	Exp12          goto state 60
+	FunctionExp    goto state 61
 
 State 39
 
@@ -834,7 +827,7 @@ State 39
 
 	BaseType       goto state 20
 	Type           goto state 40
-	ListType       goto state 76
+	ListType       goto state 75
 
 State 40
 
@@ -842,7 +835,7 @@ State 40
 	ListType -> Type . ',' ListType                     (rule 72)
 
 	')'            reduce using rule 71
-	','            shift, and enter state 75
+	','            shift, and enter state 74
 	'>'            reduce using rule 71
 
 
@@ -850,7 +843,7 @@ State 41
 
 	Type -> '(' ListType . ')' '->' BaseType            (rule 69)
 
-	')'            shift, and enter state 74
+	')'            shift, and enter state 73
 
 
 State 42
@@ -890,18 +883,18 @@ State 43
 
 	Dec -> 'var' Ident ':' Type '=' . Exp ';'           (rule 98)
 
-	'!'            shift, and enter state 63
-	'('            shift, and enter state 64
-	'++'           shift, and enter state 65
-	'-'            shift, and enter state 66
-	'--'           shift, and enter state 67
-	'Tupla'        shift, and enter state 68
-	'false'        shift, and enter state 69
-	'null'         shift, and enter state 70
-	'true'         shift, and enter state 71
-	'{'            shift, and enter state 72
+	'!'            shift, and enter state 62
+	'('            shift, and enter state 63
+	'++'           shift, and enter state 64
+	'-'            shift, and enter state 65
+	'--'           shift, and enter state 66
+	'Tupla'        shift, and enter state 67
+	'false'        shift, and enter state 68
+	'null'         shift, and enter state 69
+	'true'         shift, and enter state 70
+	'{'            shift, and enter state 71
 	L_integ        shift, and enter state 2
-	L_quoted       shift, and enter state 73
+	L_quoted       shift, and enter state 72
 	L_ident        shift, and enter state 13
 
 	Integer        goto state 45
@@ -921,7 +914,6 @@ State 43
 	Exp11          goto state 59
 	Exp12          goto state 60
 	FunctionExp    goto state 61
-	Lambda         goto state 62
 
 State 44
 
@@ -970,7 +962,6 @@ State 45
 	'step'         reduce using rule 37
 	'until'        reduce using rule 37
 	'||'           reduce using rule 37
-	'}'            reduce using rule 37
 
 
 State 46
@@ -1007,7 +998,6 @@ State 46
 	'step'         reduce using rule 38
 	'until'        reduce using rule 38
 	'||'           reduce using rule 38
-	'}'            reduce using rule 38
 
 
 State 47
@@ -1021,7 +1011,7 @@ State 47
 	'%'            reduce using rule 48
 	'%='           reduce using rule 48
 	'&&'           reduce using rule 48
-	'('            shift, and enter state 123
+	'('            shift, and enter state 122
 	')'            reduce using rule 48
 	'*'            reduce using rule 48
 	'*='           reduce using rule 48
@@ -1045,31 +1035,30 @@ State 47
 	'>='           reduce using rule 48
 	'?'            reduce using rule 48
 	'?.let'        reduce using rule 48
-	'['            shift, and enter state 124
+	'['            shift, and enter state 123
 	']'            reduce using rule 48
 	'downTo'       reduce using rule 48
 	'step'         reduce using rule 48
 	'until'        reduce using rule 48
 	'||'           reduce using rule 48
-	'}'            reduce using rule 48
 
-	DimExp         goto state 121
-	ListDimExp     goto state 122
+	DimExp         goto state 120
+	ListDimExp     goto state 121
 
 State 48
 
 	Exp -> Exp . OpAssign Exp1                          (rule 5)
 	Dec -> 'var' Ident ':' Type '=' Exp . ';'           (rule 98)
 
-	'%='           shift, and enter state 84
-	'*='           shift, and enter state 85
-	'+='           shift, and enter state 86
-	'-='           shift, and enter state 87
-	'/='           shift, and enter state 88
-	';'            shift, and enter state 120
-	'='            shift, and enter state 90
+	'%='           shift, and enter state 83
+	'*='           shift, and enter state 84
+	'+='           shift, and enter state 85
+	'-='           shift, and enter state 86
+	'/='           shift, and enter state 87
+	';'            shift, and enter state 119
+	'='            shift, and enter state 89
 
-	OpAssign       goto state 83
+	OpAssign       goto state 82
 
 State 49
 
@@ -1090,7 +1079,6 @@ State 49
 	'downTo'       reduce using rule 6
 	'step'         reduce using rule 6
 	'until'        reduce using rule 6
-	'}'            reduce using rule 6
 
 
 State 50
@@ -1114,8 +1102,7 @@ State 50
 	'downTo'       reduce using rule 8
 	'step'         reduce using rule 8
 	'until'        reduce using rule 8
-	'||'           shift, and enter state 119
-	'}'            reduce using rule 8
+	'||'           shift, and enter state 118
 
 
 State 51
@@ -1125,7 +1112,7 @@ State 51
 	Exp3 -> Exp3 . '&&' Exp4                            (rule 11)
 
 	'%='           reduce using rule 10
-	'&&'           shift, and enter state 117
+	'&&'           shift, and enter state 116
 	')'            reduce using rule 10
 	'*='           reduce using rule 10
 	'+='           reduce using rule 10
@@ -1136,14 +1123,13 @@ State 51
 	':'            reduce using rule 10
 	';'            reduce using rule 10
 	'='            reduce using rule 10
-	'?'            shift, and enter state 118
+	'?'            shift, and enter state 117
 	'?.let'        reduce using rule 10
 	']'            reduce using rule 10
 	'downTo'       reduce using rule 10
 	'step'         reduce using rule 10
 	'until'        reduce using rule 10
 	'||'           reduce using rule 10
-	'}'            reduce using rule 10
 
 
 State 52
@@ -1152,7 +1138,7 @@ State 52
 	Exp4 -> Exp4 . '==' Exp5                            (rule 13)
 	Exp4 -> Exp4 . '!=' Exp5                            (rule 14)
 
-	'!='           shift, and enter state 115
+	'!='           shift, and enter state 114
 	'%='           reduce using rule 12
 	'&&'           reduce using rule 12
 	')'            reduce using rule 12
@@ -1165,7 +1151,7 @@ State 52
 	':'            reduce using rule 12
 	';'            reduce using rule 12
 	'='            reduce using rule 12
-	'=='           shift, and enter state 116
+	'=='           shift, and enter state 115
 	'?'            reduce using rule 12
 	'?.let'        reduce using rule 12
 	']'            reduce using rule 12
@@ -1173,7 +1159,6 @@ State 52
 	'step'         reduce using rule 12
 	'until'        reduce using rule 12
 	'||'           reduce using rule 12
-	'}'            reduce using rule 12
 
 
 State 53
@@ -1196,12 +1181,12 @@ State 53
 	'/='           reduce using rule 15
 	':'            reduce using rule 15
 	';'            reduce using rule 15
-	'<'            shift, and enter state 111
-	'<='           shift, and enter state 112
+	'<'            shift, and enter state 110
+	'<='           shift, and enter state 111
 	'='            reduce using rule 15
 	'=='           reduce using rule 15
-	'>'            shift, and enter state 113
-	'>='           shift, and enter state 114
+	'>'            shift, and enter state 112
+	'>='           shift, and enter state 113
 	'?'            reduce using rule 15
 	'?.let'        reduce using rule 15
 	']'            reduce using rule 15
@@ -1209,7 +1194,6 @@ State 53
 	'step'         reduce using rule 15
 	'until'        reduce using rule 15
 	'||'           reduce using rule 15
-	'}'            reduce using rule 15
 
 
 State 54
@@ -1223,10 +1207,10 @@ State 54
 	'&&'           reduce using rule 20
 	')'            reduce using rule 20
 	'*='           reduce using rule 20
-	'+'            shift, and enter state 109
+	'+'            shift, and enter state 108
 	'+='           reduce using rule 20
 	','            reduce using rule 20
-	'-'            shift, and enter state 110
+	'-'            shift, and enter state 109
 	'-='           reduce using rule 20
 	'..'           reduce using rule 20
 	'/='           reduce using rule 20
@@ -1245,7 +1229,6 @@ State 54
 	'step'         reduce using rule 20
 	'until'        reduce using rule 20
 	'||'           reduce using rule 20
-	'}'            reduce using rule 20
 
 
 State 55
@@ -1256,11 +1239,11 @@ State 55
 	Exp7 -> Exp7 . '%' Exp8                             (rule 26)
 
 	'!='           reduce using rule 23
-	'%'            shift, and enter state 106
+	'%'            shift, and enter state 105
 	'%='           reduce using rule 23
 	'&&'           reduce using rule 23
 	')'            reduce using rule 23
-	'*'            shift, and enter state 107
+	'*'            shift, and enter state 106
 	'*='           reduce using rule 23
 	'+'            reduce using rule 23
 	'+='           reduce using rule 23
@@ -1268,7 +1251,7 @@ State 55
 	'-'            reduce using rule 23
 	'-='           reduce using rule 23
 	'..'           reduce using rule 23
-	'/'            shift, and enter state 108
+	'/'            shift, and enter state 107
 	'/='           reduce using rule 23
 	':'            reduce using rule 23
 	';'            reduce using rule 23
@@ -1285,7 +1268,6 @@ State 55
 	'step'         reduce using rule 23
 	'until'        reduce using rule 23
 	'||'           reduce using rule 23
-	'}'            reduce using rule 23
 
 
 State 56
@@ -1322,7 +1304,6 @@ State 56
 	'step'         reduce using rule 27
 	'until'        reduce using rule 27
 	'||'           reduce using rule 27
-	'}'            reduce using rule 27
 
 
 State 57
@@ -1359,7 +1340,6 @@ State 57
 	'step'         reduce using rule 32
 	'until'        reduce using rule 32
 	'||'           reduce using rule 32
-	'}'            reduce using rule 32
 
 
 State 58
@@ -1396,7 +1376,6 @@ State 58
 	'step'         reduce using rule 35
 	'until'        reduce using rule 35
 	'||'           reduce using rule 35
-	'}'            reduce using rule 35
 
 
 State 59
@@ -1406,7 +1385,7 @@ State 59
 	Exp10 -> Exp11 .                                    (rule 45)
 	Exp11 -> Exp11 . '!!'                               (rule 46)
 
-	'!!'           shift, and enter state 103
+	'!!'           shift, and enter state 102
 	'!='           reduce using rule 45
 	'%'            reduce using rule 45
 	'%='           reduce using rule 45
@@ -1415,11 +1394,11 @@ State 59
 	'*'            reduce using rule 45
 	'*='           reduce using rule 45
 	'+'            reduce using rule 45
-	'++'           shift, and enter state 104
+	'++'           shift, and enter state 103
 	'+='           reduce using rule 45
 	','            reduce using rule 45
 	'-'            reduce using rule 45
-	'--'           shift, and enter state 105
+	'--'           shift, and enter state 104
 	'-='           reduce using rule 45
 	'..'           reduce using rule 45
 	'/'            reduce using rule 45
@@ -1439,7 +1418,6 @@ State 59
 	'step'         reduce using rule 45
 	'until'        reduce using rule 45
 	'||'           reduce using rule 45
-	'}'            reduce using rule 45
 
 
 State 60
@@ -1479,7 +1457,6 @@ State 60
 	'step'         reduce using rule 47
 	'until'        reduce using rule 47
 	'||'           reduce using rule 47
-	'}'            reduce using rule 47
 
 
 State 61
@@ -1516,97 +1493,58 @@ State 61
 	'step'         reduce using rule 42
 	'until'        reduce using rule 42
 	'||'           reduce using rule 42
-	'}'            reduce using rule 42
 
 
 State 62
 
-	Exp10 -> Lambda .                                   (rule 44)
-
-	'!='           reduce using rule 44
-	'%'            reduce using rule 44
-	'%='           reduce using rule 44
-	'&&'           reduce using rule 44
-	')'            reduce using rule 44
-	'*'            reduce using rule 44
-	'*='           reduce using rule 44
-	'+'            reduce using rule 44
-	'+='           reduce using rule 44
-	','            reduce using rule 44
-	'-'            reduce using rule 44
-	'-='           reduce using rule 44
-	'..'           reduce using rule 44
-	'/'            reduce using rule 44
-	'/='           reduce using rule 44
-	':'            reduce using rule 44
-	';'            reduce using rule 44
-	'<'            reduce using rule 44
-	'<='           reduce using rule 44
-	'='            reduce using rule 44
-	'=='           reduce using rule 44
-	'>'            reduce using rule 44
-	'>='           reduce using rule 44
-	'?'            reduce using rule 44
-	'?.let'        reduce using rule 44
-	']'            reduce using rule 44
-	'downTo'       reduce using rule 44
-	'step'         reduce using rule 44
-	'until'        reduce using rule 44
-	'||'           reduce using rule 44
-	'}'            reduce using rule 44
-
-
-State 63
-
 	Exp8 -> '!' . Exp8                                  (rule 29)
 
-	'!'            shift, and enter state 63
-	'('            shift, and enter state 64
-	'++'           shift, and enter state 65
-	'-'            shift, and enter state 66
-	'--'           shift, and enter state 67
-	'Tupla'        shift, and enter state 68
-	'false'        shift, and enter state 69
-	'null'         shift, and enter state 70
-	'true'         shift, and enter state 71
-	'{'            shift, and enter state 72
+	'!'            shift, and enter state 62
+	'('            shift, and enter state 63
+	'++'           shift, and enter state 64
+	'-'            shift, and enter state 65
+	'--'           shift, and enter state 66
+	'Tupla'        shift, and enter state 67
+	'false'        shift, and enter state 68
+	'null'         shift, and enter state 69
+	'true'         shift, and enter state 70
+	'{'            shift, and enter state 71
 	L_integ        shift, and enter state 2
-	L_quoted       shift, and enter state 73
+	L_quoted       shift, and enter state 72
 	L_ident        shift, and enter state 13
 
 	Integer        goto state 45
 	String         goto state 46
 	Ident          goto state 47
-	Exp8           goto state 102
+	Exp8           goto state 101
 	Exp9           goto state 57
 	Exp10          goto state 58
 	Exp11          goto state 59
 	Exp12          goto state 60
 	FunctionExp    goto state 61
-	Lambda         goto state 62
 
-State 64
+State 63
 
 	Exp12 -> '(' . Exp ')'                              (rule 49)
 
-	'!'            shift, and enter state 63
-	'('            shift, and enter state 64
-	'++'           shift, and enter state 65
-	'-'            shift, and enter state 66
-	'--'           shift, and enter state 67
-	'Tupla'        shift, and enter state 68
-	'false'        shift, and enter state 69
-	'null'         shift, and enter state 70
-	'true'         shift, and enter state 71
-	'{'            shift, and enter state 72
+	'!'            shift, and enter state 62
+	'('            shift, and enter state 63
+	'++'           shift, and enter state 64
+	'-'            shift, and enter state 65
+	'--'           shift, and enter state 66
+	'Tupla'        shift, and enter state 67
+	'false'        shift, and enter state 68
+	'null'         shift, and enter state 69
+	'true'         shift, and enter state 70
+	'{'            shift, and enter state 71
 	L_integ        shift, and enter state 2
-	L_quoted       shift, and enter state 73
+	L_quoted       shift, and enter state 72
 	L_ident        shift, and enter state 13
 
 	Integer        goto state 45
 	String         goto state 46
 	Ident          goto state 47
-	Exp            goto state 101
+	Exp            goto state 100
 	Exp1           goto state 49
 	Exp2           goto state 50
 	Exp3           goto state 51
@@ -1620,67 +1558,65 @@ State 64
 	Exp11          goto state 59
 	Exp12          goto state 60
 	FunctionExp    goto state 61
-	Lambda         goto state 62
 
-State 65
+State 64
 
 	Exp8 -> '++' . Exp11                                (rule 30)
 
-	'('            shift, and enter state 64
+	'('            shift, and enter state 63
 	L_ident        shift, and enter state 13
 
-	Ident          goto state 97
-	Exp11          goto state 100
+	Ident          goto state 96
+	Exp11          goto state 99
 	Exp12          goto state 60
 
-State 66
+State 65
 
 	Exp8 -> '-' . Exp8                                  (rule 28)
 
-	'!'            shift, and enter state 63
-	'('            shift, and enter state 64
-	'++'           shift, and enter state 65
-	'-'            shift, and enter state 66
-	'--'           shift, and enter state 67
-	'Tupla'        shift, and enter state 68
-	'false'        shift, and enter state 69
-	'null'         shift, and enter state 70
-	'true'         shift, and enter state 71
-	'{'            shift, and enter state 72
+	'!'            shift, and enter state 62
+	'('            shift, and enter state 63
+	'++'           shift, and enter state 64
+	'-'            shift, and enter state 65
+	'--'           shift, and enter state 66
+	'Tupla'        shift, and enter state 67
+	'false'        shift, and enter state 68
+	'null'         shift, and enter state 69
+	'true'         shift, and enter state 70
+	'{'            shift, and enter state 71
 	L_integ        shift, and enter state 2
-	L_quoted       shift, and enter state 73
+	L_quoted       shift, and enter state 72
 	L_ident        shift, and enter state 13
 
 	Integer        goto state 45
 	String         goto state 46
 	Ident          goto state 47
-	Exp8           goto state 99
+	Exp8           goto state 98
 	Exp9           goto state 57
 	Exp10          goto state 58
 	Exp11          goto state 59
 	Exp12          goto state 60
 	FunctionExp    goto state 61
-	Lambda         goto state 62
 
-State 67
+State 66
 
 	Exp8 -> '--' . Exp11                                (rule 31)
 
-	'('            shift, and enter state 64
+	'('            shift, and enter state 63
 	L_ident        shift, and enter state 13
 
-	Ident          goto state 97
-	Exp11          goto state 98
+	Ident          goto state 96
+	Exp11          goto state 97
 	Exp12          goto state 60
 
-State 68
+State 67
 
 	Exp10 -> 'Tupla' . '(' ListExp ')'                  (rule 36)
 
-	'('            shift, and enter state 96
+	'('            shift, and enter state 95
 
 
-State 69
+State 68
 
 	Exp10 -> 'false' .                                  (rule 40)
 
@@ -1714,10 +1650,9 @@ State 69
 	'step'         reduce using rule 40
 	'until'        reduce using rule 40
 	'||'           reduce using rule 40
-	'}'            reduce using rule 40
 
 
-State 70
+State 69
 
 	Exp10 -> 'null' .                                   (rule 41)
 
@@ -1751,10 +1686,9 @@ State 70
 	'step'         reduce using rule 41
 	'until'        reduce using rule 41
 	'||'           reduce using rule 41
-	'}'            reduce using rule 41
 
 
-State 71
+State 70
 
 	Exp10 -> 'true' .                                   (rule 39)
 
@@ -1788,22 +1722,20 @@ State 71
 	'step'         reduce using rule 39
 	'until'        reduce using rule 39
 	'||'           reduce using rule 39
-	'}'            reduce using rule 39
 
 
-State 72
+State 71
 
-	Lambda -> '{' . ListArg '->' ListStm Exp '}'        (rule 104)
-	Lambda -> '{' . ListArg '->' ListStm '}'            (rule 105)
+	Exp10 -> '{' . ListArg '->' ListStm '}'             (rule 44)
 
 	'->'           reduce using rule 74
 	L_ident        shift, and enter state 13
 
 	Ident          goto state 30
 	Arg            goto state 31
-	ListArg        goto state 95
+	ListArg        goto state 94
 
-State 73
+State 72
 
 	String -> L_quoted .                                (rule 2)
 
@@ -1837,17 +1769,16 @@ State 73
 	'step'         reduce using rule 2
 	'until'        reduce using rule 2
 	'||'           reduce using rule 2
-	'}'            reduce using rule 2
 
 
-State 74
+State 73
 
 	Type -> '(' ListType ')' . '->' BaseType            (rule 69)
 
-	'->'           shift, and enter state 94
+	'->'           shift, and enter state 93
 
 
-State 75
+State 74
 
 	ListType -> Type ',' . ListType                     (rule 72)
 
@@ -1862,46 +1793,46 @@ State 75
 
 	BaseType       goto state 20
 	Type           goto state 40
-	ListType       goto state 93
+	ListType       goto state 92
 
-State 76
+State 75
 
 	BaseType -> 'Tupla' '<' ListType . '>'              (rule 62)
 
-	'>'            shift, and enter state 92
+	'>'            shift, and enter state 91
 
+
+State 76
+
+	Exp -> Exp . OpAssign Exp1                          (rule 5)
+	ArrayDec -> 'val' Ident '=' 'Array' '(' Exp . ',' Exp ')' ';'    (rule 110)
+
+	'%='           shift, and enter state 83
+	'*='           shift, and enter state 84
+	'+='           shift, and enter state 85
+	','            shift, and enter state 90
+	'-='           shift, and enter state 86
+	'/='           shift, and enter state 87
+	'='            shift, and enter state 89
+
+	OpAssign       goto state 82
 
 State 77
 
 	Exp -> Exp . OpAssign Exp1                          (rule 5)
-	ArrayDec -> 'val' Ident '=' 'Array' '(' Exp . ',' Exp ')' ';'    (rule 112)
-
-	'%='           shift, and enter state 84
-	'*='           shift, and enter state 85
-	'+='           shift, and enter state 86
-	','            shift, and enter state 91
-	'-='           shift, and enter state 87
-	'/='           shift, and enter state 88
-	'='            shift, and enter state 90
-
-	OpAssign       goto state 83
-
-State 78
-
-	Exp -> Exp . OpAssign Exp1                          (rule 5)
 	Dec -> 'val' Ident ':' Type '=' Exp . ';'           (rule 99)
 
-	'%='           shift, and enter state 84
-	'*='           shift, and enter state 85
-	'+='           shift, and enter state 86
-	'-='           shift, and enter state 87
-	'/='           shift, and enter state 88
-	';'            shift, and enter state 89
-	'='            shift, and enter state 90
+	'%='           shift, and enter state 83
+	'*='           shift, and enter state 84
+	'+='           shift, and enter state 85
+	'-='           shift, and enter state 86
+	'/='           shift, and enter state 87
+	';'            shift, and enter state 88
+	'='            shift, and enter state 89
 
-	OpAssign       goto state 83
+	OpAssign       goto state 82
 
-State 79
+State 78
 
 	Arg -> Ident ':' Type .                             (rule 73)
 
@@ -1910,7 +1841,7 @@ State 79
 	'->'           reduce using rule 73
 
 
-State 80
+State 79
 
 	ListArg -> Arg ',' ListArg .                        (rule 76)
 
@@ -1918,7 +1849,7 @@ State 80
 	'->'           reduce using rule 76
 
 
-State 81
+State 80
 
 	FunctionDec -> 'fun' Ident '(' ListArg ')' ':' . Type '{' ListStm '}'    (rule 102)
 
@@ -1930,37 +1861,37 @@ State 81
 	'Unit'         shift, and enter state 27
 
 	BaseType       goto state 20
-	Type           goto state 82
+	Type           goto state 81
 
-State 82
+State 81
 
 	FunctionDec -> 'fun' Ident '(' ListArg ')' ':' Type . '{' ListStm '}'    (rule 102)
 
-	'{'            shift, and enter state 149
+	'{'            shift, and enter state 148
 
 
-State 83
+State 82
 
 	Exp -> Exp OpAssign . Exp1                          (rule 5)
 
-	'!'            shift, and enter state 63
-	'('            shift, and enter state 64
-	'++'           shift, and enter state 65
-	'-'            shift, and enter state 66
-	'--'           shift, and enter state 67
-	'Tupla'        shift, and enter state 68
-	'false'        shift, and enter state 69
-	'null'         shift, and enter state 70
-	'true'         shift, and enter state 71
-	'{'            shift, and enter state 72
+	'!'            shift, and enter state 62
+	'('            shift, and enter state 63
+	'++'           shift, and enter state 64
+	'-'            shift, and enter state 65
+	'--'           shift, and enter state 66
+	'Tupla'        shift, and enter state 67
+	'false'        shift, and enter state 68
+	'null'         shift, and enter state 69
+	'true'         shift, and enter state 70
+	'{'            shift, and enter state 71
 	L_integ        shift, and enter state 2
-	L_quoted       shift, and enter state 73
+	L_quoted       shift, and enter state 72
 	L_ident        shift, and enter state 13
 
 	Integer        goto state 45
 	String         goto state 46
 	Ident          goto state 47
-	Exp1           goto state 148
+	Exp1           goto state 147
 	Exp2           goto state 50
 	Exp3           goto state 51
 	Exp4           goto state 52
@@ -1973,9 +1904,8 @@ State 83
 	Exp11          goto state 59
 	Exp12          goto state 60
 	FunctionExp    goto state 61
-	Lambda         goto state 62
 
-State 84
+State 83
 
 	OpAssign -> '%=' .                                  (rule 61)
 
@@ -1994,7 +1924,7 @@ State 84
 	L_ident        reduce using rule 61
 
 
-State 85
+State 84
 
 	OpAssign -> '*=' .                                  (rule 59)
 
@@ -2013,7 +1943,7 @@ State 85
 	L_ident        reduce using rule 59
 
 
-State 86
+State 85
 
 	OpAssign -> '+=' .                                  (rule 57)
 
@@ -2032,7 +1962,7 @@ State 86
 	L_ident        reduce using rule 57
 
 
-State 87
+State 86
 
 	OpAssign -> '-=' .                                  (rule 58)
 
@@ -2051,7 +1981,7 @@ State 87
 	L_ident        reduce using rule 58
 
 
-State 88
+State 87
 
 	OpAssign -> '/=' .                                  (rule 60)
 
@@ -2070,7 +2000,7 @@ State 88
 	L_ident        reduce using rule 60
 
 
-State 89
+State 88
 
 	Dec -> 'val' Ident ':' Type '=' Exp ';' .           (rule 99)
 
@@ -2103,7 +2033,7 @@ State 89
 	%eof           reduce using rule 99
 
 
-State 90
+State 89
 
 	OpAssign -> '=' .                                   (rule 56)
 
@@ -2122,28 +2052,28 @@ State 90
 	L_ident        reduce using rule 56
 
 
-State 91
+State 90
 
-	ArrayDec -> 'val' Ident '=' 'Array' '(' Exp ',' . Exp ')' ';'    (rule 112)
+	ArrayDec -> 'val' Ident '=' 'Array' '(' Exp ',' . Exp ')' ';'    (rule 110)
 
-	'!'            shift, and enter state 63
-	'('            shift, and enter state 64
-	'++'           shift, and enter state 65
-	'-'            shift, and enter state 66
-	'--'           shift, and enter state 67
-	'Tupla'        shift, and enter state 68
-	'false'        shift, and enter state 69
-	'null'         shift, and enter state 70
-	'true'         shift, and enter state 71
-	'{'            shift, and enter state 72
+	'!'            shift, and enter state 62
+	'('            shift, and enter state 63
+	'++'           shift, and enter state 64
+	'-'            shift, and enter state 65
+	'--'           shift, and enter state 66
+	'Tupla'        shift, and enter state 67
+	'false'        shift, and enter state 68
+	'null'         shift, and enter state 69
+	'true'         shift, and enter state 70
+	'{'            shift, and enter state 71
 	L_integ        shift, and enter state 2
-	L_quoted       shift, and enter state 73
+	L_quoted       shift, and enter state 72
 	L_ident        shift, and enter state 13
 
 	Integer        goto state 45
 	String         goto state 46
 	Ident          goto state 47
-	Exp            goto state 147
+	Exp            goto state 146
 	Exp1           goto state 49
 	Exp2           goto state 50
 	Exp3           goto state 51
@@ -2157,9 +2087,8 @@ State 91
 	Exp11          goto state 59
 	Exp12          goto state 60
 	FunctionExp    goto state 61
-	Lambda         goto state 62
 
-State 92
+State 91
 
 	BaseType -> 'Tupla' '<' ListType '>' .              (rule 62)
 
@@ -2173,7 +2102,7 @@ State 92
 	'{'            reduce using rule 62
 
 
-State 93
+State 92
 
 	ListType -> Type ',' ListType .                     (rule 72)
 
@@ -2181,7 +2110,7 @@ State 93
 	'>'            reduce using rule 72
 
 
-State 94
+State 93
 
 	Type -> '(' ListType ')' '->' . BaseType            (rule 69)
 
@@ -2190,39 +2119,38 @@ State 94
 	'String'       shift, and enter state 25
 	'Tupla'        shift, and enter state 26
 
-	BaseType       goto state 146
+	BaseType       goto state 145
+
+State 94
+
+	Exp10 -> '{' ListArg . '->' ListStm '}'             (rule 44)
+
+	'->'           shift, and enter state 144
+
 
 State 95
 
-	Lambda -> '{' ListArg . '->' ListStm Exp '}'        (rule 104)
-	Lambda -> '{' ListArg . '->' ListStm '}'            (rule 105)
-
-	'->'           shift, and enter state 145
-
-
-State 96
-
 	Exp10 -> 'Tupla' '(' . ListExp ')'                  (rule 36)
 
-	'!'            shift, and enter state 63
-	'('            shift, and enter state 64
+	'!'            shift, and enter state 62
+	'('            shift, and enter state 63
 	')'            reduce using rule 50
-	'++'           shift, and enter state 65
-	'-'            shift, and enter state 66
-	'--'           shift, and enter state 67
-	'Tupla'        shift, and enter state 68
-	'false'        shift, and enter state 69
-	'null'         shift, and enter state 70
-	'true'         shift, and enter state 71
-	'{'            shift, and enter state 72
+	'++'           shift, and enter state 64
+	'-'            shift, and enter state 65
+	'--'           shift, and enter state 66
+	'Tupla'        shift, and enter state 67
+	'false'        shift, and enter state 68
+	'null'         shift, and enter state 69
+	'true'         shift, and enter state 70
+	'{'            shift, and enter state 71
 	L_integ        shift, and enter state 2
-	L_quoted       shift, and enter state 73
+	L_quoted       shift, and enter state 72
 	L_ident        shift, and enter state 13
 
 	Integer        goto state 45
 	String         goto state 46
 	Ident          goto state 47
-	Exp            goto state 126
+	Exp            goto state 125
 	Exp1           goto state 49
 	Exp2           goto state 50
 	Exp3           goto state 51
@@ -2235,11 +2163,10 @@ State 96
 	Exp10          goto state 58
 	Exp11          goto state 59
 	Exp12          goto state 60
-	ListExp        goto state 144
+	ListExp        goto state 143
 	FunctionExp    goto state 61
-	Lambda         goto state 62
 
-State 97
+State 96
 
 	Exp12 -> Ident .                                    (rule 48)
 
@@ -2274,15 +2201,14 @@ State 97
 	'step'         reduce using rule 48
 	'until'        reduce using rule 48
 	'||'           reduce using rule 48
-	'}'            reduce using rule 48
 
 
-State 98
+State 97
 
 	Exp8 -> '--' Exp11 .                                (rule 31)
 	Exp11 -> Exp11 . '!!'                               (rule 46)
 
-	'!!'           shift, and enter state 103
+	'!!'           shift, and enter state 102
 	'!='           reduce using rule 31
 	'%'            reduce using rule 31
 	'%='           reduce using rule 31
@@ -2313,10 +2239,9 @@ State 98
 	'step'         reduce using rule 31
 	'until'        reduce using rule 31
 	'||'           reduce using rule 31
-	'}'            reduce using rule 31
 
 
-State 99
+State 98
 
 	Exp8 -> '-' Exp8 .                                  (rule 28)
 
@@ -2350,15 +2275,14 @@ State 99
 	'step'         reduce using rule 28
 	'until'        reduce using rule 28
 	'||'           reduce using rule 28
-	'}'            reduce using rule 28
 
 
-State 100
+State 99
 
 	Exp8 -> '++' Exp11 .                                (rule 30)
 	Exp11 -> Exp11 . '!!'                               (rule 46)
 
-	'!!'           shift, and enter state 103
+	'!!'           shift, and enter state 102
 	'!='           reduce using rule 30
 	'%'            reduce using rule 30
 	'%='           reduce using rule 30
@@ -2389,25 +2313,24 @@ State 100
 	'step'         reduce using rule 30
 	'until'        reduce using rule 30
 	'||'           reduce using rule 30
-	'}'            reduce using rule 30
 
 
-State 101
+State 100
 
 	Exp -> Exp . OpAssign Exp1                          (rule 5)
 	Exp12 -> '(' Exp . ')'                              (rule 49)
 
-	'%='           shift, and enter state 84
-	')'            shift, and enter state 143
-	'*='           shift, and enter state 85
-	'+='           shift, and enter state 86
-	'-='           shift, and enter state 87
-	'/='           shift, and enter state 88
-	'='            shift, and enter state 90
+	'%='           shift, and enter state 83
+	')'            shift, and enter state 142
+	'*='           shift, and enter state 84
+	'+='           shift, and enter state 85
+	'-='           shift, and enter state 86
+	'/='           shift, and enter state 87
+	'='            shift, and enter state 89
 
-	OpAssign       goto state 83
+	OpAssign       goto state 82
 
-State 102
+State 101
 
 	Exp8 -> '!' Exp8 .                                  (rule 29)
 
@@ -2441,10 +2364,9 @@ State 102
 	'step'         reduce using rule 29
 	'until'        reduce using rule 29
 	'||'           reduce using rule 29
-	'}'            reduce using rule 29
 
 
-State 103
+State 102
 
 	Exp11 -> Exp11 '!!' .                               (rule 46)
 
@@ -2481,10 +2403,9 @@ State 103
 	'step'         reduce using rule 46
 	'until'        reduce using rule 46
 	'||'           reduce using rule 46
-	'}'            reduce using rule 46
 
 
-State 104
+State 103
 
 	Exp9 -> Exp11 '++' .                                (rule 33)
 
@@ -2518,10 +2439,9 @@ State 104
 	'step'         reduce using rule 33
 	'until'        reduce using rule 33
 	'||'           reduce using rule 33
-	'}'            reduce using rule 33
 
 
-State 105
+State 104
 
 	Exp9 -> Exp11 '--' .                                (rule 34)
 
@@ -2555,54 +2475,24 @@ State 105
 	'step'         reduce using rule 34
 	'until'        reduce using rule 34
 	'||'           reduce using rule 34
-	'}'            reduce using rule 34
 
 
-State 106
+State 105
 
 	Exp7 -> Exp7 '%' . Exp8                             (rule 26)
 
-	'!'            shift, and enter state 63
-	'('            shift, and enter state 64
-	'++'           shift, and enter state 65
-	'-'            shift, and enter state 66
-	'--'           shift, and enter state 67
-	'Tupla'        shift, and enter state 68
-	'false'        shift, and enter state 69
-	'null'         shift, and enter state 70
-	'true'         shift, and enter state 71
-	'{'            shift, and enter state 72
+	'!'            shift, and enter state 62
+	'('            shift, and enter state 63
+	'++'           shift, and enter state 64
+	'-'            shift, and enter state 65
+	'--'           shift, and enter state 66
+	'Tupla'        shift, and enter state 67
+	'false'        shift, and enter state 68
+	'null'         shift, and enter state 69
+	'true'         shift, and enter state 70
+	'{'            shift, and enter state 71
 	L_integ        shift, and enter state 2
-	L_quoted       shift, and enter state 73
-	L_ident        shift, and enter state 13
-
-	Integer        goto state 45
-	String         goto state 46
-	Ident          goto state 47
-	Exp8           goto state 142
-	Exp9           goto state 57
-	Exp10          goto state 58
-	Exp11          goto state 59
-	Exp12          goto state 60
-	FunctionExp    goto state 61
-	Lambda         goto state 62
-
-State 107
-
-	Exp7 -> Exp7 '*' . Exp8                             (rule 24)
-
-	'!'            shift, and enter state 63
-	'('            shift, and enter state 64
-	'++'           shift, and enter state 65
-	'-'            shift, and enter state 66
-	'--'           shift, and enter state 67
-	'Tupla'        shift, and enter state 68
-	'false'        shift, and enter state 69
-	'null'         shift, and enter state 70
-	'true'         shift, and enter state 71
-	'{'            shift, and enter state 72
-	L_integ        shift, and enter state 2
-	L_quoted       shift, and enter state 73
+	L_quoted       shift, and enter state 72
 	L_ident        shift, and enter state 13
 
 	Integer        goto state 45
@@ -2614,24 +2504,23 @@ State 107
 	Exp11          goto state 59
 	Exp12          goto state 60
 	FunctionExp    goto state 61
-	Lambda         goto state 62
 
-State 108
+State 106
 
-	Exp7 -> Exp7 '/' . Exp8                             (rule 25)
+	Exp7 -> Exp7 '*' . Exp8                             (rule 24)
 
-	'!'            shift, and enter state 63
-	'('            shift, and enter state 64
-	'++'           shift, and enter state 65
-	'-'            shift, and enter state 66
-	'--'           shift, and enter state 67
-	'Tupla'        shift, and enter state 68
-	'false'        shift, and enter state 69
-	'null'         shift, and enter state 70
-	'true'         shift, and enter state 71
-	'{'            shift, and enter state 72
+	'!'            shift, and enter state 62
+	'('            shift, and enter state 63
+	'++'           shift, and enter state 64
+	'-'            shift, and enter state 65
+	'--'           shift, and enter state 66
+	'Tupla'        shift, and enter state 67
+	'false'        shift, and enter state 68
+	'null'         shift, and enter state 69
+	'true'         shift, and enter state 70
+	'{'            shift, and enter state 71
 	L_integ        shift, and enter state 2
-	L_quoted       shift, and enter state 73
+	L_quoted       shift, and enter state 72
 	L_ident        shift, and enter state 13
 
 	Integer        goto state 45
@@ -2643,54 +2532,51 @@ State 108
 	Exp11          goto state 59
 	Exp12          goto state 60
 	FunctionExp    goto state 61
-	Lambda         goto state 62
 
-State 109
+State 107
 
-	Exp6 -> Exp6 '+' . Exp7                             (rule 21)
+	Exp7 -> Exp7 '/' . Exp8                             (rule 25)
 
-	'!'            shift, and enter state 63
-	'('            shift, and enter state 64
-	'++'           shift, and enter state 65
-	'-'            shift, and enter state 66
-	'--'           shift, and enter state 67
-	'Tupla'        shift, and enter state 68
-	'false'        shift, and enter state 69
-	'null'         shift, and enter state 70
-	'true'         shift, and enter state 71
-	'{'            shift, and enter state 72
+	'!'            shift, and enter state 62
+	'('            shift, and enter state 63
+	'++'           shift, and enter state 64
+	'-'            shift, and enter state 65
+	'--'           shift, and enter state 66
+	'Tupla'        shift, and enter state 67
+	'false'        shift, and enter state 68
+	'null'         shift, and enter state 69
+	'true'         shift, and enter state 70
+	'{'            shift, and enter state 71
 	L_integ        shift, and enter state 2
-	L_quoted       shift, and enter state 73
+	L_quoted       shift, and enter state 72
 	L_ident        shift, and enter state 13
 
 	Integer        goto state 45
 	String         goto state 46
 	Ident          goto state 47
-	Exp7           goto state 139
-	Exp8           goto state 56
+	Exp8           goto state 139
 	Exp9           goto state 57
 	Exp10          goto state 58
 	Exp11          goto state 59
 	Exp12          goto state 60
 	FunctionExp    goto state 61
-	Lambda         goto state 62
 
-State 110
+State 108
 
-	Exp6 -> Exp6 '-' . Exp7                             (rule 22)
+	Exp6 -> Exp6 '+' . Exp7                             (rule 21)
 
-	'!'            shift, and enter state 63
-	'('            shift, and enter state 64
-	'++'           shift, and enter state 65
-	'-'            shift, and enter state 66
-	'--'           shift, and enter state 67
-	'Tupla'        shift, and enter state 68
-	'false'        shift, and enter state 69
-	'null'         shift, and enter state 70
-	'true'         shift, and enter state 71
-	'{'            shift, and enter state 72
+	'!'            shift, and enter state 62
+	'('            shift, and enter state 63
+	'++'           shift, and enter state 64
+	'-'            shift, and enter state 65
+	'--'           shift, and enter state 66
+	'Tupla'        shift, and enter state 67
+	'false'        shift, and enter state 68
+	'null'         shift, and enter state 69
+	'true'         shift, and enter state 70
+	'{'            shift, and enter state 71
 	L_integ        shift, and enter state 2
-	L_quoted       shift, and enter state 73
+	L_quoted       shift, and enter state 72
 	L_ident        shift, and enter state 13
 
 	Integer        goto state 45
@@ -2703,55 +2589,52 @@ State 110
 	Exp11          goto state 59
 	Exp12          goto state 60
 	FunctionExp    goto state 61
-	Lambda         goto state 62
 
-State 111
+State 109
 
-	Exp5 -> Exp5 '<' . Exp6                             (rule 16)
+	Exp6 -> Exp6 '-' . Exp7                             (rule 22)
 
-	'!'            shift, and enter state 63
-	'('            shift, and enter state 64
-	'++'           shift, and enter state 65
-	'-'            shift, and enter state 66
-	'--'           shift, and enter state 67
-	'Tupla'        shift, and enter state 68
-	'false'        shift, and enter state 69
-	'null'         shift, and enter state 70
-	'true'         shift, and enter state 71
-	'{'            shift, and enter state 72
+	'!'            shift, and enter state 62
+	'('            shift, and enter state 63
+	'++'           shift, and enter state 64
+	'-'            shift, and enter state 65
+	'--'           shift, and enter state 66
+	'Tupla'        shift, and enter state 67
+	'false'        shift, and enter state 68
+	'null'         shift, and enter state 69
+	'true'         shift, and enter state 70
+	'{'            shift, and enter state 71
 	L_integ        shift, and enter state 2
-	L_quoted       shift, and enter state 73
+	L_quoted       shift, and enter state 72
 	L_ident        shift, and enter state 13
 
 	Integer        goto state 45
 	String         goto state 46
 	Ident          goto state 47
-	Exp6           goto state 137
-	Exp7           goto state 55
+	Exp7           goto state 137
 	Exp8           goto state 56
 	Exp9           goto state 57
 	Exp10          goto state 58
 	Exp11          goto state 59
 	Exp12          goto state 60
 	FunctionExp    goto state 61
-	Lambda         goto state 62
 
-State 112
+State 110
 
-	Exp5 -> Exp5 '<=' . Exp6                            (rule 18)
+	Exp5 -> Exp5 '<' . Exp6                             (rule 16)
 
-	'!'            shift, and enter state 63
-	'('            shift, and enter state 64
-	'++'           shift, and enter state 65
-	'-'            shift, and enter state 66
-	'--'           shift, and enter state 67
-	'Tupla'        shift, and enter state 68
-	'false'        shift, and enter state 69
-	'null'         shift, and enter state 70
-	'true'         shift, and enter state 71
-	'{'            shift, and enter state 72
+	'!'            shift, and enter state 62
+	'('            shift, and enter state 63
+	'++'           shift, and enter state 64
+	'-'            shift, and enter state 65
+	'--'           shift, and enter state 66
+	'Tupla'        shift, and enter state 67
+	'false'        shift, and enter state 68
+	'null'         shift, and enter state 69
+	'true'         shift, and enter state 70
+	'{'            shift, and enter state 71
 	L_integ        shift, and enter state 2
-	L_quoted       shift, and enter state 73
+	L_quoted       shift, and enter state 72
 	L_ident        shift, and enter state 13
 
 	Integer        goto state 45
@@ -2765,24 +2648,23 @@ State 112
 	Exp11          goto state 59
 	Exp12          goto state 60
 	FunctionExp    goto state 61
-	Lambda         goto state 62
 
-State 113
+State 111
 
-	Exp5 -> Exp5 '>' . Exp6                             (rule 17)
+	Exp5 -> Exp5 '<=' . Exp6                            (rule 18)
 
-	'!'            shift, and enter state 63
-	'('            shift, and enter state 64
-	'++'           shift, and enter state 65
-	'-'            shift, and enter state 66
-	'--'           shift, and enter state 67
-	'Tupla'        shift, and enter state 68
-	'false'        shift, and enter state 69
-	'null'         shift, and enter state 70
-	'true'         shift, and enter state 71
-	'{'            shift, and enter state 72
+	'!'            shift, and enter state 62
+	'('            shift, and enter state 63
+	'++'           shift, and enter state 64
+	'-'            shift, and enter state 65
+	'--'           shift, and enter state 66
+	'Tupla'        shift, and enter state 67
+	'false'        shift, and enter state 68
+	'null'         shift, and enter state 69
+	'true'         shift, and enter state 70
+	'{'            shift, and enter state 71
 	L_integ        shift, and enter state 2
-	L_quoted       shift, and enter state 73
+	L_quoted       shift, and enter state 72
 	L_ident        shift, and enter state 13
 
 	Integer        goto state 45
@@ -2796,24 +2678,23 @@ State 113
 	Exp11          goto state 59
 	Exp12          goto state 60
 	FunctionExp    goto state 61
-	Lambda         goto state 62
 
-State 114
+State 112
 
-	Exp5 -> Exp5 '>=' . Exp6                            (rule 19)
+	Exp5 -> Exp5 '>' . Exp6                             (rule 17)
 
-	'!'            shift, and enter state 63
-	'('            shift, and enter state 64
-	'++'           shift, and enter state 65
-	'-'            shift, and enter state 66
-	'--'           shift, and enter state 67
-	'Tupla'        shift, and enter state 68
-	'false'        shift, and enter state 69
-	'null'         shift, and enter state 70
-	'true'         shift, and enter state 71
-	'{'            shift, and enter state 72
+	'!'            shift, and enter state 62
+	'('            shift, and enter state 63
+	'++'           shift, and enter state 64
+	'-'            shift, and enter state 65
+	'--'           shift, and enter state 66
+	'Tupla'        shift, and enter state 67
+	'false'        shift, and enter state 68
+	'null'         shift, and enter state 69
+	'true'         shift, and enter state 70
+	'{'            shift, and enter state 71
 	L_integ        shift, and enter state 2
-	L_quoted       shift, and enter state 73
+	L_quoted       shift, and enter state 72
 	L_ident        shift, and enter state 13
 
 	Integer        goto state 45
@@ -2827,31 +2708,29 @@ State 114
 	Exp11          goto state 59
 	Exp12          goto state 60
 	FunctionExp    goto state 61
-	Lambda         goto state 62
 
-State 115
+State 113
 
-	Exp4 -> Exp4 '!=' . Exp5                            (rule 14)
+	Exp5 -> Exp5 '>=' . Exp6                            (rule 19)
 
-	'!'            shift, and enter state 63
-	'('            shift, and enter state 64
-	'++'           shift, and enter state 65
-	'-'            shift, and enter state 66
-	'--'           shift, and enter state 67
-	'Tupla'        shift, and enter state 68
-	'false'        shift, and enter state 69
-	'null'         shift, and enter state 70
-	'true'         shift, and enter state 71
-	'{'            shift, and enter state 72
+	'!'            shift, and enter state 62
+	'('            shift, and enter state 63
+	'++'           shift, and enter state 64
+	'-'            shift, and enter state 65
+	'--'           shift, and enter state 66
+	'Tupla'        shift, and enter state 67
+	'false'        shift, and enter state 68
+	'null'         shift, and enter state 69
+	'true'         shift, and enter state 70
+	'{'            shift, and enter state 71
 	L_integ        shift, and enter state 2
-	L_quoted       shift, and enter state 73
+	L_quoted       shift, and enter state 72
 	L_ident        shift, and enter state 13
 
 	Integer        goto state 45
 	String         goto state 46
 	Ident          goto state 47
-	Exp5           goto state 133
-	Exp6           goto state 54
+	Exp6           goto state 133
 	Exp7           goto state 55
 	Exp8           goto state 56
 	Exp9           goto state 57
@@ -2859,24 +2738,23 @@ State 115
 	Exp11          goto state 59
 	Exp12          goto state 60
 	FunctionExp    goto state 61
-	Lambda         goto state 62
 
-State 116
+State 114
 
-	Exp4 -> Exp4 '==' . Exp5                            (rule 13)
+	Exp4 -> Exp4 '!=' . Exp5                            (rule 14)
 
-	'!'            shift, and enter state 63
-	'('            shift, and enter state 64
-	'++'           shift, and enter state 65
-	'-'            shift, and enter state 66
-	'--'           shift, and enter state 67
-	'Tupla'        shift, and enter state 68
-	'false'        shift, and enter state 69
-	'null'         shift, and enter state 70
-	'true'         shift, and enter state 71
-	'{'            shift, and enter state 72
+	'!'            shift, and enter state 62
+	'('            shift, and enter state 63
+	'++'           shift, and enter state 64
+	'-'            shift, and enter state 65
+	'--'           shift, and enter state 66
+	'Tupla'        shift, and enter state 67
+	'false'        shift, and enter state 68
+	'null'         shift, and enter state 69
+	'true'         shift, and enter state 70
+	'{'            shift, and enter state 71
 	L_integ        shift, and enter state 2
-	L_quoted       shift, and enter state 73
+	L_quoted       shift, and enter state 72
 	L_ident        shift, and enter state 13
 
 	Integer        goto state 45
@@ -2891,30 +2769,60 @@ State 116
 	Exp11          goto state 59
 	Exp12          goto state 60
 	FunctionExp    goto state 61
-	Lambda         goto state 62
 
-State 117
+State 115
 
-	Exp3 -> Exp3 '&&' . Exp4                            (rule 11)
+	Exp4 -> Exp4 '==' . Exp5                            (rule 13)
 
-	'!'            shift, and enter state 63
-	'('            shift, and enter state 64
-	'++'           shift, and enter state 65
-	'-'            shift, and enter state 66
-	'--'           shift, and enter state 67
-	'Tupla'        shift, and enter state 68
-	'false'        shift, and enter state 69
-	'null'         shift, and enter state 70
-	'true'         shift, and enter state 71
-	'{'            shift, and enter state 72
+	'!'            shift, and enter state 62
+	'('            shift, and enter state 63
+	'++'           shift, and enter state 64
+	'-'            shift, and enter state 65
+	'--'           shift, and enter state 66
+	'Tupla'        shift, and enter state 67
+	'false'        shift, and enter state 68
+	'null'         shift, and enter state 69
+	'true'         shift, and enter state 70
+	'{'            shift, and enter state 71
 	L_integ        shift, and enter state 2
-	L_quoted       shift, and enter state 73
+	L_quoted       shift, and enter state 72
 	L_ident        shift, and enter state 13
 
 	Integer        goto state 45
 	String         goto state 46
 	Ident          goto state 47
-	Exp4           goto state 131
+	Exp5           goto state 131
+	Exp6           goto state 54
+	Exp7           goto state 55
+	Exp8           goto state 56
+	Exp9           goto state 57
+	Exp10          goto state 58
+	Exp11          goto state 59
+	Exp12          goto state 60
+	FunctionExp    goto state 61
+
+State 116
+
+	Exp3 -> Exp3 '&&' . Exp4                            (rule 11)
+
+	'!'            shift, and enter state 62
+	'('            shift, and enter state 63
+	'++'           shift, and enter state 64
+	'-'            shift, and enter state 65
+	'--'           shift, and enter state 66
+	'Tupla'        shift, and enter state 67
+	'false'        shift, and enter state 68
+	'null'         shift, and enter state 69
+	'true'         shift, and enter state 70
+	'{'            shift, and enter state 71
+	L_integ        shift, and enter state 2
+	L_quoted       shift, and enter state 72
+	L_ident        shift, and enter state 13
+
+	Integer        goto state 45
+	String         goto state 46
+	Ident          goto state 47
+	Exp4           goto state 130
 	Exp5           goto state 53
 	Exp6           goto state 54
 	Exp7           goto state 55
@@ -2924,30 +2832,29 @@ State 117
 	Exp11          goto state 59
 	Exp12          goto state 60
 	FunctionExp    goto state 61
-	Lambda         goto state 62
 
-State 118
+State 117
 
 	Exp1 -> Exp3 '?' . Exp1 ':' Exp2                    (rule 7)
 
-	'!'            shift, and enter state 63
-	'('            shift, and enter state 64
-	'++'           shift, and enter state 65
-	'-'            shift, and enter state 66
-	'--'           shift, and enter state 67
-	'Tupla'        shift, and enter state 68
-	'false'        shift, and enter state 69
-	'null'         shift, and enter state 70
-	'true'         shift, and enter state 71
-	'{'            shift, and enter state 72
+	'!'            shift, and enter state 62
+	'('            shift, and enter state 63
+	'++'           shift, and enter state 64
+	'-'            shift, and enter state 65
+	'--'           shift, and enter state 66
+	'Tupla'        shift, and enter state 67
+	'false'        shift, and enter state 68
+	'null'         shift, and enter state 69
+	'true'         shift, and enter state 70
+	'{'            shift, and enter state 71
 	L_integ        shift, and enter state 2
-	L_quoted       shift, and enter state 73
+	L_quoted       shift, and enter state 72
 	L_ident        shift, and enter state 13
 
 	Integer        goto state 45
 	String         goto state 46
 	Ident          goto state 47
-	Exp1           goto state 130
+	Exp1           goto state 129
 	Exp2           goto state 50
 	Exp3           goto state 51
 	Exp4           goto state 52
@@ -2960,30 +2867,29 @@ State 118
 	Exp11          goto state 59
 	Exp12          goto state 60
 	FunctionExp    goto state 61
-	Lambda         goto state 62
 
-State 119
+State 118
 
 	Exp2 -> Exp2 '||' . Exp3                            (rule 9)
 
-	'!'            shift, and enter state 63
-	'('            shift, and enter state 64
-	'++'           shift, and enter state 65
-	'-'            shift, and enter state 66
-	'--'           shift, and enter state 67
-	'Tupla'        shift, and enter state 68
-	'false'        shift, and enter state 69
-	'null'         shift, and enter state 70
-	'true'         shift, and enter state 71
-	'{'            shift, and enter state 72
+	'!'            shift, and enter state 62
+	'('            shift, and enter state 63
+	'++'           shift, and enter state 64
+	'-'            shift, and enter state 65
+	'--'           shift, and enter state 66
+	'Tupla'        shift, and enter state 67
+	'false'        shift, and enter state 68
+	'null'         shift, and enter state 69
+	'true'         shift, and enter state 70
+	'{'            shift, and enter state 71
 	L_integ        shift, and enter state 2
-	L_quoted       shift, and enter state 73
+	L_quoted       shift, and enter state 72
 	L_ident        shift, and enter state 13
 
 	Integer        goto state 45
 	String         goto state 46
 	Ident          goto state 47
-	Exp3           goto state 129
+	Exp3           goto state 128
 	Exp4           goto state 52
 	Exp5           goto state 53
 	Exp6           goto state 54
@@ -2994,9 +2900,8 @@ State 119
 	Exp11          goto state 59
 	Exp12          goto state 60
 	FunctionExp    goto state 61
-	Lambda         goto state 62
 
-State 120
+State 119
 
 	Dec -> 'var' Ident ':' Type '=' Exp ';' .           (rule 98)
 
@@ -3029,7 +2934,7 @@ State 120
 	%eof           reduce using rule 98
 
 
-State 121
+State 120
 
 	ListDimExp -> DimExp .                              (rule 54)
 	ListDimExp -> DimExp . ListDimExp                   (rule 55)
@@ -3059,18 +2964,17 @@ State 121
 	'>='           reduce using rule 54
 	'?'            reduce using rule 54
 	'?.let'        reduce using rule 54
-	'['            shift, and enter state 124
+	'['            shift, and enter state 123
 	']'            reduce using rule 54
 	'downTo'       reduce using rule 54
 	'step'         reduce using rule 54
 	'until'        reduce using rule 54
 	'||'           reduce using rule 54
-	'}'            reduce using rule 54
 
-	DimExp         goto state 121
-	ListDimExp     goto state 128
+	DimExp         goto state 120
+	ListDimExp     goto state 127
 
-State 122
+State 121
 
 	Exp10 -> Ident ListDimExp .                         (rule 43)
 
@@ -3104,64 +3008,25 @@ State 122
 	'step'         reduce using rule 43
 	'until'        reduce using rule 43
 	'||'           reduce using rule 43
-	'}'            reduce using rule 43
 
 
-State 123
+State 122
 
 	FunctionExp -> Ident '(' . ListExp ')'              (rule 103)
 
-	'!'            shift, and enter state 63
-	'('            shift, and enter state 64
+	'!'            shift, and enter state 62
+	'('            shift, and enter state 63
 	')'            reduce using rule 50
-	'++'           shift, and enter state 65
-	'-'            shift, and enter state 66
-	'--'           shift, and enter state 67
-	'Tupla'        shift, and enter state 68
-	'false'        shift, and enter state 69
-	'null'         shift, and enter state 70
-	'true'         shift, and enter state 71
-	'{'            shift, and enter state 72
+	'++'           shift, and enter state 64
+	'-'            shift, and enter state 65
+	'--'           shift, and enter state 66
+	'Tupla'        shift, and enter state 67
+	'false'        shift, and enter state 68
+	'null'         shift, and enter state 69
+	'true'         shift, and enter state 70
+	'{'            shift, and enter state 71
 	L_integ        shift, and enter state 2
-	L_quoted       shift, and enter state 73
-	L_ident        shift, and enter state 13
-
-	Integer        goto state 45
-	String         goto state 46
-	Ident          goto state 47
-	Exp            goto state 126
-	Exp1           goto state 49
-	Exp2           goto state 50
-	Exp3           goto state 51
-	Exp4           goto state 52
-	Exp5           goto state 53
-	Exp6           goto state 54
-	Exp7           goto state 55
-	Exp8           goto state 56
-	Exp9           goto state 57
-	Exp10          goto state 58
-	Exp11          goto state 59
-	Exp12          goto state 60
-	ListExp        goto state 127
-	FunctionExp    goto state 61
-	Lambda         goto state 62
-
-State 124
-
-	DimExp -> '[' . Exp ']'                             (rule 53)
-
-	'!'            shift, and enter state 63
-	'('            shift, and enter state 64
-	'++'           shift, and enter state 65
-	'-'            shift, and enter state 66
-	'--'           shift, and enter state 67
-	'Tupla'        shift, and enter state 68
-	'false'        shift, and enter state 69
-	'null'         shift, and enter state 70
-	'true'         shift, and enter state 71
-	'{'            shift, and enter state 72
-	L_integ        shift, and enter state 2
-	L_quoted       shift, and enter state 73
+	L_quoted       shift, and enter state 72
 	L_ident        shift, and enter state 13
 
 	Integer        goto state 45
@@ -3180,49 +3045,85 @@ State 124
 	Exp10          goto state 58
 	Exp11          goto state 59
 	Exp12          goto state 60
+	ListExp        goto state 126
 	FunctionExp    goto state 61
-	Lambda         goto state 62
 
-State 125
+State 123
+
+	DimExp -> '[' . Exp ']'                             (rule 53)
+
+	'!'            shift, and enter state 62
+	'('            shift, and enter state 63
+	'++'           shift, and enter state 64
+	'-'            shift, and enter state 65
+	'--'           shift, and enter state 66
+	'Tupla'        shift, and enter state 67
+	'false'        shift, and enter state 68
+	'null'         shift, and enter state 69
+	'true'         shift, and enter state 70
+	'{'            shift, and enter state 71
+	L_integ        shift, and enter state 2
+	L_quoted       shift, and enter state 72
+	L_ident        shift, and enter state 13
+
+	Integer        goto state 45
+	String         goto state 46
+	Ident          goto state 47
+	Exp            goto state 124
+	Exp1           goto state 49
+	Exp2           goto state 50
+	Exp3           goto state 51
+	Exp4           goto state 52
+	Exp5           goto state 53
+	Exp6           goto state 54
+	Exp7           goto state 55
+	Exp8           goto state 56
+	Exp9           goto state 57
+	Exp10          goto state 58
+	Exp11          goto state 59
+	Exp12          goto state 60
+	FunctionExp    goto state 61
+
+State 124
 
 	Exp -> Exp . OpAssign Exp1                          (rule 5)
 	DimExp -> '[' Exp . ']'                             (rule 53)
 
-	'%='           shift, and enter state 84
-	'*='           shift, and enter state 85
-	'+='           shift, and enter state 86
-	'-='           shift, and enter state 87
-	'/='           shift, and enter state 88
-	'='            shift, and enter state 90
-	']'            shift, and enter state 157
+	'%='           shift, and enter state 83
+	'*='           shift, and enter state 84
+	'+='           shift, and enter state 85
+	'-='           shift, and enter state 86
+	'/='           shift, and enter state 87
+	'='            shift, and enter state 89
+	']'            shift, and enter state 156
 
-	OpAssign       goto state 83
+	OpAssign       goto state 82
 
-State 126
+State 125
 
 	Exp -> Exp . OpAssign Exp1                          (rule 5)
 	ListExp -> Exp .                                    (rule 51)
 	ListExp -> Exp . ',' ListExp                        (rule 52)
 
-	'%='           shift, and enter state 84
+	'%='           shift, and enter state 83
 	')'            reduce using rule 51
-	'*='           shift, and enter state 85
-	'+='           shift, and enter state 86
-	','            shift, and enter state 156
-	'-='           shift, and enter state 87
-	'/='           shift, and enter state 88
-	'='            shift, and enter state 90
+	'*='           shift, and enter state 84
+	'+='           shift, and enter state 85
+	','            shift, and enter state 155
+	'-='           shift, and enter state 86
+	'/='           shift, and enter state 87
+	'='            shift, and enter state 89
 
-	OpAssign       goto state 83
+	OpAssign       goto state 82
 
-State 127
+State 126
 
 	FunctionExp -> Ident '(' ListExp . ')'              (rule 103)
 
-	')'            shift, and enter state 155
+	')'            shift, and enter state 154
 
 
-State 128
+State 127
 
 	ListDimExp -> DimExp ListDimExp .                   (rule 55)
 
@@ -3256,16 +3157,15 @@ State 128
 	'step'         reduce using rule 55
 	'until'        reduce using rule 55
 	'||'           reduce using rule 55
-	'}'            reduce using rule 55
 
 
-State 129
+State 128
 
 	Exp2 -> Exp2 '||' Exp3 .                            (rule 9)
 	Exp3 -> Exp3 . '&&' Exp4                            (rule 11)
 
 	'%='           reduce using rule 9
-	'&&'           shift, and enter state 117
+	'&&'           shift, and enter state 116
 	')'            reduce using rule 9
 	'*='           reduce using rule 9
 	'+='           reduce using rule 9
@@ -3282,23 +3182,22 @@ State 129
 	'step'         reduce using rule 9
 	'until'        reduce using rule 9
 	'||'           reduce using rule 9
-	'}'            reduce using rule 9
 
 
-State 130
+State 129
 
 	Exp1 -> Exp3 '?' Exp1 . ':' Exp2                    (rule 7)
 
-	':'            shift, and enter state 154
+	':'            shift, and enter state 153
 
 
-State 131
+State 130
 
 	Exp3 -> Exp3 '&&' Exp4 .                            (rule 11)
 	Exp4 -> Exp4 . '==' Exp5                            (rule 13)
 	Exp4 -> Exp4 . '!=' Exp5                            (rule 14)
 
-	'!='           shift, and enter state 115
+	'!='           shift, and enter state 114
 	'%='           reduce using rule 11
 	'&&'           reduce using rule 11
 	')'            reduce using rule 11
@@ -3311,7 +3210,7 @@ State 131
 	':'            reduce using rule 11
 	';'            reduce using rule 11
 	'='            reduce using rule 11
-	'=='           shift, and enter state 116
+	'=='           shift, and enter state 115
 	'?'            reduce using rule 11
 	'?.let'        reduce using rule 11
 	']'            reduce using rule 11
@@ -3319,10 +3218,9 @@ State 131
 	'step'         reduce using rule 11
 	'until'        reduce using rule 11
 	'||'           reduce using rule 11
-	'}'            reduce using rule 11
 
 
-State 132
+State 131
 
 	Exp4 -> Exp4 '==' Exp5 .                            (rule 13)
 	Exp5 -> Exp5 . '<' Exp6                             (rule 16)
@@ -3342,12 +3240,12 @@ State 132
 	'/='           reduce using rule 13
 	':'            reduce using rule 13
 	';'            reduce using rule 13
-	'<'            shift, and enter state 111
-	'<='           shift, and enter state 112
+	'<'            shift, and enter state 110
+	'<='           shift, and enter state 111
 	'='            reduce using rule 13
 	'=='           reduce using rule 13
-	'>'            shift, and enter state 113
-	'>='           shift, and enter state 114
+	'>'            shift, and enter state 112
+	'>='           shift, and enter state 113
 	'?'            reduce using rule 13
 	'?.let'        reduce using rule 13
 	']'            reduce using rule 13
@@ -3355,10 +3253,9 @@ State 132
 	'step'         reduce using rule 13
 	'until'        reduce using rule 13
 	'||'           reduce using rule 13
-	'}'            reduce using rule 13
 
 
-State 133
+State 132
 
 	Exp4 -> Exp4 '!=' Exp5 .                            (rule 14)
 	Exp5 -> Exp5 . '<' Exp6                             (rule 16)
@@ -3378,12 +3275,12 @@ State 133
 	'/='           reduce using rule 14
 	':'            reduce using rule 14
 	';'            reduce using rule 14
-	'<'            shift, and enter state 111
-	'<='           shift, and enter state 112
+	'<'            shift, and enter state 110
+	'<='           shift, and enter state 111
 	'='            reduce using rule 14
 	'=='           reduce using rule 14
-	'>'            shift, and enter state 113
-	'>='           shift, and enter state 114
+	'>'            shift, and enter state 112
+	'>='           shift, and enter state 113
 	'?'            reduce using rule 14
 	'?.let'        reduce using rule 14
 	']'            reduce using rule 14
@@ -3391,10 +3288,9 @@ State 133
 	'step'         reduce using rule 14
 	'until'        reduce using rule 14
 	'||'           reduce using rule 14
-	'}'            reduce using rule 14
 
 
-State 134
+State 133
 
 	Exp5 -> Exp5 '>=' Exp6 .                            (rule 19)
 	Exp6 -> Exp6 . '+' Exp7                             (rule 21)
@@ -3405,10 +3301,10 @@ State 134
 	'&&'           reduce using rule 19
 	')'            reduce using rule 19
 	'*='           reduce using rule 19
-	'+'            shift, and enter state 109
+	'+'            shift, and enter state 108
 	'+='           reduce using rule 19
 	','            reduce using rule 19
-	'-'            shift, and enter state 110
+	'-'            shift, and enter state 109
 	'-='           reduce using rule 19
 	'..'           reduce using rule 19
 	'/='           reduce using rule 19
@@ -3427,10 +3323,9 @@ State 134
 	'step'         reduce using rule 19
 	'until'        reduce using rule 19
 	'||'           reduce using rule 19
-	'}'            reduce using rule 19
 
 
-State 135
+State 134
 
 	Exp5 -> Exp5 '>' Exp6 .                             (rule 17)
 	Exp6 -> Exp6 . '+' Exp7                             (rule 21)
@@ -3441,10 +3336,10 @@ State 135
 	'&&'           reduce using rule 17
 	')'            reduce using rule 17
 	'*='           reduce using rule 17
-	'+'            shift, and enter state 109
+	'+'            shift, and enter state 108
 	'+='           reduce using rule 17
 	','            reduce using rule 17
-	'-'            shift, and enter state 110
+	'-'            shift, and enter state 109
 	'-='           reduce using rule 17
 	'..'           reduce using rule 17
 	'/='           reduce using rule 17
@@ -3463,10 +3358,9 @@ State 135
 	'step'         reduce using rule 17
 	'until'        reduce using rule 17
 	'||'           reduce using rule 17
-	'}'            reduce using rule 17
 
 
-State 136
+State 135
 
 	Exp5 -> Exp5 '<=' Exp6 .                            (rule 18)
 	Exp6 -> Exp6 . '+' Exp7                             (rule 21)
@@ -3477,10 +3371,10 @@ State 136
 	'&&'           reduce using rule 18
 	')'            reduce using rule 18
 	'*='           reduce using rule 18
-	'+'            shift, and enter state 109
+	'+'            shift, and enter state 108
 	'+='           reduce using rule 18
 	','            reduce using rule 18
-	'-'            shift, and enter state 110
+	'-'            shift, and enter state 109
 	'-='           reduce using rule 18
 	'..'           reduce using rule 18
 	'/='           reduce using rule 18
@@ -3499,10 +3393,9 @@ State 136
 	'step'         reduce using rule 18
 	'until'        reduce using rule 18
 	'||'           reduce using rule 18
-	'}'            reduce using rule 18
 
 
-State 137
+State 136
 
 	Exp5 -> Exp5 '<' Exp6 .                             (rule 16)
 	Exp6 -> Exp6 . '+' Exp7                             (rule 21)
@@ -3513,10 +3406,10 @@ State 137
 	'&&'           reduce using rule 16
 	')'            reduce using rule 16
 	'*='           reduce using rule 16
-	'+'            shift, and enter state 109
+	'+'            shift, and enter state 108
 	'+='           reduce using rule 16
 	','            reduce using rule 16
-	'-'            shift, and enter state 110
+	'-'            shift, and enter state 109
 	'-='           reduce using rule 16
 	'..'           reduce using rule 16
 	'/='           reduce using rule 16
@@ -3535,10 +3428,9 @@ State 137
 	'step'         reduce using rule 16
 	'until'        reduce using rule 16
 	'||'           reduce using rule 16
-	'}'            reduce using rule 16
 
 
-State 138
+State 137
 
 	Exp6 -> Exp6 '-' Exp7 .                             (rule 22)
 	Exp7 -> Exp7 . '*' Exp8                             (rule 24)
@@ -3546,11 +3438,11 @@ State 138
 	Exp7 -> Exp7 . '%' Exp8                             (rule 26)
 
 	'!='           reduce using rule 22
-	'%'            shift, and enter state 106
+	'%'            shift, and enter state 105
 	'%='           reduce using rule 22
 	'&&'           reduce using rule 22
 	')'            reduce using rule 22
-	'*'            shift, and enter state 107
+	'*'            shift, and enter state 106
 	'*='           reduce using rule 22
 	'+'            reduce using rule 22
 	'+='           reduce using rule 22
@@ -3558,7 +3450,7 @@ State 138
 	'-'            reduce using rule 22
 	'-='           reduce using rule 22
 	'..'           reduce using rule 22
-	'/'            shift, and enter state 108
+	'/'            shift, and enter state 107
 	'/='           reduce using rule 22
 	':'            reduce using rule 22
 	';'            reduce using rule 22
@@ -3575,10 +3467,9 @@ State 138
 	'step'         reduce using rule 22
 	'until'        reduce using rule 22
 	'||'           reduce using rule 22
-	'}'            reduce using rule 22
 
 
-State 139
+State 138
 
 	Exp6 -> Exp6 '+' Exp7 .                             (rule 21)
 	Exp7 -> Exp7 . '*' Exp8                             (rule 24)
@@ -3586,11 +3477,11 @@ State 139
 	Exp7 -> Exp7 . '%' Exp8                             (rule 26)
 
 	'!='           reduce using rule 21
-	'%'            shift, and enter state 106
+	'%'            shift, and enter state 105
 	'%='           reduce using rule 21
 	'&&'           reduce using rule 21
 	')'            reduce using rule 21
-	'*'            shift, and enter state 107
+	'*'            shift, and enter state 106
 	'*='           reduce using rule 21
 	'+'            reduce using rule 21
 	'+='           reduce using rule 21
@@ -3598,7 +3489,7 @@ State 139
 	'-'            reduce using rule 21
 	'-='           reduce using rule 21
 	'..'           reduce using rule 21
-	'/'            shift, and enter state 108
+	'/'            shift, and enter state 107
 	'/='           reduce using rule 21
 	':'            reduce using rule 21
 	';'            reduce using rule 21
@@ -3615,10 +3506,9 @@ State 139
 	'step'         reduce using rule 21
 	'until'        reduce using rule 21
 	'||'           reduce using rule 21
-	'}'            reduce using rule 21
 
 
-State 140
+State 139
 
 	Exp7 -> Exp7 '/' Exp8 .                             (rule 25)
 
@@ -3652,10 +3542,9 @@ State 140
 	'step'         reduce using rule 25
 	'until'        reduce using rule 25
 	'||'           reduce using rule 25
-	'}'            reduce using rule 25
 
 
-State 141
+State 140
 
 	Exp7 -> Exp7 '*' Exp8 .                             (rule 24)
 
@@ -3689,10 +3578,9 @@ State 141
 	'step'         reduce using rule 24
 	'until'        reduce using rule 24
 	'||'           reduce using rule 24
-	'}'            reduce using rule 24
 
 
-State 142
+State 141
 
 	Exp7 -> Exp7 '%' Exp8 .                             (rule 26)
 
@@ -3726,10 +3614,9 @@ State 142
 	'step'         reduce using rule 26
 	'until'        reduce using rule 26
 	'||'           reduce using rule 26
-	'}'            reduce using rule 26
 
 
-State 143
+State 142
 
 	Exp12 -> '(' Exp ')' .                              (rule 49)
 
@@ -3766,20 +3653,18 @@ State 143
 	'step'         reduce using rule 49
 	'until'        reduce using rule 49
 	'||'           reduce using rule 49
-	'}'            reduce using rule 49
+
+
+State 143
+
+	Exp10 -> 'Tupla' '(' ListExp . ')'                  (rule 36)
+
+	')'            shift, and enter state 152
 
 
 State 144
 
-	Exp10 -> 'Tupla' '(' ListExp . ')'                  (rule 36)
-
-	')'            shift, and enter state 153
-
-
-State 145
-
-	Lambda -> '{' ListArg '->' . ListStm Exp '}'        (rule 104)
-	Lambda -> '{' ListArg '->' . ListStm '}'            (rule 105)
+	Exp10 -> '{' ListArg '->' . ListStm '}'             (rule 44)
 
 	'!'            reduce using rule 91
 	'('            reduce using rule 91
@@ -3808,9 +3693,9 @@ State 145
 	L_quoted       reduce using rule 91
 	L_ident        reduce using rule 91
 
-	ListStm        goto state 152
+	ListStm        goto state 151
 
-State 146
+State 145
 
 	Type -> '(' ListType ')' '->' BaseType .            (rule 69)
 
@@ -3823,22 +3708,22 @@ State 146
 	'{'            reduce using rule 69
 
 
-State 147
+State 146
 
 	Exp -> Exp . OpAssign Exp1                          (rule 5)
-	ArrayDec -> 'val' Ident '=' 'Array' '(' Exp ',' Exp . ')' ';'    (rule 112)
+	ArrayDec -> 'val' Ident '=' 'Array' '(' Exp ',' Exp . ')' ';'    (rule 110)
 
-	'%='           shift, and enter state 84
-	')'            shift, and enter state 151
-	'*='           shift, and enter state 85
-	'+='           shift, and enter state 86
-	'-='           shift, and enter state 87
-	'/='           shift, and enter state 88
-	'='            shift, and enter state 90
+	'%='           shift, and enter state 83
+	')'            shift, and enter state 150
+	'*='           shift, and enter state 84
+	'+='           shift, and enter state 85
+	'-='           shift, and enter state 86
+	'/='           shift, and enter state 87
+	'='            shift, and enter state 89
 
-	OpAssign       goto state 83
+	OpAssign       goto state 82
 
-State 148
+State 147
 
 	Exp -> Exp OpAssign Exp1 .                          (rule 5)
 
@@ -3857,10 +3742,9 @@ State 148
 	'downTo'       reduce using rule 5
 	'step'         reduce using rule 5
 	'until'        reduce using rule 5
-	'}'            reduce using rule 5
 
 
-State 149
+State 148
 
 	FunctionDec -> 'fun' Ident '(' ListArg ')' ':' Type '{' . ListStm '}'    (rule 102)
 
@@ -3891,44 +3775,44 @@ State 149
 	L_quoted       reduce using rule 91
 	L_ident        reduce using rule 91
 
-	ListStm        goto state 150
+	ListStm        goto state 149
 
-State 150
+State 149
 
 	ListStm -> ListStm . Stm                            (rule 92)
 	FunctionDec -> 'fun' Ident '(' ListArg ')' ':' Type '{' ListStm . '}'    (rule 102)
 
-	'!'            shift, and enter state 63
-	'('            shift, and enter state 64
-	'++'           shift, and enter state 65
-	'-'            shift, and enter state 66
-	'--'           shift, and enter state 67
-	'Tupla'        shift, and enter state 68
-	'break'        shift, and enter state 164
-	'continue'     shift, and enter state 165
-	'false'        shift, and enter state 69
-	'for'          shift, and enter state 166
+	'!'            shift, and enter state 62
+	'('            shift, and enter state 63
+	'++'           shift, and enter state 64
+	'-'            shift, and enter state 65
+	'--'           shift, and enter state 66
+	'Tupla'        shift, and enter state 67
+	'break'        shift, and enter state 163
+	'continue'     shift, and enter state 164
+	'false'        shift, and enter state 68
+	'for'          shift, and enter state 165
 	'fun'          shift, and enter state 9
-	'if'           shift, and enter state 167
-	'null'         shift, and enter state 70
-	'print'        shift, and enter state 168
-	'println'      shift, and enter state 169
-	'return'       shift, and enter state 170
-	'run'          shift, and enter state 171
-	'true'         shift, and enter state 71
+	'if'           shift, and enter state 166
+	'null'         shift, and enter state 69
+	'print'        shift, and enter state 167
+	'println'      shift, and enter state 168
+	'return'       shift, and enter state 169
+	'run'          shift, and enter state 170
+	'true'         shift, and enter state 70
 	'val'          shift, and enter state 10
 	'var'          shift, and enter state 11
-	'while'        shift, and enter state 172
-	'{'            shift, and enter state 72
-	'}'            shift, and enter state 176
+	'while'        shift, and enter state 171
+	'{'            shift, and enter state 71
+	'}'            shift, and enter state 174
 	L_integ        shift, and enter state 2
-	L_quoted       shift, and enter state 73
+	L_quoted       shift, and enter state 72
 	L_ident        shift, and enter state 13
 
 	Integer        goto state 45
 	String         goto state 46
 	Ident          goto state 47
-	Exp            goto state 175
+	Exp            goto state 160
 	Exp1           goto state 49
 	Exp2           goto state 50
 	Exp3           goto state 51
@@ -3941,57 +3825,55 @@ State 150
 	Exp10          goto state 58
 	Exp11          goto state 59
 	Exp12          goto state 60
-	Stm            goto state 162
-	Dec            goto state 163
+	Stm            goto state 161
+	Dec            goto state 162
 	FunctionDec    goto state 7
 	FunctionExp    goto state 61
-	Lambda         goto state 62
 	ArrayDec       goto state 8
+
+State 150
+
+	ArrayDec -> 'val' Ident '=' 'Array' '(' Exp ',' Exp ')' . ';'    (rule 110)
+
+	';'            shift, and enter state 173
+
 
 State 151
 
-	ArrayDec -> 'val' Ident '=' 'Array' '(' Exp ',' Exp ')' . ';'    (rule 112)
-
-	';'            shift, and enter state 174
-
-
-State 152
-
+	Exp10 -> '{' ListArg '->' ListStm . '}'             (rule 44)
 	ListStm -> ListStm . Stm                            (rule 92)
-	Lambda -> '{' ListArg '->' ListStm . Exp '}'        (rule 104)
-	Lambda -> '{' ListArg '->' ListStm . '}'            (rule 105)
 
-	'!'            shift, and enter state 63
-	'('            shift, and enter state 64
-	'++'           shift, and enter state 65
-	'-'            shift, and enter state 66
-	'--'           shift, and enter state 67
-	'Tupla'        shift, and enter state 68
-	'break'        shift, and enter state 164
-	'continue'     shift, and enter state 165
-	'false'        shift, and enter state 69
-	'for'          shift, and enter state 166
+	'!'            shift, and enter state 62
+	'('            shift, and enter state 63
+	'++'           shift, and enter state 64
+	'-'            shift, and enter state 65
+	'--'           shift, and enter state 66
+	'Tupla'        shift, and enter state 67
+	'break'        shift, and enter state 163
+	'continue'     shift, and enter state 164
+	'false'        shift, and enter state 68
+	'for'          shift, and enter state 165
 	'fun'          shift, and enter state 9
-	'if'           shift, and enter state 167
-	'null'         shift, and enter state 70
-	'print'        shift, and enter state 168
-	'println'      shift, and enter state 169
-	'return'       shift, and enter state 170
-	'run'          shift, and enter state 171
-	'true'         shift, and enter state 71
+	'if'           shift, and enter state 166
+	'null'         shift, and enter state 69
+	'print'        shift, and enter state 167
+	'println'      shift, and enter state 168
+	'return'       shift, and enter state 169
+	'run'          shift, and enter state 170
+	'true'         shift, and enter state 70
 	'val'          shift, and enter state 10
 	'var'          shift, and enter state 11
-	'while'        shift, and enter state 172
-	'{'            shift, and enter state 72
-	'}'            shift, and enter state 173
+	'while'        shift, and enter state 171
+	'{'            shift, and enter state 71
+	'}'            shift, and enter state 172
 	L_integ        shift, and enter state 2
-	L_quoted       shift, and enter state 73
+	L_quoted       shift, and enter state 72
 	L_ident        shift, and enter state 13
 
 	Integer        goto state 45
 	String         goto state 46
 	Ident          goto state 47
-	Exp            goto state 161
+	Exp            goto state 160
 	Exp1           goto state 49
 	Exp2           goto state 50
 	Exp3           goto state 51
@@ -4004,14 +3886,13 @@ State 152
 	Exp10          goto state 58
 	Exp11          goto state 59
 	Exp12          goto state 60
-	Stm            goto state 162
-	Dec            goto state 163
+	Stm            goto state 161
+	Dec            goto state 162
 	FunctionDec    goto state 7
 	FunctionExp    goto state 61
-	Lambda         goto state 62
 	ArrayDec       goto state 8
 
-State 153
+State 152
 
 	Exp10 -> 'Tupla' '(' ListExp ')' .                  (rule 36)
 
@@ -4045,32 +3926,31 @@ State 153
 	'step'         reduce using rule 36
 	'until'        reduce using rule 36
 	'||'           reduce using rule 36
-	'}'            reduce using rule 36
 
 
-State 154
+State 153
 
 	Exp1 -> Exp3 '?' Exp1 ':' . Exp2                    (rule 7)
 
-	'!'            shift, and enter state 63
-	'('            shift, and enter state 64
-	'++'           shift, and enter state 65
-	'-'            shift, and enter state 66
-	'--'           shift, and enter state 67
-	'Tupla'        shift, and enter state 68
-	'false'        shift, and enter state 69
-	'null'         shift, and enter state 70
-	'true'         shift, and enter state 71
-	'{'            shift, and enter state 72
+	'!'            shift, and enter state 62
+	'('            shift, and enter state 63
+	'++'           shift, and enter state 64
+	'-'            shift, and enter state 65
+	'--'           shift, and enter state 66
+	'Tupla'        shift, and enter state 67
+	'false'        shift, and enter state 68
+	'null'         shift, and enter state 69
+	'true'         shift, and enter state 70
+	'{'            shift, and enter state 71
 	L_integ        shift, and enter state 2
-	L_quoted       shift, and enter state 73
+	L_quoted       shift, and enter state 72
 	L_ident        shift, and enter state 13
 
 	Integer        goto state 45
 	String         goto state 46
 	Ident          goto state 47
-	Exp2           goto state 159
-	Exp3           goto state 160
+	Exp2           goto state 158
+	Exp3           goto state 159
 	Exp4           goto state 52
 	Exp5           goto state 53
 	Exp6           goto state 54
@@ -4081,9 +3961,8 @@ State 154
 	Exp11          goto state 59
 	Exp12          goto state 60
 	FunctionExp    goto state 61
-	Lambda         goto state 62
 
-State 155
+State 154
 
 	FunctionExp -> Ident '(' ListExp ')' .              (rule 103)
 
@@ -4117,32 +3996,31 @@ State 155
 	'step'         reduce using rule 103
 	'until'        reduce using rule 103
 	'||'           reduce using rule 103
-	'}'            reduce using rule 103
 
 
-State 156
+State 155
 
 	ListExp -> Exp ',' . ListExp                        (rule 52)
 
-	'!'            shift, and enter state 63
-	'('            shift, and enter state 64
+	'!'            shift, and enter state 62
+	'('            shift, and enter state 63
 	')'            reduce using rule 50
-	'++'           shift, and enter state 65
-	'-'            shift, and enter state 66
-	'--'           shift, and enter state 67
-	'Tupla'        shift, and enter state 68
-	'false'        shift, and enter state 69
-	'null'         shift, and enter state 70
-	'true'         shift, and enter state 71
-	'{'            shift, and enter state 72
+	'++'           shift, and enter state 64
+	'-'            shift, and enter state 65
+	'--'           shift, and enter state 66
+	'Tupla'        shift, and enter state 67
+	'false'        shift, and enter state 68
+	'null'         shift, and enter state 69
+	'true'         shift, and enter state 70
+	'{'            shift, and enter state 71
 	L_integ        shift, and enter state 2
-	L_quoted       shift, and enter state 73
+	L_quoted       shift, and enter state 72
 	L_ident        shift, and enter state 13
 
 	Integer        goto state 45
 	String         goto state 46
 	Ident          goto state 47
-	Exp            goto state 126
+	Exp            goto state 125
 	Exp1           goto state 49
 	Exp2           goto state 50
 	Exp3           goto state 51
@@ -4155,11 +4033,10 @@ State 156
 	Exp10          goto state 58
 	Exp11          goto state 59
 	Exp12          goto state 60
-	ListExp        goto state 158
+	ListExp        goto state 157
 	FunctionExp    goto state 61
-	Lambda         goto state 62
 
-State 157
+State 156
 
 	DimExp -> '[' Exp ']' .                             (rule 53)
 
@@ -4194,17 +4071,16 @@ State 157
 	'step'         reduce using rule 53
 	'until'        reduce using rule 53
 	'||'           reduce using rule 53
-	'}'            reduce using rule 53
 
 
-State 158
+State 157
 
 	ListExp -> Exp ',' ListExp .                        (rule 52)
 
 	')'            reduce using rule 52
 
 
-State 159
+State 158
 
 	Exp1 -> Exp3 '?' Exp1 ':' Exp2 .                    (rule 7)
 	Exp2 -> Exp2 . '||' Exp3                            (rule 9)
@@ -4225,17 +4101,16 @@ State 159
 	'downTo'       reduce using rule 7
 	'step'         reduce using rule 7
 	'until'        reduce using rule 7
-	'||'           shift, and enter state 119
-	'}'            reduce using rule 7
+	'||'           shift, and enter state 118
 
 
-State 160
+State 159
 
 	Exp2 -> Exp3 .                                      (rule 10)
 	Exp3 -> Exp3 . '&&' Exp4                            (rule 11)
 
 	'%='           reduce using rule 10
-	'&&'           shift, and enter state 117
+	'&&'           shift, and enter state 116
 	')'            reduce using rule 10
 	'*='           reduce using rule 10
 	'+='           reduce using rule 10
@@ -4252,29 +4127,26 @@ State 160
 	'step'         reduce using rule 10
 	'until'        reduce using rule 10
 	'||'           reduce using rule 10
-	'}'            reduce using rule 10
 
 
-State 161
+State 160
 
 	Exp -> Exp . OpAssign Exp1                          (rule 5)
 	Stm -> Exp . ';'                                    (rule 78)
 	Stm -> Exp . '?.let' '{' Stm '}'                    (rule 90)
-	Lambda -> '{' ListArg '->' ListStm Exp . '}'        (rule 104)
 
-	'%='           shift, and enter state 84
-	'*='           shift, and enter state 85
-	'+='           shift, and enter state 86
-	'-='           shift, and enter state 87
-	'/='           shift, and enter state 88
-	';'            shift, and enter state 177
-	'='            shift, and enter state 90
-	'?.let'        shift, and enter state 178
-	'}'            shift, and enter state 189
+	'%='           shift, and enter state 83
+	'*='           shift, and enter state 84
+	'+='           shift, and enter state 85
+	'-='           shift, and enter state 86
+	'/='           shift, and enter state 87
+	';'            shift, and enter state 185
+	'='            shift, and enter state 89
+	'?.let'        shift, and enter state 186
 
-	OpAssign       goto state 83
+	OpAssign       goto state 82
 
-State 162
+State 161
 
 	ListStm -> ListStm Stm .                            (rule 92)
 
@@ -4306,7 +4178,7 @@ State 162
 	L_ident        reduce using rule 92
 
 
-State 163
+State 162
 
 	Stm -> Dec .                                        (rule 77)
 
@@ -4338,73 +4210,73 @@ State 163
 	L_ident        reduce using rule 77
 
 
-State 164
+State 163
 
 	Stm -> 'break' . ';'                                (rule 82)
 
-	';'            shift, and enter state 188
+	';'            shift, and enter state 184
+
+
+State 164
+
+	Stm -> 'continue' . ';'                             (rule 83)
+
+	';'            shift, and enter state 183
 
 
 State 165
 
-	Stm -> 'continue' . ';'                             (rule 83)
+	Stm -> 'for' . '(' Ident 'in' Iterable ')' '{' ListStm '}'    (rule 80)
 
-	';'            shift, and enter state 187
+	'('            shift, and enter state 182
 
 
 State 166
 
-	Stm -> 'for' . '(' Ident 'in' Iterable ')' '{' ListStm '}'    (rule 80)
+	Stm -> 'if' . '(' Exp ')' '{' ListStm '}'           (rule 86)
+	Stm -> 'if' . '(' Exp ')' '{' ListStm '}' 'else' '{' ListStm '}'    (rule 87)
 
-	'('            shift, and enter state 186
+	'('            shift, and enter state 181
 
 
 State 167
 
-	Stm -> 'if' . '(' Exp ')' '{' ListStm '}'           (rule 86)
-	Stm -> 'if' . '(' Exp ')' '{' ListStm '}' 'else' '{' ListStm '}'    (rule 87)
+	Stm -> 'print' . '(' Exp ')' ';'                    (rule 88)
 
-	'('            shift, and enter state 185
+	'('            shift, and enter state 180
 
 
 State 168
 
-	Stm -> 'print' . '(' Exp ')' ';'                    (rule 88)
+	Stm -> 'println' . '(' Exp ')' ';'                  (rule 89)
 
-	'('            shift, and enter state 184
+	'('            shift, and enter state 179
 
 
 State 169
 
-	Stm -> 'println' . '(' Exp ')' ';'                  (rule 89)
-
-	'('            shift, and enter state 183
-
-
-State 170
-
 	Stm -> 'return' . Exp ';'                           (rule 84)
 	Stm -> 'return' . ';'                               (rule 85)
 
-	'!'            shift, and enter state 63
-	'('            shift, and enter state 64
-	'++'           shift, and enter state 65
-	'-'            shift, and enter state 66
-	'--'           shift, and enter state 67
-	';'            shift, and enter state 182
-	'Tupla'        shift, and enter state 68
-	'false'        shift, and enter state 69
-	'null'         shift, and enter state 70
-	'true'         shift, and enter state 71
-	'{'            shift, and enter state 72
+	'!'            shift, and enter state 62
+	'('            shift, and enter state 63
+	'++'           shift, and enter state 64
+	'-'            shift, and enter state 65
+	'--'           shift, and enter state 66
+	';'            shift, and enter state 178
+	'Tupla'        shift, and enter state 67
+	'false'        shift, and enter state 68
+	'null'         shift, and enter state 69
+	'true'         shift, and enter state 70
+	'{'            shift, and enter state 71
 	L_integ        shift, and enter state 2
-	L_quoted       shift, and enter state 73
+	L_quoted       shift, and enter state 72
 	L_ident        shift, and enter state 13
 
 	Integer        goto state 45
 	String         goto state 46
 	Ident          goto state 47
-	Exp            goto state 181
+	Exp            goto state 177
 	Exp1           goto state 49
 	Exp2           goto state 50
 	Exp3           goto state 51
@@ -4418,110 +4290,91 @@ State 170
 	Exp11          goto state 59
 	Exp12          goto state 60
 	FunctionExp    goto state 61
-	Lambda         goto state 62
 
-State 171
+State 170
 
 	Stm -> 'run' . '{' ListStm '}'                      (rule 79)
 
-	'{'            shift, and enter state 180
+	'{'            shift, and enter state 176
+
+
+State 171
+
+	Stm -> 'while' . '(' Exp ')' '{' ListStm '}'        (rule 81)
+
+	'('            shift, and enter state 175
 
 
 State 172
 
-	Stm -> 'while' . '(' Exp ')' '{' ListStm '}'        (rule 81)
+	Exp10 -> '{' ListArg '->' ListStm '}' .             (rule 44)
 
-	'('            shift, and enter state 179
+	'!='           reduce using rule 44
+	'%'            reduce using rule 44
+	'%='           reduce using rule 44
+	'&&'           reduce using rule 44
+	')'            reduce using rule 44
+	'*'            reduce using rule 44
+	'*='           reduce using rule 44
+	'+'            reduce using rule 44
+	'+='           reduce using rule 44
+	','            reduce using rule 44
+	'-'            reduce using rule 44
+	'-='           reduce using rule 44
+	'..'           reduce using rule 44
+	'/'            reduce using rule 44
+	'/='           reduce using rule 44
+	':'            reduce using rule 44
+	';'            reduce using rule 44
+	'<'            reduce using rule 44
+	'<='           reduce using rule 44
+	'='            reduce using rule 44
+	'=='           reduce using rule 44
+	'>'            reduce using rule 44
+	'>='           reduce using rule 44
+	'?'            reduce using rule 44
+	'?.let'        reduce using rule 44
+	']'            reduce using rule 44
+	'downTo'       reduce using rule 44
+	'step'         reduce using rule 44
+	'until'        reduce using rule 44
+	'||'           reduce using rule 44
 
 
 State 173
 
-	Lambda -> '{' ListArg '->' ListStm '}' .            (rule 105)
+	ArrayDec -> 'val' Ident '=' 'Array' '(' Exp ',' Exp ')' ';' .    (rule 110)
 
-	'!='           reduce using rule 105
-	'%'            reduce using rule 105
-	'%='           reduce using rule 105
-	'&&'           reduce using rule 105
-	')'            reduce using rule 105
-	'*'            reduce using rule 105
-	'*='           reduce using rule 105
-	'+'            reduce using rule 105
-	'+='           reduce using rule 105
-	','            reduce using rule 105
-	'-'            reduce using rule 105
-	'-='           reduce using rule 105
-	'..'           reduce using rule 105
-	'/'            reduce using rule 105
-	'/='           reduce using rule 105
-	':'            reduce using rule 105
-	';'            reduce using rule 105
-	'<'            reduce using rule 105
-	'<='           reduce using rule 105
-	'='            reduce using rule 105
-	'=='           reduce using rule 105
-	'>'            reduce using rule 105
-	'>='           reduce using rule 105
-	'?'            reduce using rule 105
-	'?.let'        reduce using rule 105
-	']'            reduce using rule 105
-	'downTo'       reduce using rule 105
-	'step'         reduce using rule 105
-	'until'        reduce using rule 105
-	'||'           reduce using rule 105
-	'}'            reduce using rule 105
+	'!'            reduce using rule 110
+	'('            reduce using rule 110
+	'++'           reduce using rule 110
+	'-'            reduce using rule 110
+	'--'           reduce using rule 110
+	'Tupla'        reduce using rule 110
+	'break'        reduce using rule 110
+	'continue'     reduce using rule 110
+	'false'        reduce using rule 110
+	'for'          reduce using rule 110
+	'fun'          reduce using rule 110
+	'if'           reduce using rule 110
+	'null'         reduce using rule 110
+	'print'        reduce using rule 110
+	'println'      reduce using rule 110
+	'return'       reduce using rule 110
+	'run'          reduce using rule 110
+	'true'         reduce using rule 110
+	'val'          reduce using rule 110
+	'var'          reduce using rule 110
+	'while'        reduce using rule 110
+	'{'            reduce using rule 110
+	'}'            reduce using rule 110
+	L_integ        reduce using rule 110
+	L_quoted       reduce using rule 110
+	L_ident        reduce using rule 110
+	%eof           reduce using rule 110
 
 
 State 174
-
-	ArrayDec -> 'val' Ident '=' 'Array' '(' Exp ',' Exp ')' ';' .    (rule 112)
-
-	'!'            reduce using rule 112
-	'('            reduce using rule 112
-	'++'           reduce using rule 112
-	'-'            reduce using rule 112
-	'--'           reduce using rule 112
-	'Tupla'        reduce using rule 112
-	'break'        reduce using rule 112
-	'continue'     reduce using rule 112
-	'false'        reduce using rule 112
-	'for'          reduce using rule 112
-	'fun'          reduce using rule 112
-	'if'           reduce using rule 112
-	'null'         reduce using rule 112
-	'print'        reduce using rule 112
-	'println'      reduce using rule 112
-	'return'       reduce using rule 112
-	'run'          reduce using rule 112
-	'true'         reduce using rule 112
-	'val'          reduce using rule 112
-	'var'          reduce using rule 112
-	'while'        reduce using rule 112
-	'{'            reduce using rule 112
-	'}'            reduce using rule 112
-	L_integ        reduce using rule 112
-	L_quoted       reduce using rule 112
-	L_ident        reduce using rule 112
-	%eof           reduce using rule 112
-
-
-State 175
-
-	Exp -> Exp . OpAssign Exp1                          (rule 5)
-	Stm -> Exp . ';'                                    (rule 78)
-	Stm -> Exp . '?.let' '{' Stm '}'                    (rule 90)
-
-	'%='           shift, and enter state 84
-	'*='           shift, and enter state 85
-	'+='           shift, and enter state 86
-	'-='           shift, and enter state 87
-	'/='           shift, and enter state 88
-	';'            shift, and enter state 177
-	'='            shift, and enter state 90
-	'?.let'        shift, and enter state 178
-
-	OpAssign       goto state 83
-
-State 176
 
 	FunctionDec -> 'fun' Ident '(' ListArg ')' ':' Type '{' ListStm '}' .    (rule 102)
 
@@ -4554,67 +4407,28 @@ State 176
 	%eof           reduce using rule 102
 
 
-State 177
-
-	Stm -> Exp ';' .                                    (rule 78)
-
-	'!'            reduce using rule 78
-	'('            reduce using rule 78
-	'++'           reduce using rule 78
-	'-'            reduce using rule 78
-	'--'           reduce using rule 78
-	'Tupla'        reduce using rule 78
-	'break'        reduce using rule 78
-	'continue'     reduce using rule 78
-	'false'        reduce using rule 78
-	'for'          reduce using rule 78
-	'fun'          reduce using rule 78
-	'if'           reduce using rule 78
-	'null'         reduce using rule 78
-	'print'        reduce using rule 78
-	'println'      reduce using rule 78
-	'return'       reduce using rule 78
-	'run'          reduce using rule 78
-	'true'         reduce using rule 78
-	'val'          reduce using rule 78
-	'var'          reduce using rule 78
-	'while'        reduce using rule 78
-	'{'            reduce using rule 78
-	'}'            reduce using rule 78
-	L_integ        reduce using rule 78
-	L_quoted       reduce using rule 78
-	L_ident        reduce using rule 78
-
-
-State 178
-
-	Stm -> Exp '?.let' . '{' Stm '}'                    (rule 90)
-
-	'{'            shift, and enter state 197
-
-
-State 179
+State 175
 
 	Stm -> 'while' '(' . Exp ')' '{' ListStm '}'        (rule 81)
 
-	'!'            shift, and enter state 63
-	'('            shift, and enter state 64
-	'++'           shift, and enter state 65
-	'-'            shift, and enter state 66
-	'--'           shift, and enter state 67
-	'Tupla'        shift, and enter state 68
-	'false'        shift, and enter state 69
-	'null'         shift, and enter state 70
-	'true'         shift, and enter state 71
-	'{'            shift, and enter state 72
+	'!'            shift, and enter state 62
+	'('            shift, and enter state 63
+	'++'           shift, and enter state 64
+	'-'            shift, and enter state 65
+	'--'           shift, and enter state 66
+	'Tupla'        shift, and enter state 67
+	'false'        shift, and enter state 68
+	'null'         shift, and enter state 69
+	'true'         shift, and enter state 70
+	'{'            shift, and enter state 71
 	L_integ        shift, and enter state 2
-	L_quoted       shift, and enter state 73
+	L_quoted       shift, and enter state 72
 	L_ident        shift, and enter state 13
 
 	Integer        goto state 45
 	String         goto state 46
 	Ident          goto state 47
-	Exp            goto state 196
+	Exp            goto state 194
 	Exp1           goto state 49
 	Exp2           goto state 50
 	Exp3           goto state 51
@@ -4628,9 +4442,8 @@ State 179
 	Exp11          goto state 59
 	Exp12          goto state 60
 	FunctionExp    goto state 61
-	Lambda         goto state 62
 
-State 180
+State 176
 
 	Stm -> 'run' '{' . ListStm '}'                      (rule 79)
 
@@ -4661,24 +4474,24 @@ State 180
 	L_quoted       reduce using rule 91
 	L_ident        reduce using rule 91
 
-	ListStm        goto state 195
+	ListStm        goto state 193
 
-State 181
+State 177
 
 	Exp -> Exp . OpAssign Exp1                          (rule 5)
 	Stm -> 'return' Exp . ';'                           (rule 84)
 
-	'%='           shift, and enter state 84
-	'*='           shift, and enter state 85
-	'+='           shift, and enter state 86
-	'-='           shift, and enter state 87
-	'/='           shift, and enter state 88
-	';'            shift, and enter state 194
-	'='            shift, and enter state 90
+	'%='           shift, and enter state 83
+	'*='           shift, and enter state 84
+	'+='           shift, and enter state 85
+	'-='           shift, and enter state 86
+	'/='           shift, and enter state 87
+	';'            shift, and enter state 192
+	'='            shift, and enter state 89
 
-	OpAssign       goto state 83
+	OpAssign       goto state 82
 
-State 182
+State 178
 
 	Stm -> 'return' ';' .                               (rule 85)
 
@@ -4710,97 +4523,22 @@ State 182
 	L_ident        reduce using rule 85
 
 
-State 183
+State 179
 
 	Stm -> 'println' '(' . Exp ')' ';'                  (rule 89)
 
-	'!'            shift, and enter state 63
-	'('            shift, and enter state 64
-	'++'           shift, and enter state 65
-	'-'            shift, and enter state 66
-	'--'           shift, and enter state 67
-	'Tupla'        shift, and enter state 68
-	'false'        shift, and enter state 69
-	'null'         shift, and enter state 70
-	'true'         shift, and enter state 71
-	'{'            shift, and enter state 72
+	'!'            shift, and enter state 62
+	'('            shift, and enter state 63
+	'++'           shift, and enter state 64
+	'-'            shift, and enter state 65
+	'--'           shift, and enter state 66
+	'Tupla'        shift, and enter state 67
+	'false'        shift, and enter state 68
+	'null'         shift, and enter state 69
+	'true'         shift, and enter state 70
+	'{'            shift, and enter state 71
 	L_integ        shift, and enter state 2
-	L_quoted       shift, and enter state 73
-	L_ident        shift, and enter state 13
-
-	Integer        goto state 45
-	String         goto state 46
-	Ident          goto state 47
-	Exp            goto state 193
-	Exp1           goto state 49
-	Exp2           goto state 50
-	Exp3           goto state 51
-	Exp4           goto state 52
-	Exp5           goto state 53
-	Exp6           goto state 54
-	Exp7           goto state 55
-	Exp8           goto state 56
-	Exp9           goto state 57
-	Exp10          goto state 58
-	Exp11          goto state 59
-	Exp12          goto state 60
-	FunctionExp    goto state 61
-	Lambda         goto state 62
-
-State 184
-
-	Stm -> 'print' '(' . Exp ')' ';'                    (rule 88)
-
-	'!'            shift, and enter state 63
-	'('            shift, and enter state 64
-	'++'           shift, and enter state 65
-	'-'            shift, and enter state 66
-	'--'           shift, and enter state 67
-	'Tupla'        shift, and enter state 68
-	'false'        shift, and enter state 69
-	'null'         shift, and enter state 70
-	'true'         shift, and enter state 71
-	'{'            shift, and enter state 72
-	L_integ        shift, and enter state 2
-	L_quoted       shift, and enter state 73
-	L_ident        shift, and enter state 13
-
-	Integer        goto state 45
-	String         goto state 46
-	Ident          goto state 47
-	Exp            goto state 192
-	Exp1           goto state 49
-	Exp2           goto state 50
-	Exp3           goto state 51
-	Exp4           goto state 52
-	Exp5           goto state 53
-	Exp6           goto state 54
-	Exp7           goto state 55
-	Exp8           goto state 56
-	Exp9           goto state 57
-	Exp10          goto state 58
-	Exp11          goto state 59
-	Exp12          goto state 60
-	FunctionExp    goto state 61
-	Lambda         goto state 62
-
-State 185
-
-	Stm -> 'if' '(' . Exp ')' '{' ListStm '}'           (rule 86)
-	Stm -> 'if' '(' . Exp ')' '{' ListStm '}' 'else' '{' ListStm '}'    (rule 87)
-
-	'!'            shift, and enter state 63
-	'('            shift, and enter state 64
-	'++'           shift, and enter state 65
-	'-'            shift, and enter state 66
-	'--'           shift, and enter state 67
-	'Tupla'        shift, and enter state 68
-	'false'        shift, and enter state 69
-	'null'         shift, and enter state 70
-	'true'         shift, and enter state 71
-	'{'            shift, and enter state 72
-	L_integ        shift, and enter state 2
-	L_quoted       shift, and enter state 73
+	L_quoted       shift, and enter state 72
 	L_ident        shift, and enter state 13
 
 	Integer        goto state 45
@@ -4820,17 +4558,89 @@ State 185
 	Exp11          goto state 59
 	Exp12          goto state 60
 	FunctionExp    goto state 61
-	Lambda         goto state 62
 
-State 186
+State 180
+
+	Stm -> 'print' '(' . Exp ')' ';'                    (rule 88)
+
+	'!'            shift, and enter state 62
+	'('            shift, and enter state 63
+	'++'           shift, and enter state 64
+	'-'            shift, and enter state 65
+	'--'           shift, and enter state 66
+	'Tupla'        shift, and enter state 67
+	'false'        shift, and enter state 68
+	'null'         shift, and enter state 69
+	'true'         shift, and enter state 70
+	'{'            shift, and enter state 71
+	L_integ        shift, and enter state 2
+	L_quoted       shift, and enter state 72
+	L_ident        shift, and enter state 13
+
+	Integer        goto state 45
+	String         goto state 46
+	Ident          goto state 47
+	Exp            goto state 190
+	Exp1           goto state 49
+	Exp2           goto state 50
+	Exp3           goto state 51
+	Exp4           goto state 52
+	Exp5           goto state 53
+	Exp6           goto state 54
+	Exp7           goto state 55
+	Exp8           goto state 56
+	Exp9           goto state 57
+	Exp10          goto state 58
+	Exp11          goto state 59
+	Exp12          goto state 60
+	FunctionExp    goto state 61
+
+State 181
+
+	Stm -> 'if' '(' . Exp ')' '{' ListStm '}'           (rule 86)
+	Stm -> 'if' '(' . Exp ')' '{' ListStm '}' 'else' '{' ListStm '}'    (rule 87)
+
+	'!'            shift, and enter state 62
+	'('            shift, and enter state 63
+	'++'           shift, and enter state 64
+	'-'            shift, and enter state 65
+	'--'           shift, and enter state 66
+	'Tupla'        shift, and enter state 67
+	'false'        shift, and enter state 68
+	'null'         shift, and enter state 69
+	'true'         shift, and enter state 70
+	'{'            shift, and enter state 71
+	L_integ        shift, and enter state 2
+	L_quoted       shift, and enter state 72
+	L_ident        shift, and enter state 13
+
+	Integer        goto state 45
+	String         goto state 46
+	Ident          goto state 47
+	Exp            goto state 189
+	Exp1           goto state 49
+	Exp2           goto state 50
+	Exp3           goto state 51
+	Exp4           goto state 52
+	Exp5           goto state 53
+	Exp6           goto state 54
+	Exp7           goto state 55
+	Exp8           goto state 56
+	Exp9           goto state 57
+	Exp10          goto state 58
+	Exp11          goto state 59
+	Exp12          goto state 60
+	FunctionExp    goto state 61
+
+State 182
 
 	Stm -> 'for' '(' . Ident 'in' Iterable ')' '{' ListStm '}'    (rule 80)
 
 	L_ident        shift, and enter state 13
 
-	Ident          goto state 190
+	Ident          goto state 188
 
-State 187
+State 183
 
 	Stm -> 'continue' ';' .                             (rule 83)
 
@@ -4862,7 +4672,7 @@ State 187
 	L_ident        reduce using rule 83
 
 
-State 188
+State 184
 
 	Stm -> 'break' ';' .                                (rule 82)
 
@@ -4894,97 +4704,151 @@ State 188
 	L_ident        reduce using rule 82
 
 
-State 189
+State 185
 
-	Lambda -> '{' ListArg '->' ListStm Exp '}' .        (rule 104)
+	Stm -> Exp ';' .                                    (rule 78)
 
-	'!='           reduce using rule 104
-	'%'            reduce using rule 104
-	'%='           reduce using rule 104
-	'&&'           reduce using rule 104
-	')'            reduce using rule 104
-	'*'            reduce using rule 104
-	'*='           reduce using rule 104
-	'+'            reduce using rule 104
-	'+='           reduce using rule 104
-	','            reduce using rule 104
-	'-'            reduce using rule 104
-	'-='           reduce using rule 104
-	'..'           reduce using rule 104
-	'/'            reduce using rule 104
-	'/='           reduce using rule 104
-	':'            reduce using rule 104
-	';'            reduce using rule 104
-	'<'            reduce using rule 104
-	'<='           reduce using rule 104
-	'='            reduce using rule 104
-	'=='           reduce using rule 104
-	'>'            reduce using rule 104
-	'>='           reduce using rule 104
-	'?'            reduce using rule 104
-	'?.let'        reduce using rule 104
-	']'            reduce using rule 104
-	'downTo'       reduce using rule 104
-	'step'         reduce using rule 104
-	'until'        reduce using rule 104
-	'||'           reduce using rule 104
-	'}'            reduce using rule 104
+	'!'            reduce using rule 78
+	'('            reduce using rule 78
+	'++'           reduce using rule 78
+	'-'            reduce using rule 78
+	'--'           reduce using rule 78
+	'Tupla'        reduce using rule 78
+	'break'        reduce using rule 78
+	'continue'     reduce using rule 78
+	'false'        reduce using rule 78
+	'for'          reduce using rule 78
+	'fun'          reduce using rule 78
+	'if'           reduce using rule 78
+	'null'         reduce using rule 78
+	'print'        reduce using rule 78
+	'println'      reduce using rule 78
+	'return'       reduce using rule 78
+	'run'          reduce using rule 78
+	'true'         reduce using rule 78
+	'val'          reduce using rule 78
+	'var'          reduce using rule 78
+	'while'        reduce using rule 78
+	'{'            reduce using rule 78
+	'}'            reduce using rule 78
+	L_integ        reduce using rule 78
+	L_quoted       reduce using rule 78
+	L_ident        reduce using rule 78
 
 
-State 190
+State 186
+
+	Stm -> Exp '?.let' . '{' Stm '}'                    (rule 90)
+
+	'{'            shift, and enter state 187
+
+
+State 187
+
+	Stm -> Exp '?.let' '{' . Stm '}'                    (rule 90)
+
+	'!'            shift, and enter state 62
+	'('            shift, and enter state 63
+	'++'           shift, and enter state 64
+	'-'            shift, and enter state 65
+	'--'           shift, and enter state 66
+	'Tupla'        shift, and enter state 67
+	'break'        shift, and enter state 163
+	'continue'     shift, and enter state 164
+	'false'        shift, and enter state 68
+	'for'          shift, and enter state 165
+	'fun'          shift, and enter state 9
+	'if'           shift, and enter state 166
+	'null'         shift, and enter state 69
+	'print'        shift, and enter state 167
+	'println'      shift, and enter state 168
+	'return'       shift, and enter state 169
+	'run'          shift, and enter state 170
+	'true'         shift, and enter state 70
+	'val'          shift, and enter state 10
+	'var'          shift, and enter state 11
+	'while'        shift, and enter state 171
+	'{'            shift, and enter state 71
+	L_integ        shift, and enter state 2
+	L_quoted       shift, and enter state 72
+	L_ident        shift, and enter state 13
+
+	Integer        goto state 45
+	String         goto state 46
+	Ident          goto state 47
+	Exp            goto state 160
+	Exp1           goto state 49
+	Exp2           goto state 50
+	Exp3           goto state 51
+	Exp4           goto state 52
+	Exp5           goto state 53
+	Exp6           goto state 54
+	Exp7           goto state 55
+	Exp8           goto state 56
+	Exp9           goto state 57
+	Exp10          goto state 58
+	Exp11          goto state 59
+	Exp12          goto state 60
+	Stm            goto state 201
+	Dec            goto state 162
+	FunctionDec    goto state 7
+	FunctionExp    goto state 61
+	ArrayDec       goto state 8
+
+State 188
 
 	Stm -> 'for' '(' Ident . 'in' Iterable ')' '{' ListStm '}'    (rule 80)
 
-	'in'           shift, and enter state 204
+	'in'           shift, and enter state 200
 
 
-State 191
+State 189
 
 	Exp -> Exp . OpAssign Exp1                          (rule 5)
 	Stm -> 'if' '(' Exp . ')' '{' ListStm '}'           (rule 86)
 	Stm -> 'if' '(' Exp . ')' '{' ListStm '}' 'else' '{' ListStm '}'    (rule 87)
 
-	'%='           shift, and enter state 84
-	')'            shift, and enter state 203
-	'*='           shift, and enter state 85
-	'+='           shift, and enter state 86
-	'-='           shift, and enter state 87
-	'/='           shift, and enter state 88
-	'='            shift, and enter state 90
+	'%='           shift, and enter state 83
+	')'            shift, and enter state 199
+	'*='           shift, and enter state 84
+	'+='           shift, and enter state 85
+	'-='           shift, and enter state 86
+	'/='           shift, and enter state 87
+	'='            shift, and enter state 89
 
-	OpAssign       goto state 83
+	OpAssign       goto state 82
 
-State 192
+State 190
 
 	Exp -> Exp . OpAssign Exp1                          (rule 5)
 	Stm -> 'print' '(' Exp . ')' ';'                    (rule 88)
 
-	'%='           shift, and enter state 84
-	')'            shift, and enter state 202
-	'*='           shift, and enter state 85
-	'+='           shift, and enter state 86
-	'-='           shift, and enter state 87
-	'/='           shift, and enter state 88
-	'='            shift, and enter state 90
+	'%='           shift, and enter state 83
+	')'            shift, and enter state 198
+	'*='           shift, and enter state 84
+	'+='           shift, and enter state 85
+	'-='           shift, and enter state 86
+	'/='           shift, and enter state 87
+	'='            shift, and enter state 89
 
-	OpAssign       goto state 83
+	OpAssign       goto state 82
 
-State 193
+State 191
 
 	Exp -> Exp . OpAssign Exp1                          (rule 5)
 	Stm -> 'println' '(' Exp . ')' ';'                  (rule 89)
 
-	'%='           shift, and enter state 84
-	')'            shift, and enter state 201
-	'*='           shift, and enter state 85
-	'+='           shift, and enter state 86
-	'-='           shift, and enter state 87
-	'/='           shift, and enter state 88
-	'='            shift, and enter state 90
+	'%='           shift, and enter state 83
+	')'            shift, and enter state 197
+	'*='           shift, and enter state 84
+	'+='           shift, and enter state 85
+	'-='           shift, and enter state 86
+	'/='           shift, and enter state 87
+	'='            shift, and enter state 89
 
-	OpAssign       goto state 83
+	OpAssign       goto state 82
 
-State 194
+State 192
 
 	Stm -> 'return' Exp ';' .                           (rule 84)
 
@@ -5016,42 +4880,42 @@ State 194
 	L_ident        reduce using rule 84
 
 
-State 195
+State 193
 
 	Stm -> 'run' '{' ListStm . '}'                      (rule 79)
 	ListStm -> ListStm . Stm                            (rule 92)
 
-	'!'            shift, and enter state 63
-	'('            shift, and enter state 64
-	'++'           shift, and enter state 65
-	'-'            shift, and enter state 66
-	'--'           shift, and enter state 67
-	'Tupla'        shift, and enter state 68
-	'break'        shift, and enter state 164
-	'continue'     shift, and enter state 165
-	'false'        shift, and enter state 69
-	'for'          shift, and enter state 166
+	'!'            shift, and enter state 62
+	'('            shift, and enter state 63
+	'++'           shift, and enter state 64
+	'-'            shift, and enter state 65
+	'--'           shift, and enter state 66
+	'Tupla'        shift, and enter state 67
+	'break'        shift, and enter state 163
+	'continue'     shift, and enter state 164
+	'false'        shift, and enter state 68
+	'for'          shift, and enter state 165
 	'fun'          shift, and enter state 9
-	'if'           shift, and enter state 167
-	'null'         shift, and enter state 70
-	'print'        shift, and enter state 168
-	'println'      shift, and enter state 169
-	'return'       shift, and enter state 170
-	'run'          shift, and enter state 171
-	'true'         shift, and enter state 71
+	'if'           shift, and enter state 166
+	'null'         shift, and enter state 69
+	'print'        shift, and enter state 167
+	'println'      shift, and enter state 168
+	'return'       shift, and enter state 169
+	'run'          shift, and enter state 170
+	'true'         shift, and enter state 70
 	'val'          shift, and enter state 10
 	'var'          shift, and enter state 11
-	'while'        shift, and enter state 172
-	'{'            shift, and enter state 72
-	'}'            shift, and enter state 200
+	'while'        shift, and enter state 171
+	'{'            shift, and enter state 71
+	'}'            shift, and enter state 196
 	L_integ        shift, and enter state 2
-	L_quoted       shift, and enter state 73
+	L_quoted       shift, and enter state 72
 	L_ident        shift, and enter state 13
 
 	Integer        goto state 45
 	String         goto state 46
 	Ident          goto state 47
-	Exp            goto state 175
+	Exp            goto state 160
 	Exp1           goto state 49
 	Exp2           goto state 50
 	Exp3           goto state 51
@@ -5064,96 +4928,35 @@ State 195
 	Exp10          goto state 58
 	Exp11          goto state 59
 	Exp12          goto state 60
-	Stm            goto state 162
-	Dec            goto state 163
+	Stm            goto state 161
+	Dec            goto state 162
 	FunctionDec    goto state 7
 	FunctionExp    goto state 61
-	Lambda         goto state 62
 	ArrayDec       goto state 8
 
-State 196
+State 194
 
 	Exp -> Exp . OpAssign Exp1                          (rule 5)
 	Stm -> 'while' '(' Exp . ')' '{' ListStm '}'        (rule 81)
 
-	'%='           shift, and enter state 84
-	')'            shift, and enter state 199
-	'*='           shift, and enter state 85
-	'+='           shift, and enter state 86
-	'-='           shift, and enter state 87
-	'/='           shift, and enter state 88
-	'='            shift, and enter state 90
+	'%='           shift, and enter state 83
+	')'            shift, and enter state 195
+	'*='           shift, and enter state 84
+	'+='           shift, and enter state 85
+	'-='           shift, and enter state 86
+	'/='           shift, and enter state 87
+	'='            shift, and enter state 89
 
-	OpAssign       goto state 83
+	OpAssign       goto state 82
 
-State 197
-
-	Stm -> Exp '?.let' '{' . Stm '}'                    (rule 90)
-
-	'!'            shift, and enter state 63
-	'('            shift, and enter state 64
-	'++'           shift, and enter state 65
-	'-'            shift, and enter state 66
-	'--'           shift, and enter state 67
-	'Tupla'        shift, and enter state 68
-	'break'        shift, and enter state 164
-	'continue'     shift, and enter state 165
-	'false'        shift, and enter state 69
-	'for'          shift, and enter state 166
-	'fun'          shift, and enter state 9
-	'if'           shift, and enter state 167
-	'null'         shift, and enter state 70
-	'print'        shift, and enter state 168
-	'println'      shift, and enter state 169
-	'return'       shift, and enter state 170
-	'run'          shift, and enter state 171
-	'true'         shift, and enter state 71
-	'val'          shift, and enter state 10
-	'var'          shift, and enter state 11
-	'while'        shift, and enter state 172
-	'{'            shift, and enter state 72
-	L_integ        shift, and enter state 2
-	L_quoted       shift, and enter state 73
-	L_ident        shift, and enter state 13
-
-	Integer        goto state 45
-	String         goto state 46
-	Ident          goto state 47
-	Exp            goto state 175
-	Exp1           goto state 49
-	Exp2           goto state 50
-	Exp3           goto state 51
-	Exp4           goto state 52
-	Exp5           goto state 53
-	Exp6           goto state 54
-	Exp7           goto state 55
-	Exp8           goto state 56
-	Exp9           goto state 57
-	Exp10          goto state 58
-	Exp11          goto state 59
-	Exp12          goto state 60
-	Stm            goto state 198
-	Dec            goto state 163
-	FunctionDec    goto state 7
-	FunctionExp    goto state 61
-	Lambda         goto state 62
-	ArrayDec       goto state 8
-
-State 198
-
-	Stm -> Exp '?.let' '{' Stm . '}'                    (rule 90)
-
-	'}'            shift, and enter state 212
-
-
-State 199
+State 195
 
 	Stm -> 'while' '(' Exp ')' . '{' ListStm '}'        (rule 81)
 
-	'{'            shift, and enter state 211
+	'{'            shift, and enter state 209
 
 
-State 200
+State 196
 
 	Stm -> 'run' '{' ListStm '}' .                      (rule 79)
 
@@ -5185,50 +4988,50 @@ State 200
 	L_ident        reduce using rule 79
 
 
-State 201
+State 197
 
 	Stm -> 'println' '(' Exp ')' . ';'                  (rule 89)
 
-	';'            shift, and enter state 210
+	';'            shift, and enter state 208
 
 
-State 202
+State 198
 
 	Stm -> 'print' '(' Exp ')' . ';'                    (rule 88)
 
-	';'            shift, and enter state 209
+	';'            shift, and enter state 207
 
 
-State 203
+State 199
 
 	Stm -> 'if' '(' Exp ')' . '{' ListStm '}'           (rule 86)
 	Stm -> 'if' '(' Exp ')' . '{' ListStm '}' 'else' '{' ListStm '}'    (rule 87)
 
-	'{'            shift, and enter state 208
+	'{'            shift, and enter state 206
 
 
-State 204
+State 200
 
 	Stm -> 'for' '(' Ident 'in' . Iterable ')' '{' ListStm '}'    (rule 80)
 
-	'!'            shift, and enter state 63
-	'('            shift, and enter state 64
-	'++'           shift, and enter state 65
-	'-'            shift, and enter state 66
-	'--'           shift, and enter state 67
-	'Tupla'        shift, and enter state 68
-	'false'        shift, and enter state 69
-	'null'         shift, and enter state 70
-	'true'         shift, and enter state 71
-	'{'            shift, and enter state 72
+	'!'            shift, and enter state 62
+	'('            shift, and enter state 63
+	'++'           shift, and enter state 64
+	'-'            shift, and enter state 65
+	'--'           shift, and enter state 66
+	'Tupla'        shift, and enter state 67
+	'false'        shift, and enter state 68
+	'null'         shift, and enter state 69
+	'true'         shift, and enter state 70
+	'{'            shift, and enter state 71
 	L_integ        shift, and enter state 2
-	L_quoted       shift, and enter state 73
+	L_quoted       shift, and enter state 72
 	L_ident        shift, and enter state 13
 
 	Integer        goto state 45
 	String         goto state 46
-	Ident          goto state 205
-	Exp            goto state 206
+	Ident          goto state 203
+	Exp            goto state 204
 	Exp1           goto state 49
 	Exp2           goto state 50
 	Exp3           goto state 51
@@ -5242,209 +5045,16 @@ State 204
 	Exp11          goto state 59
 	Exp12          goto state 60
 	FunctionExp    goto state 61
-	Lambda         goto state 62
-	Iterable       goto state 207
+	Iterable       goto state 205
 
-State 205
+State 201
 
-	Exp10 -> Ident . ListDimExp                         (rule 43)
-	Exp12 -> Ident .                                    (rule 48)
-	FunctionExp -> Ident . '(' ListExp ')'              (rule 103)
-	Iterable -> Ident .                                 (rule 106)
+	Stm -> Exp '?.let' '{' Stm . '}'                    (rule 90)
 
-	'!!'           reduce using rule 48
-	'!='           reduce using rule 48
-	'%'            reduce using rule 48
-	'%='           reduce using rule 48
-	'&&'           reduce using rule 48
-	'('            shift, and enter state 123
-	')'            reduce using rule 106
-	'*'            reduce using rule 48
-	'*='           reduce using rule 48
-	'+'            reduce using rule 48
-	'++'           reduce using rule 48
-	'+='           reduce using rule 48
-	'-'            reduce using rule 48
-	'--'           reduce using rule 48
-	'-='           reduce using rule 48
-	'..'           reduce using rule 48
-	'/'            reduce using rule 48
-	'/='           reduce using rule 48
-	'<'            reduce using rule 48
-	'<='           reduce using rule 48
-	'='            reduce using rule 48
-	'=='           reduce using rule 48
-	'>'            reduce using rule 48
-	'>='           reduce using rule 48
-	'?'            reduce using rule 48
-	'['            shift, and enter state 124
-	'downTo'       reduce using rule 48
-	'until'        reduce using rule 48
-	'||'           reduce using rule 48
-
-	DimExp         goto state 121
-	ListDimExp     goto state 122
-
-State 206
-
-	Exp -> Exp . OpAssign Exp1                          (rule 5)
-	Iterable -> Exp . '..' Exp                          (rule 107)
-	Iterable -> Exp . 'until' Exp                       (rule 108)
-	Iterable -> Exp . 'downTo' Exp                      (rule 109)
-	Iterable -> Exp . 'until' Exp 'step' Exp            (rule 110)
-	Iterable -> Exp . 'downTo' Exp 'step' Exp           (rule 111)
-
-	'%='           shift, and enter state 84
-	'*='           shift, and enter state 85
-	'+='           shift, and enter state 86
-	'-='           shift, and enter state 87
-	'..'           shift, and enter state 216
-	'/='           shift, and enter state 88
-	'='            shift, and enter state 90
-	'downTo'       shift, and enter state 217
-	'until'        shift, and enter state 218
-
-	OpAssign       goto state 83
-
-State 207
-
-	Stm -> 'for' '(' Ident 'in' Iterable . ')' '{' ListStm '}'    (rule 80)
-
-	')'            shift, and enter state 215
+	'}'            shift, and enter state 202
 
 
-State 208
-
-	Stm -> 'if' '(' Exp ')' '{' . ListStm '}'           (rule 86)
-	Stm -> 'if' '(' Exp ')' '{' . ListStm '}' 'else' '{' ListStm '}'    (rule 87)
-
-	'!'            reduce using rule 91
-	'('            reduce using rule 91
-	'++'           reduce using rule 91
-	'-'            reduce using rule 91
-	'--'           reduce using rule 91
-	'Tupla'        reduce using rule 91
-	'break'        reduce using rule 91
-	'continue'     reduce using rule 91
-	'false'        reduce using rule 91
-	'for'          reduce using rule 91
-	'fun'          reduce using rule 91
-	'if'           reduce using rule 91
-	'null'         reduce using rule 91
-	'print'        reduce using rule 91
-	'println'      reduce using rule 91
-	'return'       reduce using rule 91
-	'run'          reduce using rule 91
-	'true'         reduce using rule 91
-	'val'          reduce using rule 91
-	'var'          reduce using rule 91
-	'while'        reduce using rule 91
-	'{'            reduce using rule 91
-	'}'            reduce using rule 91
-	L_integ        reduce using rule 91
-	L_quoted       reduce using rule 91
-	L_ident        reduce using rule 91
-
-	ListStm        goto state 214
-
-State 209
-
-	Stm -> 'print' '(' Exp ')' ';' .                    (rule 88)
-
-	'!'            reduce using rule 88
-	'('            reduce using rule 88
-	'++'           reduce using rule 88
-	'-'            reduce using rule 88
-	'--'           reduce using rule 88
-	'Tupla'        reduce using rule 88
-	'break'        reduce using rule 88
-	'continue'     reduce using rule 88
-	'false'        reduce using rule 88
-	'for'          reduce using rule 88
-	'fun'          reduce using rule 88
-	'if'           reduce using rule 88
-	'null'         reduce using rule 88
-	'print'        reduce using rule 88
-	'println'      reduce using rule 88
-	'return'       reduce using rule 88
-	'run'          reduce using rule 88
-	'true'         reduce using rule 88
-	'val'          reduce using rule 88
-	'var'          reduce using rule 88
-	'while'        reduce using rule 88
-	'{'            reduce using rule 88
-	'}'            reduce using rule 88
-	L_integ        reduce using rule 88
-	L_quoted       reduce using rule 88
-	L_ident        reduce using rule 88
-
-
-State 210
-
-	Stm -> 'println' '(' Exp ')' ';' .                  (rule 89)
-
-	'!'            reduce using rule 89
-	'('            reduce using rule 89
-	'++'           reduce using rule 89
-	'-'            reduce using rule 89
-	'--'           reduce using rule 89
-	'Tupla'        reduce using rule 89
-	'break'        reduce using rule 89
-	'continue'     reduce using rule 89
-	'false'        reduce using rule 89
-	'for'          reduce using rule 89
-	'fun'          reduce using rule 89
-	'if'           reduce using rule 89
-	'null'         reduce using rule 89
-	'print'        reduce using rule 89
-	'println'      reduce using rule 89
-	'return'       reduce using rule 89
-	'run'          reduce using rule 89
-	'true'         reduce using rule 89
-	'val'          reduce using rule 89
-	'var'          reduce using rule 89
-	'while'        reduce using rule 89
-	'{'            reduce using rule 89
-	'}'            reduce using rule 89
-	L_integ        reduce using rule 89
-	L_quoted       reduce using rule 89
-	L_ident        reduce using rule 89
-
-
-State 211
-
-	Stm -> 'while' '(' Exp ')' '{' . ListStm '}'        (rule 81)
-
-	'!'            reduce using rule 91
-	'('            reduce using rule 91
-	'++'           reduce using rule 91
-	'-'            reduce using rule 91
-	'--'           reduce using rule 91
-	'Tupla'        reduce using rule 91
-	'break'        reduce using rule 91
-	'continue'     reduce using rule 91
-	'false'        reduce using rule 91
-	'for'          reduce using rule 91
-	'fun'          reduce using rule 91
-	'if'           reduce using rule 91
-	'null'         reduce using rule 91
-	'print'        reduce using rule 91
-	'println'      reduce using rule 91
-	'return'       reduce using rule 91
-	'run'          reduce using rule 91
-	'true'         reduce using rule 91
-	'val'          reduce using rule 91
-	'var'          reduce using rule 91
-	'while'        reduce using rule 91
-	'{'            reduce using rule 91
-	'}'            reduce using rule 91
-	L_integ        reduce using rule 91
-	L_quoted       reduce using rule 91
-	L_ident        reduce using rule 91
-
-	ListStm        goto state 213
-
-State 212
+State 202
 
 	Stm -> Exp '?.let' '{' Stm '}' .                    (rule 90)
 
@@ -5476,42 +5086,241 @@ State 212
 	L_ident        reduce using rule 90
 
 
-State 213
+State 203
+
+	Exp10 -> Ident . ListDimExp                         (rule 43)
+	Exp12 -> Ident .                                    (rule 48)
+	FunctionExp -> Ident . '(' ListExp ')'              (rule 103)
+	Iterable -> Ident .                                 (rule 104)
+
+	'!!'           reduce using rule 48
+	'!='           reduce using rule 48
+	'%'            reduce using rule 48
+	'%='           reduce using rule 48
+	'&&'           reduce using rule 48
+	'('            shift, and enter state 122
+	')'            reduce using rule 104
+	'*'            reduce using rule 48
+	'*='           reduce using rule 48
+	'+'            reduce using rule 48
+	'++'           reduce using rule 48
+	'+='           reduce using rule 48
+	'-'            reduce using rule 48
+	'--'           reduce using rule 48
+	'-='           reduce using rule 48
+	'..'           reduce using rule 48
+	'/'            reduce using rule 48
+	'/='           reduce using rule 48
+	'<'            reduce using rule 48
+	'<='           reduce using rule 48
+	'='            reduce using rule 48
+	'=='           reduce using rule 48
+	'>'            reduce using rule 48
+	'>='           reduce using rule 48
+	'?'            reduce using rule 48
+	'['            shift, and enter state 123
+	'downTo'       reduce using rule 48
+	'until'        reduce using rule 48
+	'||'           reduce using rule 48
+
+	DimExp         goto state 120
+	ListDimExp     goto state 121
+
+State 204
+
+	Exp -> Exp . OpAssign Exp1                          (rule 5)
+	Iterable -> Exp . '..' Exp                          (rule 105)
+	Iterable -> Exp . 'until' Exp                       (rule 106)
+	Iterable -> Exp . 'downTo' Exp                      (rule 107)
+	Iterable -> Exp . 'until' Exp 'step' Exp            (rule 108)
+	Iterable -> Exp . 'downTo' Exp 'step' Exp           (rule 109)
+
+	'%='           shift, and enter state 83
+	'*='           shift, and enter state 84
+	'+='           shift, and enter state 85
+	'-='           shift, and enter state 86
+	'..'           shift, and enter state 213
+	'/='           shift, and enter state 87
+	'='            shift, and enter state 89
+	'downTo'       shift, and enter state 214
+	'until'        shift, and enter state 215
+
+	OpAssign       goto state 82
+
+State 205
+
+	Stm -> 'for' '(' Ident 'in' Iterable . ')' '{' ListStm '}'    (rule 80)
+
+	')'            shift, and enter state 212
+
+
+State 206
+
+	Stm -> 'if' '(' Exp ')' '{' . ListStm '}'           (rule 86)
+	Stm -> 'if' '(' Exp ')' '{' . ListStm '}' 'else' '{' ListStm '}'    (rule 87)
+
+	'!'            reduce using rule 91
+	'('            reduce using rule 91
+	'++'           reduce using rule 91
+	'-'            reduce using rule 91
+	'--'           reduce using rule 91
+	'Tupla'        reduce using rule 91
+	'break'        reduce using rule 91
+	'continue'     reduce using rule 91
+	'false'        reduce using rule 91
+	'for'          reduce using rule 91
+	'fun'          reduce using rule 91
+	'if'           reduce using rule 91
+	'null'         reduce using rule 91
+	'print'        reduce using rule 91
+	'println'      reduce using rule 91
+	'return'       reduce using rule 91
+	'run'          reduce using rule 91
+	'true'         reduce using rule 91
+	'val'          reduce using rule 91
+	'var'          reduce using rule 91
+	'while'        reduce using rule 91
+	'{'            reduce using rule 91
+	'}'            reduce using rule 91
+	L_integ        reduce using rule 91
+	L_quoted       reduce using rule 91
+	L_ident        reduce using rule 91
+
+	ListStm        goto state 211
+
+State 207
+
+	Stm -> 'print' '(' Exp ')' ';' .                    (rule 88)
+
+	'!'            reduce using rule 88
+	'('            reduce using rule 88
+	'++'           reduce using rule 88
+	'-'            reduce using rule 88
+	'--'           reduce using rule 88
+	'Tupla'        reduce using rule 88
+	'break'        reduce using rule 88
+	'continue'     reduce using rule 88
+	'false'        reduce using rule 88
+	'for'          reduce using rule 88
+	'fun'          reduce using rule 88
+	'if'           reduce using rule 88
+	'null'         reduce using rule 88
+	'print'        reduce using rule 88
+	'println'      reduce using rule 88
+	'return'       reduce using rule 88
+	'run'          reduce using rule 88
+	'true'         reduce using rule 88
+	'val'          reduce using rule 88
+	'var'          reduce using rule 88
+	'while'        reduce using rule 88
+	'{'            reduce using rule 88
+	'}'            reduce using rule 88
+	L_integ        reduce using rule 88
+	L_quoted       reduce using rule 88
+	L_ident        reduce using rule 88
+
+
+State 208
+
+	Stm -> 'println' '(' Exp ')' ';' .                  (rule 89)
+
+	'!'            reduce using rule 89
+	'('            reduce using rule 89
+	'++'           reduce using rule 89
+	'-'            reduce using rule 89
+	'--'           reduce using rule 89
+	'Tupla'        reduce using rule 89
+	'break'        reduce using rule 89
+	'continue'     reduce using rule 89
+	'false'        reduce using rule 89
+	'for'          reduce using rule 89
+	'fun'          reduce using rule 89
+	'if'           reduce using rule 89
+	'null'         reduce using rule 89
+	'print'        reduce using rule 89
+	'println'      reduce using rule 89
+	'return'       reduce using rule 89
+	'run'          reduce using rule 89
+	'true'         reduce using rule 89
+	'val'          reduce using rule 89
+	'var'          reduce using rule 89
+	'while'        reduce using rule 89
+	'{'            reduce using rule 89
+	'}'            reduce using rule 89
+	L_integ        reduce using rule 89
+	L_quoted       reduce using rule 89
+	L_ident        reduce using rule 89
+
+
+State 209
+
+	Stm -> 'while' '(' Exp ')' '{' . ListStm '}'        (rule 81)
+
+	'!'            reduce using rule 91
+	'('            reduce using rule 91
+	'++'           reduce using rule 91
+	'-'            reduce using rule 91
+	'--'           reduce using rule 91
+	'Tupla'        reduce using rule 91
+	'break'        reduce using rule 91
+	'continue'     reduce using rule 91
+	'false'        reduce using rule 91
+	'for'          reduce using rule 91
+	'fun'          reduce using rule 91
+	'if'           reduce using rule 91
+	'null'         reduce using rule 91
+	'print'        reduce using rule 91
+	'println'      reduce using rule 91
+	'return'       reduce using rule 91
+	'run'          reduce using rule 91
+	'true'         reduce using rule 91
+	'val'          reduce using rule 91
+	'var'          reduce using rule 91
+	'while'        reduce using rule 91
+	'{'            reduce using rule 91
+	'}'            reduce using rule 91
+	L_integ        reduce using rule 91
+	L_quoted       reduce using rule 91
+	L_ident        reduce using rule 91
+
+	ListStm        goto state 210
+
+State 210
 
 	Stm -> 'while' '(' Exp ')' '{' ListStm . '}'        (rule 81)
 	ListStm -> ListStm . Stm                            (rule 92)
 
-	'!'            shift, and enter state 63
-	'('            shift, and enter state 64
-	'++'           shift, and enter state 65
-	'-'            shift, and enter state 66
-	'--'           shift, and enter state 67
-	'Tupla'        shift, and enter state 68
-	'break'        shift, and enter state 164
-	'continue'     shift, and enter state 165
-	'false'        shift, and enter state 69
-	'for'          shift, and enter state 166
+	'!'            shift, and enter state 62
+	'('            shift, and enter state 63
+	'++'           shift, and enter state 64
+	'-'            shift, and enter state 65
+	'--'           shift, and enter state 66
+	'Tupla'        shift, and enter state 67
+	'break'        shift, and enter state 163
+	'continue'     shift, and enter state 164
+	'false'        shift, and enter state 68
+	'for'          shift, and enter state 165
 	'fun'          shift, and enter state 9
-	'if'           shift, and enter state 167
-	'null'         shift, and enter state 70
-	'print'        shift, and enter state 168
-	'println'      shift, and enter state 169
-	'return'       shift, and enter state 170
-	'run'          shift, and enter state 171
-	'true'         shift, and enter state 71
+	'if'           shift, and enter state 166
+	'null'         shift, and enter state 69
+	'print'        shift, and enter state 167
+	'println'      shift, and enter state 168
+	'return'       shift, and enter state 169
+	'run'          shift, and enter state 170
+	'true'         shift, and enter state 70
 	'val'          shift, and enter state 10
 	'var'          shift, and enter state 11
-	'while'        shift, and enter state 172
-	'{'            shift, and enter state 72
-	'}'            shift, and enter state 224
+	'while'        shift, and enter state 171
+	'{'            shift, and enter state 71
+	'}'            shift, and enter state 221
 	L_integ        shift, and enter state 2
-	L_quoted       shift, and enter state 73
+	L_quoted       shift, and enter state 72
 	L_ident        shift, and enter state 13
 
 	Integer        goto state 45
 	String         goto state 46
 	Ident          goto state 47
-	Exp            goto state 175
+	Exp            goto state 160
 	Exp1           goto state 49
 	Exp2           goto state 50
 	Exp3           goto state 51
@@ -5524,50 +5333,49 @@ State 213
 	Exp10          goto state 58
 	Exp11          goto state 59
 	Exp12          goto state 60
-	Stm            goto state 162
-	Dec            goto state 163
+	Stm            goto state 161
+	Dec            goto state 162
 	FunctionDec    goto state 7
 	FunctionExp    goto state 61
-	Lambda         goto state 62
 	ArrayDec       goto state 8
 
-State 214
+State 211
 
 	Stm -> 'if' '(' Exp ')' '{' ListStm . '}'           (rule 86)
 	Stm -> 'if' '(' Exp ')' '{' ListStm . '}' 'else' '{' ListStm '}'    (rule 87)
 	ListStm -> ListStm . Stm                            (rule 92)
 
-	'!'            shift, and enter state 63
-	'('            shift, and enter state 64
-	'++'           shift, and enter state 65
-	'-'            shift, and enter state 66
-	'--'           shift, and enter state 67
-	'Tupla'        shift, and enter state 68
-	'break'        shift, and enter state 164
-	'continue'     shift, and enter state 165
-	'false'        shift, and enter state 69
-	'for'          shift, and enter state 166
+	'!'            shift, and enter state 62
+	'('            shift, and enter state 63
+	'++'           shift, and enter state 64
+	'-'            shift, and enter state 65
+	'--'           shift, and enter state 66
+	'Tupla'        shift, and enter state 67
+	'break'        shift, and enter state 163
+	'continue'     shift, and enter state 164
+	'false'        shift, and enter state 68
+	'for'          shift, and enter state 165
 	'fun'          shift, and enter state 9
-	'if'           shift, and enter state 167
-	'null'         shift, and enter state 70
-	'print'        shift, and enter state 168
-	'println'      shift, and enter state 169
-	'return'       shift, and enter state 170
-	'run'          shift, and enter state 171
-	'true'         shift, and enter state 71
+	'if'           shift, and enter state 166
+	'null'         shift, and enter state 69
+	'print'        shift, and enter state 167
+	'println'      shift, and enter state 168
+	'return'       shift, and enter state 169
+	'run'          shift, and enter state 170
+	'true'         shift, and enter state 70
 	'val'          shift, and enter state 10
 	'var'          shift, and enter state 11
-	'while'        shift, and enter state 172
-	'{'            shift, and enter state 72
-	'}'            shift, and enter state 223
+	'while'        shift, and enter state 171
+	'{'            shift, and enter state 71
+	'}'            shift, and enter state 220
 	L_integ        shift, and enter state 2
-	L_quoted       shift, and enter state 73
+	L_quoted       shift, and enter state 72
 	L_ident        shift, and enter state 13
 
 	Integer        goto state 45
 	String         goto state 46
 	Ident          goto state 47
-	Exp            goto state 175
+	Exp            goto state 160
 	Exp1           goto state 49
 	Exp2           goto state 50
 	Exp3           goto state 51
@@ -5580,183 +5388,179 @@ State 214
 	Exp10          goto state 58
 	Exp11          goto state 59
 	Exp12          goto state 60
-	Stm            goto state 162
-	Dec            goto state 163
+	Stm            goto state 161
+	Dec            goto state 162
 	FunctionDec    goto state 7
 	FunctionExp    goto state 61
-	Lambda         goto state 62
 	ArrayDec       goto state 8
 
-State 215
+State 212
 
 	Stm -> 'for' '(' Ident 'in' Iterable ')' . '{' ListStm '}'    (rule 80)
 
-	'{'            shift, and enter state 222
+	'{'            shift, and enter state 219
 
+
+State 213
+
+	Iterable -> Exp '..' . Exp                          (rule 105)
+
+	'!'            shift, and enter state 62
+	'('            shift, and enter state 63
+	'++'           shift, and enter state 64
+	'-'            shift, and enter state 65
+	'--'           shift, and enter state 66
+	'Tupla'        shift, and enter state 67
+	'false'        shift, and enter state 68
+	'null'         shift, and enter state 69
+	'true'         shift, and enter state 70
+	'{'            shift, and enter state 71
+	L_integ        shift, and enter state 2
+	L_quoted       shift, and enter state 72
+	L_ident        shift, and enter state 13
+
+	Integer        goto state 45
+	String         goto state 46
+	Ident          goto state 47
+	Exp            goto state 218
+	Exp1           goto state 49
+	Exp2           goto state 50
+	Exp3           goto state 51
+	Exp4           goto state 52
+	Exp5           goto state 53
+	Exp6           goto state 54
+	Exp7           goto state 55
+	Exp8           goto state 56
+	Exp9           goto state 57
+	Exp10          goto state 58
+	Exp11          goto state 59
+	Exp12          goto state 60
+	FunctionExp    goto state 61
+
+State 214
+
+	Iterable -> Exp 'downTo' . Exp                      (rule 107)
+	Iterable -> Exp 'downTo' . Exp 'step' Exp           (rule 109)
+
+	'!'            shift, and enter state 62
+	'('            shift, and enter state 63
+	'++'           shift, and enter state 64
+	'-'            shift, and enter state 65
+	'--'           shift, and enter state 66
+	'Tupla'        shift, and enter state 67
+	'false'        shift, and enter state 68
+	'null'         shift, and enter state 69
+	'true'         shift, and enter state 70
+	'{'            shift, and enter state 71
+	L_integ        shift, and enter state 2
+	L_quoted       shift, and enter state 72
+	L_ident        shift, and enter state 13
+
+	Integer        goto state 45
+	String         goto state 46
+	Ident          goto state 47
+	Exp            goto state 217
+	Exp1           goto state 49
+	Exp2           goto state 50
+	Exp3           goto state 51
+	Exp4           goto state 52
+	Exp5           goto state 53
+	Exp6           goto state 54
+	Exp7           goto state 55
+	Exp8           goto state 56
+	Exp9           goto state 57
+	Exp10          goto state 58
+	Exp11          goto state 59
+	Exp12          goto state 60
+	FunctionExp    goto state 61
+
+State 215
+
+	Iterable -> Exp 'until' . Exp                       (rule 106)
+	Iterable -> Exp 'until' . Exp 'step' Exp            (rule 108)
+
+	'!'            shift, and enter state 62
+	'('            shift, and enter state 63
+	'++'           shift, and enter state 64
+	'-'            shift, and enter state 65
+	'--'           shift, and enter state 66
+	'Tupla'        shift, and enter state 67
+	'false'        shift, and enter state 68
+	'null'         shift, and enter state 69
+	'true'         shift, and enter state 70
+	'{'            shift, and enter state 71
+	L_integ        shift, and enter state 2
+	L_quoted       shift, and enter state 72
+	L_ident        shift, and enter state 13
+
+	Integer        goto state 45
+	String         goto state 46
+	Ident          goto state 47
+	Exp            goto state 216
+	Exp1           goto state 49
+	Exp2           goto state 50
+	Exp3           goto state 51
+	Exp4           goto state 52
+	Exp5           goto state 53
+	Exp6           goto state 54
+	Exp7           goto state 55
+	Exp8           goto state 56
+	Exp9           goto state 57
+	Exp10          goto state 58
+	Exp11          goto state 59
+	Exp12          goto state 60
+	FunctionExp    goto state 61
 
 State 216
 
-	Iterable -> Exp '..' . Exp                          (rule 107)
+	Exp -> Exp . OpAssign Exp1                          (rule 5)
+	Iterable -> Exp 'until' Exp .                       (rule 106)
+	Iterable -> Exp 'until' Exp . 'step' Exp            (rule 108)
 
-	'!'            shift, and enter state 63
-	'('            shift, and enter state 64
-	'++'           shift, and enter state 65
-	'-'            shift, and enter state 66
-	'--'           shift, and enter state 67
-	'Tupla'        shift, and enter state 68
-	'false'        shift, and enter state 69
-	'null'         shift, and enter state 70
-	'true'         shift, and enter state 71
-	'{'            shift, and enter state 72
-	L_integ        shift, and enter state 2
-	L_quoted       shift, and enter state 73
-	L_ident        shift, and enter state 13
+	'%='           shift, and enter state 83
+	')'            reduce using rule 106
+	'*='           shift, and enter state 84
+	'+='           shift, and enter state 85
+	'-='           shift, and enter state 86
+	'/='           shift, and enter state 87
+	'='            shift, and enter state 89
+	'step'         shift, and enter state 225
 
-	Integer        goto state 45
-	String         goto state 46
-	Ident          goto state 47
-	Exp            goto state 221
-	Exp1           goto state 49
-	Exp2           goto state 50
-	Exp3           goto state 51
-	Exp4           goto state 52
-	Exp5           goto state 53
-	Exp6           goto state 54
-	Exp7           goto state 55
-	Exp8           goto state 56
-	Exp9           goto state 57
-	Exp10          goto state 58
-	Exp11          goto state 59
-	Exp12          goto state 60
-	FunctionExp    goto state 61
-	Lambda         goto state 62
+	OpAssign       goto state 82
 
 State 217
 
-	Iterable -> Exp 'downTo' . Exp                      (rule 109)
-	Iterable -> Exp 'downTo' . Exp 'step' Exp           (rule 111)
+	Exp -> Exp . OpAssign Exp1                          (rule 5)
+	Iterable -> Exp 'downTo' Exp .                      (rule 107)
+	Iterable -> Exp 'downTo' Exp . 'step' Exp           (rule 109)
 
-	'!'            shift, and enter state 63
-	'('            shift, and enter state 64
-	'++'           shift, and enter state 65
-	'-'            shift, and enter state 66
-	'--'           shift, and enter state 67
-	'Tupla'        shift, and enter state 68
-	'false'        shift, and enter state 69
-	'null'         shift, and enter state 70
-	'true'         shift, and enter state 71
-	'{'            shift, and enter state 72
-	L_integ        shift, and enter state 2
-	L_quoted       shift, and enter state 73
-	L_ident        shift, and enter state 13
+	'%='           shift, and enter state 83
+	')'            reduce using rule 107
+	'*='           shift, and enter state 84
+	'+='           shift, and enter state 85
+	'-='           shift, and enter state 86
+	'/='           shift, and enter state 87
+	'='            shift, and enter state 89
+	'step'         shift, and enter state 224
 
-	Integer        goto state 45
-	String         goto state 46
-	Ident          goto state 47
-	Exp            goto state 220
-	Exp1           goto state 49
-	Exp2           goto state 50
-	Exp3           goto state 51
-	Exp4           goto state 52
-	Exp5           goto state 53
-	Exp6           goto state 54
-	Exp7           goto state 55
-	Exp8           goto state 56
-	Exp9           goto state 57
-	Exp10          goto state 58
-	Exp11          goto state 59
-	Exp12          goto state 60
-	FunctionExp    goto state 61
-	Lambda         goto state 62
+	OpAssign       goto state 82
 
 State 218
 
-	Iterable -> Exp 'until' . Exp                       (rule 108)
-	Iterable -> Exp 'until' . Exp 'step' Exp            (rule 110)
+	Exp -> Exp . OpAssign Exp1                          (rule 5)
+	Iterable -> Exp '..' Exp .                          (rule 105)
 
-	'!'            shift, and enter state 63
-	'('            shift, and enter state 64
-	'++'           shift, and enter state 65
-	'-'            shift, and enter state 66
-	'--'           shift, and enter state 67
-	'Tupla'        shift, and enter state 68
-	'false'        shift, and enter state 69
-	'null'         shift, and enter state 70
-	'true'         shift, and enter state 71
-	'{'            shift, and enter state 72
-	L_integ        shift, and enter state 2
-	L_quoted       shift, and enter state 73
-	L_ident        shift, and enter state 13
+	'%='           shift, and enter state 83
+	')'            reduce using rule 105
+	'*='           shift, and enter state 84
+	'+='           shift, and enter state 85
+	'-='           shift, and enter state 86
+	'/='           shift, and enter state 87
+	'='            shift, and enter state 89
 
-	Integer        goto state 45
-	String         goto state 46
-	Ident          goto state 47
-	Exp            goto state 219
-	Exp1           goto state 49
-	Exp2           goto state 50
-	Exp3           goto state 51
-	Exp4           goto state 52
-	Exp5           goto state 53
-	Exp6           goto state 54
-	Exp7           goto state 55
-	Exp8           goto state 56
-	Exp9           goto state 57
-	Exp10          goto state 58
-	Exp11          goto state 59
-	Exp12          goto state 60
-	FunctionExp    goto state 61
-	Lambda         goto state 62
+	OpAssign       goto state 82
 
 State 219
-
-	Exp -> Exp . OpAssign Exp1                          (rule 5)
-	Iterable -> Exp 'until' Exp .                       (rule 108)
-	Iterable -> Exp 'until' Exp . 'step' Exp            (rule 110)
-
-	'%='           shift, and enter state 84
-	')'            reduce using rule 108
-	'*='           shift, and enter state 85
-	'+='           shift, and enter state 86
-	'-='           shift, and enter state 87
-	'/='           shift, and enter state 88
-	'='            shift, and enter state 90
-	'step'         shift, and enter state 228
-
-	OpAssign       goto state 83
-
-State 220
-
-	Exp -> Exp . OpAssign Exp1                          (rule 5)
-	Iterable -> Exp 'downTo' Exp .                      (rule 109)
-	Iterable -> Exp 'downTo' Exp . 'step' Exp           (rule 111)
-
-	'%='           shift, and enter state 84
-	')'            reduce using rule 109
-	'*='           shift, and enter state 85
-	'+='           shift, and enter state 86
-	'-='           shift, and enter state 87
-	'/='           shift, and enter state 88
-	'='            shift, and enter state 90
-	'step'         shift, and enter state 227
-
-	OpAssign       goto state 83
-
-State 221
-
-	Exp -> Exp . OpAssign Exp1                          (rule 5)
-	Iterable -> Exp '..' Exp .                          (rule 107)
-
-	'%='           shift, and enter state 84
-	')'            reduce using rule 107
-	'*='           shift, and enter state 85
-	'+='           shift, and enter state 86
-	'-='           shift, and enter state 87
-	'/='           shift, and enter state 88
-	'='            shift, and enter state 90
-
-	OpAssign       goto state 83
-
-State 222
 
 	Stm -> 'for' '(' Ident 'in' Iterable ')' '{' . ListStm '}'    (rule 80)
 
@@ -5787,9 +5591,9 @@ State 222
 	L_quoted       reduce using rule 91
 	L_ident        reduce using rule 91
 
-	ListStm        goto state 226
+	ListStm        goto state 223
 
-State 223
+State 220
 
 	Stm -> 'if' '(' Exp ')' '{' ListStm '}' .           (rule 86)
 	Stm -> 'if' '(' Exp ')' '{' ListStm '}' . 'else' '{' ListStm '}'    (rule 87)
@@ -5802,7 +5606,7 @@ State 223
 	'Tupla'        reduce using rule 86
 	'break'        reduce using rule 86
 	'continue'     reduce using rule 86
-	'else'         shift, and enter state 225
+	'else'         shift, and enter state 222
 	'false'        reduce using rule 86
 	'for'          reduce using rule 86
 	'fun'          reduce using rule 86
@@ -5823,7 +5627,7 @@ State 223
 	L_ident        reduce using rule 86
 
 
-State 224
+State 221
 
 	Stm -> 'while' '(' Exp ')' '{' ListStm '}' .        (rule 81)
 
@@ -5855,49 +5659,49 @@ State 224
 	L_ident        reduce using rule 81
 
 
-State 225
+State 222
 
 	Stm -> 'if' '(' Exp ')' '{' ListStm '}' 'else' . '{' ListStm '}'    (rule 87)
 
-	'{'            shift, and enter state 232
+	'{'            shift, and enter state 229
 
 
-State 226
+State 223
 
 	Stm -> 'for' '(' Ident 'in' Iterable ')' '{' ListStm . '}'    (rule 80)
 	ListStm -> ListStm . Stm                            (rule 92)
 
-	'!'            shift, and enter state 63
-	'('            shift, and enter state 64
-	'++'           shift, and enter state 65
-	'-'            shift, and enter state 66
-	'--'           shift, and enter state 67
-	'Tupla'        shift, and enter state 68
-	'break'        shift, and enter state 164
-	'continue'     shift, and enter state 165
-	'false'        shift, and enter state 69
-	'for'          shift, and enter state 166
+	'!'            shift, and enter state 62
+	'('            shift, and enter state 63
+	'++'           shift, and enter state 64
+	'-'            shift, and enter state 65
+	'--'           shift, and enter state 66
+	'Tupla'        shift, and enter state 67
+	'break'        shift, and enter state 163
+	'continue'     shift, and enter state 164
+	'false'        shift, and enter state 68
+	'for'          shift, and enter state 165
 	'fun'          shift, and enter state 9
-	'if'           shift, and enter state 167
-	'null'         shift, and enter state 70
-	'print'        shift, and enter state 168
-	'println'      shift, and enter state 169
-	'return'       shift, and enter state 170
-	'run'          shift, and enter state 171
-	'true'         shift, and enter state 71
+	'if'           shift, and enter state 166
+	'null'         shift, and enter state 69
+	'print'        shift, and enter state 167
+	'println'      shift, and enter state 168
+	'return'       shift, and enter state 169
+	'run'          shift, and enter state 170
+	'true'         shift, and enter state 70
 	'val'          shift, and enter state 10
 	'var'          shift, and enter state 11
-	'while'        shift, and enter state 172
-	'{'            shift, and enter state 72
-	'}'            shift, and enter state 231
+	'while'        shift, and enter state 171
+	'{'            shift, and enter state 71
+	'}'            shift, and enter state 228
 	L_integ        shift, and enter state 2
-	L_quoted       shift, and enter state 73
+	L_quoted       shift, and enter state 72
 	L_ident        shift, and enter state 13
 
 	Integer        goto state 45
 	String         goto state 46
 	Ident          goto state 47
-	Exp            goto state 175
+	Exp            goto state 160
 	Exp1           goto state 49
 	Exp2           goto state 50
 	Exp3           goto state 51
@@ -5910,118 +5714,115 @@ State 226
 	Exp10          goto state 58
 	Exp11          goto state 59
 	Exp12          goto state 60
-	Stm            goto state 162
-	Dec            goto state 163
+	Stm            goto state 161
+	Dec            goto state 162
 	FunctionDec    goto state 7
 	FunctionExp    goto state 61
-	Lambda         goto state 62
 	ArrayDec       goto state 8
+
+State 224
+
+	Iterable -> Exp 'downTo' Exp 'step' . Exp           (rule 109)
+
+	'!'            shift, and enter state 62
+	'('            shift, and enter state 63
+	'++'           shift, and enter state 64
+	'-'            shift, and enter state 65
+	'--'           shift, and enter state 66
+	'Tupla'        shift, and enter state 67
+	'false'        shift, and enter state 68
+	'null'         shift, and enter state 69
+	'true'         shift, and enter state 70
+	'{'            shift, and enter state 71
+	L_integ        shift, and enter state 2
+	L_quoted       shift, and enter state 72
+	L_ident        shift, and enter state 13
+
+	Integer        goto state 45
+	String         goto state 46
+	Ident          goto state 47
+	Exp            goto state 227
+	Exp1           goto state 49
+	Exp2           goto state 50
+	Exp3           goto state 51
+	Exp4           goto state 52
+	Exp5           goto state 53
+	Exp6           goto state 54
+	Exp7           goto state 55
+	Exp8           goto state 56
+	Exp9           goto state 57
+	Exp10          goto state 58
+	Exp11          goto state 59
+	Exp12          goto state 60
+	FunctionExp    goto state 61
+
+State 225
+
+	Iterable -> Exp 'until' Exp 'step' . Exp            (rule 108)
+
+	'!'            shift, and enter state 62
+	'('            shift, and enter state 63
+	'++'           shift, and enter state 64
+	'-'            shift, and enter state 65
+	'--'           shift, and enter state 66
+	'Tupla'        shift, and enter state 67
+	'false'        shift, and enter state 68
+	'null'         shift, and enter state 69
+	'true'         shift, and enter state 70
+	'{'            shift, and enter state 71
+	L_integ        shift, and enter state 2
+	L_quoted       shift, and enter state 72
+	L_ident        shift, and enter state 13
+
+	Integer        goto state 45
+	String         goto state 46
+	Ident          goto state 47
+	Exp            goto state 226
+	Exp1           goto state 49
+	Exp2           goto state 50
+	Exp3           goto state 51
+	Exp4           goto state 52
+	Exp5           goto state 53
+	Exp6           goto state 54
+	Exp7           goto state 55
+	Exp8           goto state 56
+	Exp9           goto state 57
+	Exp10          goto state 58
+	Exp11          goto state 59
+	Exp12          goto state 60
+	FunctionExp    goto state 61
+
+State 226
+
+	Exp -> Exp . OpAssign Exp1                          (rule 5)
+	Iterable -> Exp 'until' Exp 'step' Exp .            (rule 108)
+
+	'%='           shift, and enter state 83
+	')'            reduce using rule 108
+	'*='           shift, and enter state 84
+	'+='           shift, and enter state 85
+	'-='           shift, and enter state 86
+	'/='           shift, and enter state 87
+	'='            shift, and enter state 89
+
+	OpAssign       goto state 82
 
 State 227
 
-	Iterable -> Exp 'downTo' Exp 'step' . Exp           (rule 111)
+	Exp -> Exp . OpAssign Exp1                          (rule 5)
+	Iterable -> Exp 'downTo' Exp 'step' Exp .           (rule 109)
 
-	'!'            shift, and enter state 63
-	'('            shift, and enter state 64
-	'++'           shift, and enter state 65
-	'-'            shift, and enter state 66
-	'--'           shift, and enter state 67
-	'Tupla'        shift, and enter state 68
-	'false'        shift, and enter state 69
-	'null'         shift, and enter state 70
-	'true'         shift, and enter state 71
-	'{'            shift, and enter state 72
-	L_integ        shift, and enter state 2
-	L_quoted       shift, and enter state 73
-	L_ident        shift, and enter state 13
+	'%='           shift, and enter state 83
+	')'            reduce using rule 109
+	'*='           shift, and enter state 84
+	'+='           shift, and enter state 85
+	'-='           shift, and enter state 86
+	'/='           shift, and enter state 87
+	'='            shift, and enter state 89
 
-	Integer        goto state 45
-	String         goto state 46
-	Ident          goto state 47
-	Exp            goto state 230
-	Exp1           goto state 49
-	Exp2           goto state 50
-	Exp3           goto state 51
-	Exp4           goto state 52
-	Exp5           goto state 53
-	Exp6           goto state 54
-	Exp7           goto state 55
-	Exp8           goto state 56
-	Exp9           goto state 57
-	Exp10          goto state 58
-	Exp11          goto state 59
-	Exp12          goto state 60
-	FunctionExp    goto state 61
-	Lambda         goto state 62
+	OpAssign       goto state 82
 
 State 228
-
-	Iterable -> Exp 'until' Exp 'step' . Exp            (rule 110)
-
-	'!'            shift, and enter state 63
-	'('            shift, and enter state 64
-	'++'           shift, and enter state 65
-	'-'            shift, and enter state 66
-	'--'           shift, and enter state 67
-	'Tupla'        shift, and enter state 68
-	'false'        shift, and enter state 69
-	'null'         shift, and enter state 70
-	'true'         shift, and enter state 71
-	'{'            shift, and enter state 72
-	L_integ        shift, and enter state 2
-	L_quoted       shift, and enter state 73
-	L_ident        shift, and enter state 13
-
-	Integer        goto state 45
-	String         goto state 46
-	Ident          goto state 47
-	Exp            goto state 229
-	Exp1           goto state 49
-	Exp2           goto state 50
-	Exp3           goto state 51
-	Exp4           goto state 52
-	Exp5           goto state 53
-	Exp6           goto state 54
-	Exp7           goto state 55
-	Exp8           goto state 56
-	Exp9           goto state 57
-	Exp10          goto state 58
-	Exp11          goto state 59
-	Exp12          goto state 60
-	FunctionExp    goto state 61
-	Lambda         goto state 62
-
-State 229
-
-	Exp -> Exp . OpAssign Exp1                          (rule 5)
-	Iterable -> Exp 'until' Exp 'step' Exp .            (rule 110)
-
-	'%='           shift, and enter state 84
-	')'            reduce using rule 110
-	'*='           shift, and enter state 85
-	'+='           shift, and enter state 86
-	'-='           shift, and enter state 87
-	'/='           shift, and enter state 88
-	'='            shift, and enter state 90
-
-	OpAssign       goto state 83
-
-State 230
-
-	Exp -> Exp . OpAssign Exp1                          (rule 5)
-	Iterable -> Exp 'downTo' Exp 'step' Exp .           (rule 111)
-
-	'%='           shift, and enter state 84
-	')'            reduce using rule 111
-	'*='           shift, and enter state 85
-	'+='           shift, and enter state 86
-	'-='           shift, and enter state 87
-	'/='           shift, and enter state 88
-	'='            shift, and enter state 90
-
-	OpAssign       goto state 83
-
-State 231
 
 	Stm -> 'for' '(' Ident 'in' Iterable ')' '{' ListStm '}' .    (rule 80)
 
@@ -6053,7 +5854,7 @@ State 231
 	L_ident        reduce using rule 80
 
 
-State 232
+State 229
 
 	Stm -> 'if' '(' Exp ')' '{' ListStm '}' 'else' '{' . ListStm '}'    (rule 87)
 
@@ -6084,44 +5885,44 @@ State 232
 	L_quoted       reduce using rule 91
 	L_ident        reduce using rule 91
 
-	ListStm        goto state 233
+	ListStm        goto state 230
 
-State 233
+State 230
 
 	Stm -> 'if' '(' Exp ')' '{' ListStm '}' 'else' '{' ListStm . '}'    (rule 87)
 	ListStm -> ListStm . Stm                            (rule 92)
 
-	'!'            shift, and enter state 63
-	'('            shift, and enter state 64
-	'++'           shift, and enter state 65
-	'-'            shift, and enter state 66
-	'--'           shift, and enter state 67
-	'Tupla'        shift, and enter state 68
-	'break'        shift, and enter state 164
-	'continue'     shift, and enter state 165
-	'false'        shift, and enter state 69
-	'for'          shift, and enter state 166
+	'!'            shift, and enter state 62
+	'('            shift, and enter state 63
+	'++'           shift, and enter state 64
+	'-'            shift, and enter state 65
+	'--'           shift, and enter state 66
+	'Tupla'        shift, and enter state 67
+	'break'        shift, and enter state 163
+	'continue'     shift, and enter state 164
+	'false'        shift, and enter state 68
+	'for'          shift, and enter state 165
 	'fun'          shift, and enter state 9
-	'if'           shift, and enter state 167
-	'null'         shift, and enter state 70
-	'print'        shift, and enter state 168
-	'println'      shift, and enter state 169
-	'return'       shift, and enter state 170
-	'run'          shift, and enter state 171
-	'true'         shift, and enter state 71
+	'if'           shift, and enter state 166
+	'null'         shift, and enter state 69
+	'print'        shift, and enter state 167
+	'println'      shift, and enter state 168
+	'return'       shift, and enter state 169
+	'run'          shift, and enter state 170
+	'true'         shift, and enter state 70
 	'val'          shift, and enter state 10
 	'var'          shift, and enter state 11
-	'while'        shift, and enter state 172
-	'{'            shift, and enter state 72
-	'}'            shift, and enter state 234
+	'while'        shift, and enter state 171
+	'{'            shift, and enter state 71
+	'}'            shift, and enter state 231
 	L_integ        shift, and enter state 2
-	L_quoted       shift, and enter state 73
+	L_quoted       shift, and enter state 72
 	L_ident        shift, and enter state 13
 
 	Integer        goto state 45
 	String         goto state 46
 	Ident          goto state 47
-	Exp            goto state 175
+	Exp            goto state 160
 	Exp1           goto state 49
 	Exp2           goto state 50
 	Exp3           goto state 51
@@ -6134,14 +5935,13 @@ State 233
 	Exp10          goto state 58
 	Exp11          goto state 59
 	Exp12          goto state 60
-	Stm            goto state 162
-	Dec            goto state 163
+	Stm            goto state 161
+	Dec            goto state 162
 	FunctionDec    goto state 7
 	FunctionExp    goto state 61
-	Lambda         goto state 62
 	ArrayDec       goto state 8
 
-State 234
+State 231
 
 	Stm -> 'if' '(' Exp ')' '{' ListStm '}' 'else' '{' ListStm '}' .    (rule 87)
 
@@ -6176,7 +5976,7 @@ State 234
 -----------------------------------------------------------------------------
 Grammar Totals
 -----------------------------------------------------------------------------
-Number of rules: 113
+Number of rules: 111
 Number of terminals: 65
-Number of non-terminals: 37
-Number of states: 235
+Number of non-terminals: 36
+Number of states: 232

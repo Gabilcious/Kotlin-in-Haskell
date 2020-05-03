@@ -32,7 +32,7 @@ Efalse.   Exp10     ::=  "false" ;
 Enull.    Exp10     ::=  "null" ;
 Ecall.    Exp10     ::=  FunctionExp ;
 Eget.     Exp10     ::=  Ident [DimExp] ;
-Elambda.  Exp10     ::=  Lambda ;
+Elambda.  Exp10     ::=  "{"  [Arg] "->" [Stm] "}" ;
 Ennass.   Exp11     ::=  Exp11 "!!" ;
 Evar.     Exp12     ::=  Ident ;
 
@@ -117,11 +117,6 @@ Dvalnull. Dec  ::=  "val" Ident ":" Type ";" ;
 FunDec.   FunctionDec    ::= "fun" Ident "(" [Arg] ")" ":" Type "{" [Stm] "}" ;
 FunCall.  FunctionExp    ::= Ident "(" [Exp] ")" ;
 
-
--- lambdas
-
-LambdaRet.     Lambda    ::=  "{"  [Arg] "->" [Stm] Exp "}" ;
-LambdaNoRet.   Lambda    ::=  "{"  [Arg] "->" [Stm] "}" ;
 
 
 -- iterable

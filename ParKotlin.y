@@ -140,7 +140,7 @@ Exp10 : 'Tupla' '(' ListExp ')' { AbsKotlin.Etupla $3 }
       | 'null' { AbsKotlin.Enull }
       | FunctionExp { AbsKotlin.Ecall $1 }
       | Ident ListDimExp { AbsKotlin.Eget $1 $2 }
-      | Lambda { AbsKotlin.Elambda $1 }
+      | '{' ListArg '->' ListStm '}' { AbsKotlin.Elambda $2 (reverse $4) }
       | Exp11 { $1 }
 Exp11 :: { Exp }
 Exp11 : Exp11 '!!' { AbsKotlin.Ennass $1 } | Exp12 { $1 }
@@ -213,9 +213,6 @@ FunctionDec :: { FunctionDec }
 FunctionDec : 'fun' Ident '(' ListArg ')' ':' Type '{' ListStm '}' { AbsKotlin.FunDec $2 $4 $7 (reverse $9) }
 FunctionExp :: { FunctionExp }
 FunctionExp : Ident '(' ListExp ')' { AbsKotlin.FunCall $1 $3 }
-Lambda :: { Lambda }
-Lambda : '{' ListArg '->' ListStm Exp '}' { AbsKotlin.LambdaRet $2 (reverse $4) $5 }
-       | '{' ListArg '->' ListStm '}' { AbsKotlin.LambdaNoRet $2 (reverse $4) }
 Iterable :: { Iterable }
 Iterable : Ident { AbsKotlin.Itarray $1 }
          | Exp '..' Exp { AbsKotlin.Itrange $1 $3 }

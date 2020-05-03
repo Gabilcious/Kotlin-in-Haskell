@@ -7,11 +7,13 @@
 // czy transExp wgl zmienia env? - nie powinno
 // Funkcja zmienia env podczas deklaracji swoj
 
+fun f(x: Int): Unit {
+    return x*x;
+}
+
+val arr = Array( 5, f );
 
 fun main() : Unit {
-        var i: Int = 1;
-    	while (i <= 350) {
-    	  println (i*=2);
-    	}
-  println ("DONE");
+   // arr[10];
+    println (arr[0]);
 }
