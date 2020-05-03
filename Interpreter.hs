@@ -261,20 +261,20 @@ transStm x e s  = case x of
 -- E X P R E S I O N S --
 -- ------------------- --
 
-addArgsHelper :: [Arg] -> [Exp] -> Env -> State -> IO(Env, State)
-addArgsHelper args exps e s = case (args, exps) of
-    ([], []) -> return(e, s)
+addArgsHelper :: [Arg] -> [Exp] -> Env -> Env -> State -> IO(Env, State)
+addArgsHelper args exps eToAdd eToEval s = case (args, exps) of
+    ([], []) -> return(eToAdd, s)
     (Args ident _:at, exp:et) -> do
-        (ne, ns, v) <- transExp exp e s
-        (nne, nns) <- declare e s ident v False
-        addArgsHelper at et nne nns
+        (_, ns, v) <- transExp exp eToEval s
+        (ne, nns) <- declare eToAdd s ident v False
+        addArgsHelper at et ne eToEval nns
 
 transFunctionExp :: FunctionExp -> Env -> State -> IO(Env, State, Value)
 transFunctionExp x e@(E em) s@(S sm) = case x of
   FunCall ident exps -> do
       let (index, const) = em ! ident
       let VFun args stms ne = sm ! index
-      (nne, ns) <- addArgsHelper args exps ne s
+      (nne, ns) <- addArgsHelper args exps ne e s
       (_, nns, v) <- doFun stms nne ns
       return(e, nns, v)
 

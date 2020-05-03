@@ -7,13 +7,32 @@ fun fib(d: Int) : Int {
     return fib (d - 1) + fib (d - 2);
 }
 
+// Return w ifie - flaga w State (1) oraz wartosc reta (2):
+//    -1 - return
+//    -2 - continue
+//    -3 - break
+// czy boole?
+
+// wywolywanie funkcji - ewaluate vlaue zanim zmienisz env
+// czy transExp wgl zmienia env? - nie powinno
+
+fun sil(x: Int) : Unit {
+    var ret: Int = 0;
+    if(x == 1) {
+        ret = 1;
+    } else {
+        ret = x * sil(x-1);
+    }
+    return ret;
+}
+
 fun main() : Unit {
   if (30 < 10) {
      println ("Jest");
   } else {
     println ("Nie jestem");
   }
-  println( fib(3) );
+  println( sil(5) );
 }
 
 fun foo() : Int { }
