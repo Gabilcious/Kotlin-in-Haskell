@@ -24,6 +24,7 @@ type Result = Err String
 
 data Value
     = VNull
+    | VUnit
     | VInt Integer
     | VString String
     | VBool Bool
@@ -51,7 +52,7 @@ doMain :: [Stm] -> Env -> State -> IO(Env, State)
 doMain stms e s = case stms of
   [] -> return(e,s)
   h:t -> do
-      (ne, ns) <- transStm h e s
+      (ne, ns, nv, isRet) <- transStm h e s
       doMain t ne ns
 
 start :: Prog -> IO()
@@ -73,6 +74,23 @@ transInst :: Inst -> Env -> State -> IO(Env, State)
 transInst x = case x of
   Idec dec -> transDec dec
 
+doFun :: [Stm] -> Env -> State -> IO(Env, State, Value)
+doFun stms e s = do
+    (ne, ns, v, isRet) <- doStms stms e s VUnit
+    return(ne, ns, v)
+
+--bedzie ustawiac flagi dla break i continue
+doStms :: [Stm] -> Env -> State -> Value -> IO(Env, State, Value, Bool)
+doStms stms e s v = case stms of
+-- Dla lambd, jak skonczy się bez return to wartośc ostatniej instrukcji jest zwracana
+    [] -> return(e, s, v, True)
+    h:t -> do
+        (ne, ns, nv, isRet) <- transStm h e s
+        case isRet of
+          True -> return(ne, ns, nv, isRet)
+          False -> doStms t ne ns nv
+
+
 
 
 
@@ -86,6 +104,13 @@ declare (E em) (S sm) id val const = do
     let nem = insert id (index, const) em
     let nsm = insert index val sm
     let nnsm = insert 0 (VInt (index+1)) nsm
+--    putStrLn ""
+--    putStrLn ""
+--    putStrLn "DECLARE CALLED"
+--    putStrLn ""
+--    putStrLn (Data.Map.Internal.Debug.showTree nem)
+--    putStrLn (Data.Map.Internal.Debug.showTree nnsm)
+--    putStrLn ""
     return(E nem, S nnsm)
 
 declareFun :: Env -> State -> Ident -> [Arg] -> [Stm] -> Bool -> IO(Env, State)
@@ -112,6 +137,16 @@ transDec x e s = case x of
   Dvalnull ident type_ -> do
       (ne, ns, val) <- transExp Enull e s
       declare ne ns ident val True
+
+transFunctionDec :: FunctionDec -> Env -> State -> IO(Env, State)
+transFunctionDec x e s = case x of
+  FunDec (Ident "main") _ _ stms -> do
+      (ne, ns, v) <- doFun stms e s
+      return (e, ns)
+--  FunDec (Ident "main") _ _ stms -> do
+--      error "Function 'main' shloud look like:\n  fun main(): Unit { }"
+--      return(e,s)
+  FunDec ident args type_ stms -> declareFun e s ident args stms True
 
 
 
@@ -148,65 +183,6 @@ transArg x = case x of
 transIdent :: Ident -> Result
 transIdent x = case x of
   Ident string -> failure x
-
-
-
--- ------------------- --
--- S T A T E M E N T S --
--- ------------------- --
-
-transStm :: Stm -> Env -> State -> IO(Env, State)
-transStm x e s  = case x of
-  Sdec dec -> transDec dec e s
-  Sexp exp -> do
-      (ne, se, v) <- transExp exp e s
-      return(ne, se)
-  Sblock stms -> failure x
-  Sfor ident iterable stms -> failure x
-  Swhile exp stms -> failure x
-  Sbreak -> failure x
-  Scont -> failure x
-  Sretexp exp -> failure x
-  Sret -> return(e,s)
-  Sif exp stms -> failure x
-  Sifelse exp stms1 stms2 -> failure x
---  print pokazuje tylko int lub string
-  Sprint exp -> do
-      (ne, ns, x) <- transExp exp e s
-      case x of
-        VInt v -> putStr (show v)
-        VString v -> putStr (show v)
-        VBool v -> putStr (show v)
-      return(ne, ns)
-  Sprintln exp -> do
-      (ne, ns) <- transStm (Sprint exp) e s
-      putStrLn ""
-      return(ne, ns)
-  Snotnull exp stm -> failure x
-
-
-
-
-
-
--- ----------------- --
--- F U N C T I O N S --
--- ----------------- --
-
-transFunctionDec :: FunctionDec -> Env -> State -> IO(Env, State)
-transFunctionDec x e s = case x of
-  FunDec (Ident "main") _ _ stms -> do
-      (ne, ns) <- doMain stms e s
-      return (e, ns)
---  FunDec (Ident "main") _ _ stms -> do
---      error "Function 'main' shloud look like:\n  fun main(): Unit { }"
---      return(e,s)
-  FunDec ident args type_ stms -> declareFun e s ident args stms True
-
-transFunctionExp :: FunctionExp -> IO()
-transFunctionExp x = case x of
-  FunCall ident exps -> failure x
-
 transLambda :: Lambda -> IO()
 transLambda x = case x of
   LambdaRet args stms exp -> failure x
@@ -225,11 +201,68 @@ transArrayDec x = case x of
 
 
 
+-- ------------------- --
+-- S T A T E M E N T S --
+-- ------------------- --
+
+transStm :: Stm -> Env -> State -> IO(Env, State, Value, Bool)
+transStm x e s  = case x of
+  Sdec dec -> do
+      (ne, se) <- transDec dec e s
+      return(ne, se, VUnit, False)
+  Sexp exp -> do
+      (ne, ns, v) <- transExp exp e s
+      return(ne, ns, v, False)
+  Sblock stms -> do
+      (_, ns, _, _) <- doStms stms e s VUnit
+      return(e, ns, VUnit, False)
+  Sfor ident iterable stms -> failure x
+  Swhile exp stms -> failure x
+  Sbreak -> failure x
+  Scont -> failure x
+  Sretexp exp -> do
+      (ne, ns, v) <- transExp exp e s
+      return(ne, ns, v, True)
+  Sret -> return(e, s, VUnit, True)
+  Sif exp stms -> failure x
+  Sifelse exp stms1 stms2 -> failure x
+  Sprint exp -> do
+      (ne, ns, x) <- transExp exp e s
+      case x of
+        VInt v -> putStr (show v)
+        VString v -> putStr (show v)
+        VBool v -> putStr (show v)
+      return(ne, ns, VUnit, False)
+  Sprintln exp -> do
+      (ne, ns, v, isRet) <- transStm (Sprint exp) e s
+      putStrLn ""
+      return(ne, ns, v, isRet)
+  Snotnull exp stm -> failure x
+
+
+
 
 
 -- ------------------- --
 -- E X P R E S I O N S --
 -- ------------------- --
+
+addArgsHelper :: [Arg] -> [Exp] -> Env -> State -> IO(Env, State)
+addArgsHelper args exps e s = case (args, exps) of
+    ([], []) -> return(e, s)
+    (Args ident _:at, exp:et) -> do
+        (ne, ns, v) <- transExp exp e s
+        (nne, nns) <- declare e s ident v False
+        addArgsHelper at et nne nns
+
+transFunctionExp :: FunctionExp -> Env -> State -> IO(Env, State, Value)
+transFunctionExp x e@(E em) s@(S sm) = case x of
+  FunCall ident exps -> do
+      let (index, const) = em ! ident
+      let VFun args stms ne = sm ! index
+      (nne, ns) <- addArgsHelper args exps ne s
+      (_, nns, v) <- doFun stms nne ns
+      return(e, nns, v)
 
 transEtuplaHelper :: [Exp] -> Env -> State -> IO(Env, State, [Value])
 transEtuplaHelper exps e s = case exps of
@@ -298,7 +331,7 @@ transExp x e@(E em) s@(S sm) = case x of
   Etrue -> return(e, s, VBool True)
   Efalse -> return(e, s, VBool False)
   Enull -> return(e, s, VNull)
-  Ecall functionexp -> failure x
+  Ecall functionexp -> transFunctionExp functionexp e s
   Eget ident dimexps -> failure x
   Elambda lambda -> failure x
   Ennass exp -> failure x

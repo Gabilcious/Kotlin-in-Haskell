@@ -1,13 +1,17 @@
 val a: Int = 15;
 
+fun f(mes: String?) : Unit {
+  a = 23;
+  val a: Int = 30;
+  println (mes);
+}
+
 fun main() : Unit {
   var b: Int = 10;
-  println (a+b);
-  println (a*b);
-  println (a==b);
-  b = a;
-  println (a==b);
-  println ("mama");
+  println(a);
+  f("Hello world");
+  val c: String = "mamusia";
+  println(a);
 }
 
 fun foo() : Int { }
