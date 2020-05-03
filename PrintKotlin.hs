@@ -244,4 +244,5 @@ instance Print AbsKotlin.Iterable where
 instance Print AbsKotlin.ArrayDec where
   prt i e = case e of
     AbsKotlin.ArrDec id exp1 exp2 -> prPrec i 0 (concatD [doc (showString "val"), prt 0 id, doc (showString "="), doc (showString "Array"), doc (showString "("), prt 0 exp1, doc (showString ","), prt 0 exp2, doc (showString ")"), doc (showString ";")])
+    AbsKotlin.ArrItDec id iterable -> prPrec i 0 (concatD [doc (showString "val"), prt 0 id, doc (showString "="), doc (showString "["), prt 0 iterable, doc (showString "]"), doc (showString ";")])
 

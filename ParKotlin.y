@@ -222,6 +222,7 @@ Iterable : Ident { AbsKotlin.Itarray $1 }
          | Exp 'downTo' Exp 'step' Exp { AbsKotlin.Itdownst $1 $3 $5 }
 ArrayDec :: { ArrayDec }
 ArrayDec : 'val' Ident '=' 'Array' '(' Exp ',' Exp ')' ';' { AbsKotlin.ArrDec $2 $6 $8 }
+         | 'val' Ident '=' '[' Iterable ']' ';' { AbsKotlin.ArrItDec $2 $5 }
 {
 
 returnM :: a -> Err a

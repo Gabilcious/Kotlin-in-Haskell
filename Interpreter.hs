@@ -172,6 +172,9 @@ transArrayDec x e s = case x of
       (ns, VFun [Args it _] stms eFun) <- transExp exp e s
       (nns, list) <- transArrayDecHelper e ns stms it 0 size []
       declare e nns ident (VArray list) True
+  ArrItDec ident iterable -> do
+      (ns, list) <- transIterable iterable e s
+      declare e ns ident (VArray list) True
 
 
 
@@ -180,18 +183,27 @@ transArrayDec x e s = case x of
 -- I T E R A B L E --
 -- --------------- --
 
---doArrayList :: Env -> State -> Integer -> Integer -> Value -> [Value]
---doIterable e s size expected f = failure x
+transIterableHelper :: Env -> State -> Exp -> Exp -> Exp -> Bool -> IO(State, [Value])
+transIterableHelper e s av bv stepv inclusive = do
+    (ns, VInt a) <- transExp av e s
+    (nns, VInt c) <- transExp bv e ns
+    (nnns, VInt step) <- transExp stepv e ns
+    let b = a + step
+    case (inclusive, step > 0) of
+      (True, _) -> return(nnns, Prelude.map (\x -> VInt x) [a,b..c])
+      (False, True) -> return(nnns, Prelude.map (\x -> VInt x) [a,b..(c-1)])
+      (False, False) -> return(nnns, Prelude.map (\x -> VInt x) [a,b..(c+1)])
 
-
-transIterable :: Iterable -> [Value]
-transIterable x = case x of
-  Itarray ident -> failure x
-  Itrange exp1 exp2 -> failure x
-  Itup exp1 exp2 -> failure x
-  Itdown exp1 exp2 -> failure x
-  Itupst exp1 exp2 exp3 -> failure x
-  Itdownst exp1 exp2 exp3 -> failure x
+transIterable :: Iterable -> Env -> State -> IO(State, [Value])
+transIterable x e s = case x of
+  Itarray ident -> do
+      let VArray list = getVal e s ident
+      return(s, list)
+  Itrange exp1 exp2 -> transIterableHelper e s exp1 exp2 (Eint 1) True
+  Itup exp1 exp2 -> transIterableHelper e s exp1 exp2 (Eint 1) False
+  Itdown exp1 exp2 -> transIterableHelper e s exp1 exp2 (Eint (-1)) False
+  Itupst exp1 exp2 exp3 -> transIterableHelper e s exp1 exp2 exp3 False
+  Itdownst exp1 exp2 exp3 -> transIterableHelper e s exp1 exp2 (Eneg exp3) False
 
 
 

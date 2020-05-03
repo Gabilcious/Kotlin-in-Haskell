@@ -119,4 +119,5 @@ transIterable x = case x of
 transArrayDec :: ArrayDec -> Result
 transArrayDec x = case x of
   ArrDec ident exp1 exp2 -> failure x
+  ArrItDec ident iterable -> failure x
 

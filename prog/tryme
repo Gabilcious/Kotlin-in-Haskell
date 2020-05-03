@@ -14,10 +14,7 @@ fun f(x: Int): Unit {
 val arr = Array( 5, f );
 
 fun main() : Unit {
-    val i: Int = 0;
-    while (i++ < 10) {
-      //println (i);
-      println (i%3==0 ? "podzielne" : "niepodzielne" );
-    }
-    println (arr[0]);
+    val arr = [100 downTo 10 step 10];
+    val arr2 = [10 until 100 step 10];
+    val arr3 = [1..10];
 }

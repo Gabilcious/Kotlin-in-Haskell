@@ -110,6 +110,6 @@ data Iterable
     | Itdownst Exp Exp Exp
   deriving (Eq, Ord, Show, Read)
 
-data ArrayDec = ArrDec Ident Exp Exp
+data ArrayDec = ArrDec Ident Exp Exp | ArrItDec Ident Iterable
   deriving (Eq, Ord, Show, Read)
 

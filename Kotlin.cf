@@ -132,6 +132,7 @@ Itdownst. Iterable  ::=  Exp "downTo" Exp "step" Exp ;
 -- array
 
 ArrDec.   ArrayDec ::=  "val" Ident "=" "Array" "(" Exp "," Exp ")" ";" ; 
+ArrItDec. ArrayDec ::=  "val" Ident "=" "[" Iterable "]" ";" ; 
 
 
 -- Comment
