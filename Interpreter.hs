@@ -126,17 +126,17 @@ transDec x e s = case x of
   Dfun functiondec -> transFunctionDec functiondec e s
   Darray arraydec -> failure x
   Dvar ident type_ exp -> do
-      (ne, ns, val) <- transExp exp e s
-      declare ne ns ident val False
+      (ns, val) <- transExp exp e s
+      declare e ns ident val False
   Dval ident type_ exp -> do
-      (ne, ns, val) <- transExp exp e s
-      declare ne ns ident val True
+      (ns, val) <- transExp exp e s
+      declare e ns ident val True
   Dvarnull ident type_ -> do
-      (ne, ns, val) <- transExp Enull e s
-      declare ne ns ident val False
+      (ns, val) <- transExp Enull e s
+      declare e ns ident val False
   Dvalnull ident type_ -> do
-      (ne, ns, val) <- transExp Enull e s
-      declare ne ns ident val True
+      (ns, val) <- transExp Enull e s
+      declare e ns ident val True
 
 transFunctionDec :: FunctionDec -> Env -> State -> IO(Env, State)
 transFunctionDec x e s = case x of
@@ -211,8 +211,8 @@ transStm x e s  = case x of
       (ne, se) <- transDec dec e s
       return(ne, se, VUnit, False)
   Sexp exp -> do
-      (ne, ns, v) <- transExp exp e s
-      return(ne, ns, v, False)
+      (ns, v) <- transExp exp e s
+      return(e, ns, v, False)
   Sblock stms -> do
       (_, ns, _, _) <- doStms stms e s VUnit
       return(e, ns, VUnit, False)
@@ -221,32 +221,32 @@ transStm x e s  = case x of
   Sbreak -> failure x
   Scont -> failure x
   Sretexp exp -> do
-      (ne, ns, v) <- transExp exp e s
-      return(ne, ns, v, True)
+      (ns, v) <- transExp exp e s
+      return(e, ns, v, True)
   Sret -> return(e, s, VUnit, True)
   Sif exp stms -> do
-      (ne, ns, VBool v) <- transExp exp e s
+      (ns, VBool v) <- transExp exp e s
       case v of
         True -> do
-            (nne, nns, _, _) <- doStms stms ne ns VUnit
+            (_, nns, _, _) <- doStms stms e ns VUnit
             return(e, nns, VUnit, False)
         False -> return(e, s ,VUnit, False)
   Sifelse exp stms1 stms2 -> do
-      (ne, ns, VBool v) <- transExp exp e s
+      (ns, VBool v) <- transExp exp e s
       case v of
         True -> do
-            (nne, nns, _, _) <- doStms stms1 ne ns VUnit
+            (_, nns, _, _) <- doStms stms1 e ns VUnit
             return(e, nns, VUnit, False)
         False -> do
-            (nne, nns, _, _) <- doStms stms2 ne ns VUnit
+            (_, nns, _, _) <- doStms stms2 e ns VUnit
             return(e, nns, VUnit, False)
   Sprint exp -> do
-      (ne, ns, x) <- transExp exp e s
+      (ns, x) <- transExp exp e s
       case x of
         VInt v -> putStr (show v)
         VString v -> putStr (show v)
         VBool v -> putStr (show v)
-      return(ne, ns, VUnit, False)
+      return(e, ns, VUnit, False)
   Sprintln exp -> do
       (ne, ns, v, isRet) <- transStm (Sprint exp) e s
       putStrLn ""
@@ -265,56 +265,56 @@ addArgsHelper :: [Arg] -> [Exp] -> Env -> Env -> State -> IO(Env, State)
 addArgsHelper args exps eToAdd eToEval s = case (args, exps) of
     ([], []) -> return(eToAdd, s)
     (Args ident _:at, exp:et) -> do
-        (_, ns, v) <- transExp exp eToEval s
+        (ns, v) <- transExp exp eToEval s
         (ne, nns) <- declare eToAdd s ident v False
         addArgsHelper at et ne eToEval nns
 
-transFunctionExp :: FunctionExp -> Env -> State -> IO(Env, State, Value)
+transFunctionExp :: FunctionExp -> Env -> State -> IO(State, Value)
 transFunctionExp x e@(E em) s@(S sm) = case x of
   FunCall ident exps -> do
       let (index, const) = em ! ident
       let VFun args stms ne = sm ! index
       (nne, ns) <- addArgsHelper args exps ne e s
       (_, nns, v) <- doFun stms nne ns
-      return(e, nns, v)
+      return(nns, v)
 
-transEtuplaHelper :: [Exp] -> Env -> State -> IO(Env, State, [Value])
+transEtuplaHelper :: [Exp] -> Env -> State -> IO(State, [Value])
 transEtuplaHelper exps e s = case exps of
-  [] -> return(e, s, [])
+  [] -> return(s, [])
   h:t -> do
-      (ne, ns, nv) <- transExp h e s
-      (nne, nns, nvs) <- transEtuplaHelper t ne ns
-      return(nne, nns, nv:nvs)
+      (ns, nv) <- transExp h e s
+      (nns, nvs) <- transEtuplaHelper t e ns
+      return(nns, nv:nvs)
 
-transIntHelper :: Exp -> Exp -> (Integer -> Integer -> Integer) -> Env -> State -> IO(Env, State, Value)
+transIntHelper :: Exp -> Exp -> (Integer -> Integer -> Integer) -> Env -> State -> IO(State, Value)
 transIntHelper exp1 exp2 f e s = do
-    (ne, ns, VInt a) <- transExp exp1 e s
-    (nne, nns, VInt b) <- transExp exp2 ne ns
-    return(nne, nns, VInt (f a b))
+    (ns, VInt a) <- transExp exp1 e s
+    (nns, VInt b) <- transExp exp2 e ns
+    return(nns, VInt (f a b))
 
-transBoolHelper :: Exp -> Exp -> (Value -> Value -> Bool) -> Env -> State -> IO(Env, State, Value)
+transBoolHelper :: Exp -> Exp -> (Value -> Value -> Bool) -> Env -> State -> IO(State, Value)
 transBoolHelper exp1 exp2 f e s = do
-    (ne, ns, a) <- transExp exp1 e s
-    (nne, nns, b) <- transExp exp2 ne ns
-    return(nne, nns, VBool (f a b))
+    (ns, a) <- transExp exp1 e s
+    (nns, b) <- transExp exp2 e ns
+    return(nns, VBool (f a b))
 
 
-transExp :: Exp -> Env -> State -> IO(Env, State, Value)
+transExp :: Exp -> Env -> State -> IO(State, Value)
 transExp x e@(E em) s@(S sm) = case x of
   Eassign (Ear ident) opassign exp -> do
-      (ne, ns, val) <- transExp exp e s
+      (ns, val) <- transExp exp e s
       let (index, const) = em ! ident
       let nsm = insert index val sm
-      return(e, S nsm, val)
+      return(S nsm, val)
   Eternary exp1 exp2 exp3 -> failure x
   Eor exp1 exp2 -> do
-      (ne, ns, VBool a) <- transExp exp1 e s
-      (nne, nns, VBool b) <- transExp exp2 ne ns
-      return(nne, nns, VBool (a || b))
+      (ns, VBool a) <- transExp exp1 e s
+      (nns, VBool b) <- transExp exp2 e ns
+      return(nns, VBool (a || b))
   Eand exp1 exp2 -> do
-      (ne, ns, VBool a) <- transExp exp1 e s
-      (nne, nns, VBool b) <- transExp exp2 ne ns
-      return(nne, nns, VBool (a && b))
+      (ns, VBool a) <- transExp exp1 e s
+      (nns, VBool b) <- transExp exp2 e ns
+      return(nns, VBool (a && b))
   Eeq exp1 exp2 -> transBoolHelper exp1 exp2 (==) e s
   Eneq exp1 exp2 -> transBoolHelper exp1 exp2 (/=) e s
   El exp1 exp2 -> transBoolHelper exp1 exp2 (<) e s
@@ -325,26 +325,26 @@ transExp x e@(E em) s@(S sm) = case x of
   Esub exp1 exp2 -> transIntHelper exp1 exp2 (-) e s
   Emul exp1 exp2 -> transIntHelper exp1 exp2 (*) e s
   Ediv exp1 exp2 -> do
-      (ne, ns, a) <- transExp exp1 e s
-      (nne, nns, b) <- transExp exp2 ne ns
+      (ns, a) <- transExp exp1 e s
+      (nns, b) <- transExp exp2 e ns
       case (a, b) of
         (_, VInt 0) -> error "Cannot divide by 0"
-        (VInt va, VInt vb) -> return(nne, nns, VInt (div va vb))
+        (VInt va, VInt vb) -> return(nns, VInt (div va vb))
   Emod exp1 exp2 -> transIntHelper exp1 exp2 mod e s
   Eneg exp -> do
-      (ne, ns, VBool a) <- transExp exp e s
-      return(ne, ns, VBool (not a))
+      (ns, VBool a) <- transExp exp e s
+      return(ns, VBool (not a))
   Elneg exp -> failure x
   Einc exp -> failure x
   Edec exp -> failure x
   Etupla exps -> do
-      (ne, ns, vs) <- transEtuplaHelper exps e s
-      return(ne, ns, VTupla (reverse vs))
-  Eint integer -> return(e, s, VInt integer)
-  Estring string -> return(e, s, VString string)
-  Etrue -> return(e, s, VBool True)
-  Efalse -> return(e, s, VBool False)
-  Enull -> return(e, s, VNull)
+      (ns, vs) <- transEtuplaHelper exps e s
+      return(ns, VTupla (reverse vs))
+  Eint integer -> return(s, VInt integer)
+  Estring string -> return(s, VString string)
+  Etrue -> return(s, VBool True)
+  Efalse -> return(s, VBool False)
+  Enull -> return(s, VNull)
   Ecall functionexp -> transFunctionExp functionexp e s
   Eget ident dimexps -> failure x
   Elambda lambda -> failure x
@@ -352,4 +352,4 @@ transExp x e@(E em) s@(S sm) = case x of
   Ear ident -> do
       let (index, c) = em ! ident
       let v =  sm ! index
-      return(e, s, v)
+      return(s, v)
