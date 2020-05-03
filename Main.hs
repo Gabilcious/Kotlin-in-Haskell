@@ -13,7 +13,6 @@ import PrintKotlin
 import AbsKotlin
 import Interpreter
 
-import Data.Map
 import ErrM
 
 type ParseFun a = [Token] -> Err a
@@ -36,7 +35,8 @@ run v p s = let ts = myLLexer s in case p ts of
                           putStrV v $ show ts
                           putStrLn s
                           exitFailure
-           Ok  tree -> do transProg tree (E empty) (S empty)
+           Ok  tree -> do putStrLn ""
+                          start tree
 
                           Main.showTree v tree
                           exitSuccess

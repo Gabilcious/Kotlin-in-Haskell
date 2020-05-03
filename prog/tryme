@@ -1,7 +1,12 @@
+val a: Int = 15;
+
 fun main() : Unit {
-  println (10%7);
-  println (2+2*2);
-  println (4==3*2);
+  var b: Int = 10;
+  println (a+b);
+  println (a*b);
+  println (a==b);
+  b = a;
+  println (a==b);
   println ("mama");
 }
 

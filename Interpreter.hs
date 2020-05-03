@@ -18,16 +18,12 @@ import Data.Map
 import Data.Map.Internal.Debug
 type Result = Err String
 
---data BaseValue
---    = VInt Integer
---    | VString String
---    | VBool Bool
---    | VTupla [Value]
---    | VArray [Value]
---  deriving (Eq, Ord, Show, Read)
+-- ------------- --
+-- -- D A T A -- --
+-- ------------- --
 
 data Value
-    = Vnull
+    = VNull
     | VInt Integer
     | VString String
     | VBool Bool
@@ -36,28 +32,21 @@ data Value
     | VFun [Arg] [Stm] Env
   deriving (Eq, Ord, Show, Read)
 
-data Env = E (Map Ident Int)
+data Env = E (Map Ident (Integer, Bool))
   deriving (Eq, Ord, Show, Read)
 
-data State = S (Map Int Value)
+data State = S (Map Integer Value)
   deriving (Eq, Ord, Show, Read)
 
+failure x = error ("Undefined case: " ++ show x)
 
-declare :: Env -> State -> Ident -> Value -> IO(Env, State)
-declare (E em) (S sm) i v = do
-    let index = size sm
-    let ne = E (insert i index em)
-    let ns = S (insert index v sm)
-    return(ne,ns)
 
-declareFun :: Env -> State -> Ident -> [Arg] -> [Stm] -> IO(Env, State)
-declareFun (E em) (S sm) i a s = do
-    let index = size sm
-    let ne = E (insert i index em)
-    let ns = S (insert index (VFun a s ne) sm)
-    return(ne,ns)
 
---    podobnie można doFun
+
+-- ------------- --
+-- P R O G R A M --
+-- ------------- --
+
 doMain :: [Stm] -> Env -> State -> IO(Env, State)
 doMain stms e s = case stms of
   [] -> return(e,s)
@@ -65,19 +54,15 @@ doMain stms e s = case stms of
       (ne, ns) <- transStm h e s
       doMain t ne ns
 
-
-
-
-
-failure x = error ("Undefined case: " ++ show x)
-
-transIdent :: Ident -> Result
-transIdent x = case x of
-  Ident string -> failure x
+start :: Prog -> IO()
+start prog = transProg prog (E empty) (S (singleton 0 (VInt 1)))
 
 transProg :: Prog -> Env -> State -> IO()
 transProg x (E em) (S sm) = case x of
   Program [] -> do
+      putStrLn ""
+      putStrLn ""
+      putStrLn ""
       putStrLn (Data.Map.Internal.Debug.showTree em)
       putStrLn (Data.Map.Internal.Debug.showTree sm)
   Program (h:t) -> do
@@ -88,14 +73,163 @@ transInst :: Inst -> Env -> State -> IO(Env, State)
 transInst x = case x of
   Idec dec -> transDec dec
 
+
+
+
+-- ----------------------- --
+-- D E C L A R A T I O N S --
+-- ----------------------- --
+
+declare :: Env -> State -> Ident -> Value -> Bool -> IO(Env, State)
+declare (E em) (S sm) id val const = do
+    let VInt index = sm ! 0
+    let nem = insert id (index, const) em
+    let nsm = insert index val sm
+    let nnsm = insert 0 (VInt (index+1)) nsm
+    return(E nem, S nnsm)
+
+declareFun :: Env -> State -> Ident -> [Arg] -> [Stm] -> Bool -> IO(Env, State)
+declareFun (E em) (S sm) id args stms const = do
+    let VInt index = sm ! 0
+    let ne = E (insert id (index, const) em)
+    let nsm = insert index (VFun args stms ne) sm
+    let nnsm = insert 0 (VInt (index+1)) nsm
+    return(ne, S nnsm)
+
 transDec :: Dec -> Env -> State -> IO(Env, State)
 transDec x e s = case x of
   Dfun functiondec -> transFunctionDec functiondec e s
-  Darray arraydec -> return(e,s)
-  Dvar ident type_ exp -> return(e,s)
-  Dval ident type_ exp -> return(e,s)
-  Dvarnull ident type_ -> return(e,s)
-  Dvalnull ident type_ -> return(e,s)
+  Darray arraydec -> failure x
+  Dvar ident type_ exp -> do
+      (ne, ns, val) <- transExp exp e s
+      declare ne ns ident val False
+  Dval ident type_ exp -> do
+      (ne, ns, val) <- transExp exp e s
+      declare ne ns ident val True
+  Dvarnull ident type_ -> do
+      (ne, ns, val) <- transExp Enull e s
+      declare ne ns ident val False
+  Dvalnull ident type_ -> do
+      (ne, ns, val) <- transExp Enull e s
+      declare ne ns ident val True
+
+
+
+
+-- --------------- --
+-- ---- I D K ---- --
+-- --------------- --
+
+transDimExp :: DimExp -> IO()
+transDimExp x = case x of
+  Dim exp -> failure x
+transOpAssign :: OpAssign -> IO()
+transOpAssign x = case x of
+  OpAssign1 -> failure x
+  OpAssign2 -> failure x
+  OpAssign3 -> failure x
+  OpAssign4 -> failure x
+  OpAssign5 -> failure x
+transBaseType :: BaseType -> IO()
+transBaseType x = case x of
+  Ttupla types -> failure x
+  Tbool -> failure x
+  Tint -> failure x
+  Tstring -> failure x
+transType :: Type -> IO()
+transType x = case x of
+  Tunit -> failure x
+  Tnull basetype -> failure x
+  Tnonnull basetype -> failure x
+  Tfun types basetype -> failure x
+transArg :: Arg -> IO()
+transArg x = case x of
+  Args ident type_ -> failure x
+transIdent :: Ident -> Result
+transIdent x = case x of
+  Ident string -> failure x
+
+
+
+-- ------------------- --
+-- S T A T E M E N T S --
+-- ------------------- --
+
+transStm :: Stm -> Env -> State -> IO(Env, State)
+transStm x e s  = case x of
+  Sdec dec -> transDec dec e s
+  Sexp exp -> do
+      (ne, se, v) <- transExp exp e s
+      return(ne, se)
+  Sblock stms -> failure x
+  Sfor ident iterable stms -> failure x
+  Swhile exp stms -> failure x
+  Sbreak -> failure x
+  Scont -> failure x
+  Sretexp exp -> failure x
+  Sret -> return(e,s)
+  Sif exp stms -> failure x
+  Sifelse exp stms1 stms2 -> failure x
+--  print pokazuje tylko int lub string
+  Sprint exp -> do
+      (ne, ns, x) <- transExp exp e s
+      case x of
+        VInt v -> putStr (show v)
+        VString v -> putStr (show v)
+        VBool v -> putStr (show v)
+      return(ne, ns)
+  Sprintln exp -> do
+      (ne, ns) <- transStm (Sprint exp) e s
+      putStrLn ""
+      return(ne, ns)
+  Snotnull exp stm -> failure x
+
+
+
+
+
+
+-- ----------------- --
+-- F U N C T I O N S --
+-- ----------------- --
+
+transFunctionDec :: FunctionDec -> Env -> State -> IO(Env, State)
+transFunctionDec x e s = case x of
+  FunDec (Ident "main") _ _ stms -> do
+      (ne, ns) <- doMain stms e s
+      return (e, ns)
+--  FunDec (Ident "main") _ _ stms -> do
+--      error "Function 'main' shloud look like:\n  fun main(): Unit { }"
+--      return(e,s)
+  FunDec ident args type_ stms -> declareFun e s ident args stms True
+
+transFunctionExp :: FunctionExp -> IO()
+transFunctionExp x = case x of
+  FunCall ident exps -> failure x
+
+transLambda :: Lambda -> IO()
+transLambda x = case x of
+  LambdaRet args stms exp -> failure x
+  LambdaNoRet args stms -> failure x
+transIterable :: Iterable -> IO()
+transIterable x = case x of
+  Itarray ident -> failure x
+  Itrange exp1 exp2 -> failure x
+  Itup exp1 exp2 -> failure x
+  Itdown exp1 exp2 -> failure x
+  Itupst exp1 exp2 exp3 -> failure x
+  Itdownst exp1 exp2 exp3 -> failure x
+transArrayDec :: ArrayDec -> IO()
+transArrayDec x = case x of
+  ArrDec ident exp1 exp2 -> failure x
+
+
+
+
+
+-- ------------------- --
+-- E X P R E S I O N S --
+-- ------------------- --
 
 transEtuplaHelper :: [Exp] -> Env -> State -> IO(Env, State, [Value])
 transEtuplaHelper exps e s = case exps of
@@ -119,8 +253,12 @@ transBoolHelper exp1 exp2 f e s = do
 
 
 transExp :: Exp -> Env -> State -> IO(Env, State, Value)
-transExp x e s = case x of
-  Eassign exp1 opassign exp2 -> failure x
+transExp x e@(E em) s@(S sm) = case x of
+  Eassign (Ear ident) opassign exp -> do
+      (ne, ns, val) <- transExp exp e s
+      let (index, const) = em ! ident
+      let nsm = insert index val sm
+      return(e, S nsm, val)
   Eternary exp1 exp2 exp3 -> failure x
   Eor exp1 exp2 -> do
       (ne, ns, VBool a) <- transExp exp1 e s
@@ -159,95 +297,12 @@ transExp x e s = case x of
   Estring string -> return(e, s, VString string)
   Etrue -> return(e, s, VBool True)
   Efalse -> return(e, s, VBool False)
-  Enull -> return(e, s, Vnull)
+  Enull -> return(e, s, VNull)
   Ecall functionexp -> failure x
   Eget ident dimexps -> failure x
   Elambda lambda -> failure x
   Ennass exp -> failure x
-  Ear ident -> failure x
-
-transDimExp :: DimExp -> IO()
-transDimExp x = case x of
-  Dim exp -> failure x
-transOpAssign :: OpAssign -> IO()
-transOpAssign x = case x of
-  OpAssign1 -> failure x
-  OpAssign2 -> failure x
-  OpAssign3 -> failure x
-  OpAssign4 -> failure x
-  OpAssign5 -> failure x
-transBaseType :: BaseType -> IO()
-transBaseType x = case x of
-  Ttupla types -> failure x
-  Tbool -> failure x
-  Tint -> failure x
-  Tstring -> failure x
-transType :: Type -> IO()
-transType x = case x of
-  Tunit -> failure x
-  Tnull basetype -> failure x
-  Tnonnull basetype -> failure x
-  Tfun types basetype -> failure x
-transArg :: Arg -> IO()
-transArg x = case x of
-  Args ident type_ -> failure x
-
-
-transStm :: Stm -> Env -> State -> IO(Env, State)
-transStm x e s  = case x of
-  Sdec dec -> failure x
-  Sexp exp -> failure x
-  Sblock stms -> failure x
-  Sfor ident iterable stms -> failure x
-  Swhile exp stms -> failure x
-  Sbreak -> failure x
-  Scont -> failure x
-  Sretexp exp -> failure x
-  Sret -> return(e,s)
-  Sif exp stms -> failure x
-  Sifelse exp stms1 stms2 -> failure x
---  print pokazuje tylko int lub string
-  Sprint exp -> do
-      (ne, ns, x) <- transExp exp e s
-      case x of
-        VInt v -> putStr (show v)
-        VString v -> putStr (show v)
-        VBool v -> putStr (show v)
-      return(ne, ns)
-  Sprintln exp -> do
-      (ne, ns) <- transStm (Sprint exp) e s
-      putStrLn ""
-      return(ne, ns)
-  Snotnull exp stm -> failure x
-
-
-transFunctionDec :: FunctionDec -> Env -> State -> IO(Env, State)
-transFunctionDec x e s = case x of
-  FunDec (Ident "main") _ _ stms -> do
-      (ne, ns) <- doMain stms e s
-      return (e, ns)
---  FunDec (Ident "main") _ _ stms -> do
---      error "Function 'main' shloud look like:\n  fun main(): Unit { }"
---      return(e,s)
-  FunDec ident args type_ stms -> declareFun e s ident args stms
-
-transFunctionExp :: FunctionExp -> IO()
-transFunctionExp x = case x of
-  FunCall ident exps -> failure x
-
-transLambda :: Lambda -> IO()
-transLambda x = case x of
-  LambdaRet args stms exp -> failure x
-  LambdaNoRet args stms -> failure x
-transIterable :: Iterable -> IO()
-transIterable x = case x of
-  Itarray ident -> failure x
-  Itrange exp1 exp2 -> failure x
-  Itup exp1 exp2 -> failure x
-  Itdown exp1 exp2 -> failure x
-  Itupst exp1 exp2 exp3 -> failure x
-  Itdownst exp1 exp2 exp3 -> failure x
-transArrayDec :: ArrayDec -> IO()
-transArrayDec x = case x of
-  ArrDec ident exp1 exp2 -> failure x
-
+  Ear ident -> do
+      let (index, c) = em ! ident
+      let v =  sm ! index
+      return(e, s, v)
