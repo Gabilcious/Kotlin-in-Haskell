@@ -418,7 +418,11 @@ transExp x e s = case x of
   Ecall functionexp -> transFunctionExp functionexp e s
   Eget ident dimexps -> transGetExp ident dimexps e s
   Elambda args stms -> return(s, VFun args stms e)
-  Ennass exp -> failure x -- wszędzie gdzie zakladam Evar, dodac obsluge
+  Ennass exp -> do
+      (ns, v) <- transExp exp e s
+      case v of
+        VNull -> error "Runtime error - null safety"
+        _ -> return(ns,v)
   Evar ident -> return(s, getVal e s ident)
 
 transOpAssign :: OpAssign -> Value -> Value -> Value

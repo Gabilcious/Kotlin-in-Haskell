@@ -7,14 +7,16 @@
 // czy transExp wgl zmienia env? - nie powinno
 // Funkcja zmienia env podczas deklaracji swoj
 
-fun f(x: Int): Unit {
-    return x*x;
+fun f(h: (String) -> Unit) : Unit {
+    h("hello");
 }
 
-val arr = Array( 5, f );
+
+fun g(mes: String) : Unit {
+  println (mes);
+}
+
 
 fun main() : Unit {
-    val arr = [100 downTo 10 step 10];
-    val arr2 = [10 until 100 step 10];
-    val arr3 = [1..10];
+    f(g);
 }

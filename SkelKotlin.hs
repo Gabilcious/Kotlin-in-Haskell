@@ -71,7 +71,7 @@ transType x = case x of
   Tunit -> failure x
   Tnull basetype -> failure x
   Tnonnull basetype -> failure x
-  Tfun types basetype -> failure x
+  Tfun types type_ -> failure x
 transArg :: Arg -> Result
 transArg x = case x of
   Args ident type_ -> failure x

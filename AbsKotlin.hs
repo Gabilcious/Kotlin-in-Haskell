@@ -60,7 +60,7 @@ data BaseType = Ttupla [Type] | Tbool | Tint | Tstring
   deriving (Eq, Ord, Show, Read)
 
 data Type
-    = Tunit | Tnull BaseType | Tnonnull BaseType | Tfun [Type] BaseType
+    = Tunit | Tnull BaseType | Tnonnull BaseType | Tfun [Type] Type
   deriving (Eq, Ord, Show, Read)
 
 data Arg = Args Ident Type

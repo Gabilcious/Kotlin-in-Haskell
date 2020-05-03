@@ -114,10 +114,10 @@ instance Print AbsKotlin.Exp where
     AbsKotlin.Emod exp1 exp2 -> prPrec i 7 (concatD [prt 7 exp1, doc (showString "%"), prt 8 exp2])
     AbsKotlin.Eneg exp -> prPrec i 8 (concatD [doc (showString "-"), prt 8 exp])
     AbsKotlin.Elneg exp -> prPrec i 8 (concatD [doc (showString "!"), prt 8 exp])
-    AbsKotlin.Einc exp -> prPrec i 8 (concatD [doc (showString "++"), prt 11 exp])
-    AbsKotlin.Edec exp -> prPrec i 8 (concatD [doc (showString "--"), prt 11 exp])
-    AbsKotlin.EPinc exp -> prPrec i 9 (concatD [prt 11 exp, doc (showString "++")])
-    AbsKotlin.EPdec exp -> prPrec i 9 (concatD [prt 11 exp, doc (showString "--")])
+    AbsKotlin.Einc exp -> prPrec i 8 (concatD [doc (showString "++"), prt 12 exp])
+    AbsKotlin.Edec exp -> prPrec i 8 (concatD [doc (showString "--"), prt 12 exp])
+    AbsKotlin.EPinc exp -> prPrec i 9 (concatD [prt 12 exp, doc (showString "++")])
+    AbsKotlin.EPdec exp -> prPrec i 9 (concatD [prt 12 exp, doc (showString "--")])
     AbsKotlin.Etupla exps -> prPrec i 10 (concatD [doc (showString "Tupla"), doc (showString "("), prt 0 exps, doc (showString ")")])
     AbsKotlin.Eint n -> prPrec i 10 (concatD [prt 0 n])
     AbsKotlin.Estring str -> prPrec i 10 (concatD [prt 0 str])
@@ -166,7 +166,7 @@ instance Print AbsKotlin.Type where
     AbsKotlin.Tunit -> prPrec i 0 (concatD [doc (showString "Unit")])
     AbsKotlin.Tnull basetype -> prPrec i 0 (concatD [prt 0 basetype, doc (showString "?")])
     AbsKotlin.Tnonnull basetype -> prPrec i 0 (concatD [prt 0 basetype])
-    AbsKotlin.Tfun types basetype -> prPrec i 0 (concatD [doc (showString "("), prt 0 types, doc (showString ")"), doc (showString "->"), prt 0 basetype])
+    AbsKotlin.Tfun types type_ -> prPrec i 0 (concatD [doc (showString "("), prt 0 types, doc (showString ")"), doc (showString "->"), prt 0 type_])
   prtList _ [] = concatD []
   prtList _ [x] = concatD [prt 0 x]
   prtList _ (x:xs) = concatD [prt 0 x, doc (showString ","), prt 0 xs]

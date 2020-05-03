@@ -124,12 +124,12 @@ Exp7 : Exp7 '*' Exp8 { AbsKotlin.Emul $1 $3 }
 Exp8 :: { Exp }
 Exp8 : '-' Exp8 { AbsKotlin.Eneg $2 }
      | '!' Exp8 { AbsKotlin.Elneg $2 }
-     | '++' Exp11 { AbsKotlin.Einc $2 }
-     | '--' Exp11 { AbsKotlin.Edec $2 }
+     | '++' Exp12 { AbsKotlin.Einc $2 }
+     | '--' Exp12 { AbsKotlin.Edec $2 }
      | Exp9 { $1 }
 Exp9 :: { Exp }
-Exp9 : Exp11 '++' { AbsKotlin.EPinc $1 }
-     | Exp11 '--' { AbsKotlin.EPdec $1 }
+Exp9 : Exp12 '++' { AbsKotlin.EPinc $1 }
+     | Exp12 '--' { AbsKotlin.EPdec $1 }
      | Exp10 { $1 }
 Exp10 :: { Exp }
 Exp10 : 'Tupla' '(' ListExp ')' { AbsKotlin.Etupla $3 }
@@ -170,7 +170,7 @@ Type :: { Type }
 Type : 'Unit' { AbsKotlin.Tunit }
      | BaseType '?' { AbsKotlin.Tnull $1 }
      | BaseType { AbsKotlin.Tnonnull $1 }
-     | '(' ListType ')' '->' BaseType { AbsKotlin.Tfun $2 $5 }
+     | '(' ListType ')' '->' Type { AbsKotlin.Tfun $2 $5 }
 ListType :: { [Type] }
 ListType : {- empty -} { [] }
          | Type { (:[]) $1 }

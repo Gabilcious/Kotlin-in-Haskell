@@ -36,11 +36,11 @@ Grammar
 	Exp7 -> Exp8                                       (27)
 	Exp8 -> '-' Exp8                                   (28)
 	Exp8 -> '!' Exp8                                   (29)
-	Exp8 -> '++' Exp11                                 (30)
-	Exp8 -> '--' Exp11                                 (31)
+	Exp8 -> '++' Exp12                                 (30)
+	Exp8 -> '--' Exp12                                 (31)
 	Exp8 -> Exp9                                       (32)
-	Exp9 -> Exp11 '++'                                 (33)
-	Exp9 -> Exp11 '--'                                 (34)
+	Exp9 -> Exp12 '++'                                 (33)
+	Exp9 -> Exp12 '--'                                 (34)
 	Exp9 -> Exp10                                      (35)
 	Exp10 -> 'Tupla' '(' ListExp ')'                   (36)
 	Exp10 -> Integer                                   (37)
@@ -75,7 +75,7 @@ Grammar
 	Type -> 'Unit'                                     (66)
 	Type -> BaseType '?'                               (67)
 	Type -> BaseType                                   (68)
-	Type -> '(' ListType ')' '->' BaseType             (69)
+	Type -> '(' ListType ')' '->' Type                 (69)
 	ListType ->                                        (70)
 	ListType -> Type                                   (71)
 	ListType -> Type ',' ListType                      (72)
@@ -564,7 +564,7 @@ State 21
 
 State 22
 
-	Type -> '(' . ListType ')' '->' BaseType            (rule 69)
+	Type -> '(' . ListType ')' '->' Type                (rule 69)
 
 	'('            shift, and enter state 22
 	')'            reduce using rule 70
@@ -1273,12 +1273,10 @@ State 52
 
 State 53
 
-	Exp9 -> Exp11 . '++'                                (rule 33)
-	Exp9 -> Exp11 . '--'                                (rule 34)
 	Exp10 -> Exp11 .                                    (rule 45)
 	Exp11 -> Exp11 . '!!'                               (rule 46)
 
-	'!!'           shift, and enter state 90
+	'!!'           shift, and enter state 92
 	'!='           reduce using rule 45
 	'%'            reduce using rule 45
 	'%='           reduce using rule 45
@@ -1287,11 +1285,9 @@ State 53
 	'*'            reduce using rule 45
 	'*='           reduce using rule 45
 	'+'            reduce using rule 45
-	'++'           shift, and enter state 91
 	'+='           reduce using rule 45
 	','            reduce using rule 45
 	'-'            reduce using rule 45
-	'--'           shift, and enter state 92
 	'-='           reduce using rule 45
 	'..'           reduce using rule 45
 	'/'            reduce using rule 45
@@ -1315,6 +1311,8 @@ State 53
 
 State 54
 
+	Exp9 -> Exp12 . '++'                                (rule 33)
+	Exp9 -> Exp12 . '--'                                (rule 34)
 	Exp11 -> Exp12 .                                    (rule 47)
 
 	'!!'           reduce using rule 47
@@ -1326,11 +1324,11 @@ State 54
 	'*'            reduce using rule 47
 	'*='           reduce using rule 47
 	'+'            reduce using rule 47
-	'++'           reduce using rule 47
+	'++'           shift, and enter state 90
 	'+='           reduce using rule 47
 	','            reduce using rule 47
 	'-'            reduce using rule 47
-	'--'           reduce using rule 47
+	'--'           shift, and enter state 91
 	'-='           reduce using rule 47
 	'..'           reduce using rule 47
 	'/'            reduce using rule 47
@@ -1461,14 +1459,13 @@ State 58
 
 State 59
 
-	Exp8 -> '++' . Exp11                                (rule 30)
+	Exp8 -> '++' . Exp12                                (rule 30)
 
 	'('            shift, and enter state 58
 	L_ident        shift, and enter state 13
 
 	Ident          goto state 83
-	Exp11          goto state 86
-	Exp12          goto state 54
+	Exp12          goto state 86
 
 State 60
 
@@ -1500,14 +1497,13 @@ State 60
 
 State 61
 
-	Exp8 -> '--' . Exp11                                (rule 31)
+	Exp8 -> '--' . Exp12                                (rule 31)
 
 	'('            shift, and enter state 58
 	L_ident        shift, and enter state 13
 
 	Ident          goto state 83
-	Exp11          goto state 84
-	Exp12          goto state 54
+	Exp12          goto state 84
 
 State 62
 
@@ -1735,7 +1731,7 @@ State 70
 
 State 71
 
-	Type -> '(' ListType . ')' '->' BaseType            (rule 69)
+	Type -> '(' ListType . ')' '->' Type                (rule 69)
 
 	')'            shift, and enter state 77
 
@@ -1884,7 +1880,7 @@ State 76
 
 State 77
 
-	Type -> '(' ListType ')' . '->' BaseType            (rule 69)
+	Type -> '(' ListType ')' . '->' Type                (rule 69)
 
 	'->'           shift, and enter state 156
 
@@ -1977,7 +1973,6 @@ State 83
 
 	Exp12 -> Ident .                                    (rule 48)
 
-	'!!'           reduce using rule 48
 	'!='           reduce using rule 48
 	'%'            reduce using rule 48
 	'%='           reduce using rule 48
@@ -2012,10 +2007,8 @@ State 83
 
 State 84
 
-	Exp8 -> '--' Exp11 .                                (rule 31)
-	Exp11 -> Exp11 . '!!'                               (rule 46)
+	Exp8 -> '--' Exp12 .                                (rule 31)
 
-	'!!'           shift, and enter state 90
 	'!='           reduce using rule 31
 	'%'            reduce using rule 31
 	'%='           reduce using rule 31
@@ -2086,10 +2079,8 @@ State 85
 
 State 86
 
-	Exp8 -> '++' Exp11 .                                (rule 30)
-	Exp11 -> Exp11 . '!!'                               (rule 46)
+	Exp8 -> '++' Exp12 .                                (rule 30)
 
-	'!!'           shift, and enter state 90
 	'!='           reduce using rule 30
 	'%'            reduce using rule 30
 	'%='           reduce using rule 30
@@ -2182,46 +2173,7 @@ State 89
 
 State 90
 
-	Exp11 -> Exp11 '!!' .                               (rule 46)
-
-	'!!'           reduce using rule 46
-	'!='           reduce using rule 46
-	'%'            reduce using rule 46
-	'%='           reduce using rule 46
-	'&&'           reduce using rule 46
-	')'            reduce using rule 46
-	'*'            reduce using rule 46
-	'*='           reduce using rule 46
-	'+'            reduce using rule 46
-	'++'           reduce using rule 46
-	'+='           reduce using rule 46
-	','            reduce using rule 46
-	'-'            reduce using rule 46
-	'--'           reduce using rule 46
-	'-='           reduce using rule 46
-	'..'           reduce using rule 46
-	'/'            reduce using rule 46
-	'/='           reduce using rule 46
-	':'            reduce using rule 46
-	';'            reduce using rule 46
-	'<'            reduce using rule 46
-	'<='           reduce using rule 46
-	'='            reduce using rule 46
-	'=='           reduce using rule 46
-	'>'            reduce using rule 46
-	'>='           reduce using rule 46
-	'?'            reduce using rule 46
-	'?.let'        reduce using rule 46
-	']'            reduce using rule 46
-	'downTo'       reduce using rule 46
-	'step'         reduce using rule 46
-	'until'        reduce using rule 46
-	'||'           reduce using rule 46
-
-
-State 91
-
-	Exp9 -> Exp11 '++' .                                (rule 33)
+	Exp9 -> Exp12 '++' .                                (rule 33)
 
 	'!='           reduce using rule 33
 	'%'            reduce using rule 33
@@ -2255,9 +2207,9 @@ State 91
 	'||'           reduce using rule 33
 
 
-State 92
+State 91
 
-	Exp9 -> Exp11 '--' .                                (rule 34)
+	Exp9 -> Exp12 '--' .                                (rule 34)
 
 	'!='           reduce using rule 34
 	'%'            reduce using rule 34
@@ -2289,6 +2241,43 @@ State 92
 	'step'         reduce using rule 34
 	'until'        reduce using rule 34
 	'||'           reduce using rule 34
+
+
+State 92
+
+	Exp11 -> Exp11 '!!' .                               (rule 46)
+
+	'!!'           reduce using rule 46
+	'!='           reduce using rule 46
+	'%'            reduce using rule 46
+	'%='           reduce using rule 46
+	'&&'           reduce using rule 46
+	')'            reduce using rule 46
+	'*'            reduce using rule 46
+	'*='           reduce using rule 46
+	'+'            reduce using rule 46
+	'+='           reduce using rule 46
+	','            reduce using rule 46
+	'-'            reduce using rule 46
+	'-='           reduce using rule 46
+	'..'           reduce using rule 46
+	'/'            reduce using rule 46
+	'/='           reduce using rule 46
+	':'            reduce using rule 46
+	';'            reduce using rule 46
+	'<'            reduce using rule 46
+	'<='           reduce using rule 46
+	'='            reduce using rule 46
+	'=='           reduce using rule 46
+	'>'            reduce using rule 46
+	'>='           reduce using rule 46
+	'?'            reduce using rule 46
+	'?.let'        reduce using rule 46
+	']'            reduce using rule 46
+	'downTo'       reduce using rule 46
+	'step'         reduce using rule 46
+	'until'        reduce using rule 46
+	'||'           reduce using rule 46
 
 
 State 93
@@ -3987,14 +3976,17 @@ State 155
 
 State 156
 
-	Type -> '(' ListType ')' '->' . BaseType            (rule 69)
+	Type -> '(' ListType ')' '->' . Type                (rule 69)
 
+	'('            shift, and enter state 22
 	'Bool'         shift, and enter state 23
 	'Int'          shift, and enter state 24
 	'String'       shift, and enter state 25
 	'Tupla'        shift, and enter state 26
+	'Unit'         shift, and enter state 27
 
-	BaseType       goto state 158
+	BaseType       goto state 20
+	Type           goto state 158
 
 State 157
 
@@ -4031,7 +4023,7 @@ State 157
 
 State 158
 
-	Type -> '(' ListType ')' '->' BaseType .            (rule 69)
+	Type -> '(' ListType ')' '->' Type .                (rule 69)
 
 	')'            reduce using rule 69
 	','            reduce using rule 69
