@@ -82,9 +82,9 @@ doFun stms e s = do
 --bedzie ustawiac flagi dla break i continue
 doStms :: [Stm] -> Env -> State -> Value -> IO(Env, State, Value, Bool)
 doStms stms e s v = case stms of
--- Dla lambd, jak skonczy się bez return to wartośc ostatniej instrukcji jest zwracana
     [] -> return(e, s, v, True)
     h:t -> do
+--        putStrLn $ show h
         (ne, ns, nv, isRet) <- transStm h e s
         case isRet of
           True -> return(ne, ns, nv, isRet)
@@ -224,8 +224,22 @@ transStm x e s  = case x of
       (ne, ns, v) <- transExp exp e s
       return(ne, ns, v, True)
   Sret -> return(e, s, VUnit, True)
-  Sif exp stms -> failure x
-  Sifelse exp stms1 stms2 -> failure x
+  Sif exp stms -> do
+      (ne, ns, VBool v) <- transExp exp e s
+      case v of
+        True -> do
+            (nne, nns, _, _) <- doStms stms ne ns VUnit
+            return(e, nns, VUnit, False)
+        False -> return(e, s ,VUnit, False)
+  Sifelse exp stms1 stms2 -> do
+      (ne, ns, VBool v) <- transExp exp e s
+      case v of
+        True -> do
+            (nne, nns, _, _) <- doStms stms1 ne ns VUnit
+            return(e, nns, VUnit, False)
+        False -> do
+            (nne, nns, _, _) <- doStms stms2 ne ns VUnit
+            return(e, nns, VUnit, False)
   Sprint exp -> do
       (ne, ns, x) <- transExp exp e s
       case x of

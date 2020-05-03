@@ -1,17 +1,19 @@
 val a: Int = 15;
 
-fun f(mes: String?) : Unit {
-  a = 23;
-  val a: Int = 30;
-  println (mes);
+fun fib(d: Int) : Int {
+    if (d == 1 || d == 2) {
+        return 1;
+    }
+    return fib (d - 1) + fib (d - 2);
 }
 
 fun main() : Unit {
-  var b: Int = 10;
-  println(a);
-  f("Hello world");
-  val c: String = "mamusia";
-  println(a);
+  if (30 < 10) {
+     println ("Jest");
+  } else {
+    println ("Nie jestem");
+  }
+  println( fib(3) );
 }
 
 fun foo() : Int { }
