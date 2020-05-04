@@ -226,6 +226,18 @@ doStms :: [Stm] -> Env -> State -> IO(Env, State, Value)
 doStms stms e s = doStmsHelper stms e s VUnit
 
 
+doFor :: Ident -> [Value] -> [Stm] -> Value -> Env -> State -> IO(State, Value)
+doFor ident list stms v e s = case list of
+    [] -> return(s, v)
+    h:t -> do
+      let ns = assign e s ident h
+      (_, nns, nv) <- doStms stms e ns
+      case get nns of
+              x | x == ret  -> return(ns, v)
+                | x == bre  -> return(set go ns, v)
+                | x == cont -> doFor ident t stms nv e (set go nns)
+                | x == go   -> doFor ident t stms nv e nns
+
 
 transStm :: Stm -> Env -> State -> IO(Env, State, Value)
 transStm x e s  = case x of
@@ -238,14 +250,19 @@ transStm x e s  = case x of
   Sblock stms -> do
       (_, ns, v) <- doStms stms e s
       return(e, ns, v)
-  Sfor ident iterable stms -> failure x
+  Sfor ident iterable stms -> do
+      let (ne, ns) = alloc e s ident True
+      (nns, list) <- transIterable iterable ne ns
+      (nnns, v) <- doFor ident list stms VUnit ne nns
+      return(e, nnns, v)
+
   Swhile exp stms -> do
       (_, ns, v) <- transStm (Sifelse exp stms [Sbreak]) e s
       case get ns of
-        x | x == ret -> return(e, ns, v)
-          | x == bre -> return(e, set go ns, v)
+        x | x == ret  -> return(e, ns, v)
+          | x == bre  -> return(e, set go ns, v)
           | x == cont -> transStm (Swhile exp stms) e (set go ns)
-        _ -> transStm (Swhile exp stms) e ns
+          | x == go   -> transStm (Swhile exp stms) e ns
   Sbreak -> return(e, set bre s, VUnit)
   Scont -> return(e, set cont s, VUnit)
   Sretexp exp -> do

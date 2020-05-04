@@ -10,7 +10,7 @@ fun main() : Unit {
 
     val f: (Int) -> Int = {i: Int -> i*i*i;};
     val arr_3 = Array(10, f);
-    for (i in 1..10) {
+    for (i in 1 until 10) {
         println(arr_3[i]);
     }
 
