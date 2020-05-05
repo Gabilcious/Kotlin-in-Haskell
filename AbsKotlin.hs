@@ -59,8 +59,11 @@ data OpAssign
 data BaseType = Ttupla [Type] | Tbool | Tint | Tstring
   deriving (Eq, Ord, Show, Read)
 
+data RetType = TRunit | TRtype Type
+  deriving (Eq, Ord, Show, Read)
+
 data Type
-    = Tunit | Tnull BaseType | Tnonnull BaseType | Tfun [Type] Type
+    = Tnullable BaseType | Tnonnull BaseType | Tfun [Type] RetType | Tnull | Help Integer
   deriving (Eq, Ord, Show, Read)
 
 data Arg = Args Ident Type
@@ -95,7 +98,7 @@ data Dec
     | Dvalnull Ident Type
   deriving (Eq, Ord, Show, Read)
 
-data FunctionDec = FunDec Ident [Arg] Type [Stm]
+data FunctionDec = FunDec Ident [Arg] RetType [Stm]
   deriving (Eq, Ord, Show, Read)
 
 data FunctionExp = FunCall Ident [Exp]

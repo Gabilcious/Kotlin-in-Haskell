@@ -438,7 +438,7 @@ transExp x e s = case x of
   Ennass exp -> do
       (ns, v) <- transExp exp e s
       case v of
-        VNull -> error "Runtime error - null safety"
+        VNull -> error "Null pointer exeption"
         _ -> return(ns,v)
   Evar ident -> return(s, getVal e s ident)
 

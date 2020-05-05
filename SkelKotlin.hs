@@ -66,12 +66,15 @@ transBaseType x = case x of
   Tbool -> failure x
   Tint -> failure x
   Tstring -> failure x
+transRetType :: RetType -> Result
+transRetType x = case x of
+  TRunit -> failure x
+  TRtype type_ -> failure x
 transType :: Type -> Result
 transType x = case x of
-  Tunit -> failure x
-  Tnull basetype -> failure x
+  Tnullable basetype -> failure x
   Tnonnull basetype -> failure x
-  Tfun types type_ -> failure x
+  Tfun types rettype -> failure x
 transArg :: Arg -> Result
 transArg x = case x of
   Args ident type_ -> failure x
@@ -104,7 +107,7 @@ transDec x = case x of
   Dvalnull ident type_ -> failure x
 transFunctionDec :: FunctionDec -> Result
 transFunctionDec x = case x of
-  FunDec ident args type_ stms -> failure x
+  FunDec ident args rettype stms -> failure x
 transFunctionExp :: FunctionExp -> Result
 transFunctionExp x = case x of
   FunCall ident exps -> failure x

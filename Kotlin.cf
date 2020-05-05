@@ -46,15 +46,17 @@ rules     OpAssign  ::=  "=" | "+=" | "-=" | "*=" | "/=" | "%=" ;
 
 -- types       
 
-Ttupla.   BaseType  ::= "Tupla""<" [Type] ">" ;
-Tbool.    BaseType  ::= "Bool" ;
-Tint.     BaseType   ::= "Int" ;
-Tstring.  BaseType  ::= "String" ;
+Ttupla.     BaseType  ::= "Tupla""<" [Type] ">" ;
+Tbool.      BaseType  ::= "Bool" ;
+Tint.       BaseType  ::= "Int" ;
+Tstring.    BaseType  ::= "String" ;
 
-Tunit.    Type ::=  "Unit" ;
-Tnull.    Type ::=  BaseType "?" ;
-Tnonnull. Type ::=  BaseType ;
-Tfun.     Type ::=  "(" [Type] ")" "->" Type ;
+TRunit.     RetType   ::=  "Unit" ;
+TRtype.     RetType   ::= Type ;
+
+Tnullable.  Type      ::=  BaseType "?" ;
+Tnonnull.   Type      ::=  BaseType ;
+Tfun.       Type      ::=  "(" [Type] ")" "->" RetType ;
 
 separator Type "," ;
 
@@ -114,7 +116,7 @@ Dvalnull. Dec  ::=  "val" Ident ":" Type ";" ;
 
 -- function
 
-FunDec.   FunctionDec    ::= "fun" Ident "(" [Arg] ")" ":" Type "{" [Stm] "}" ;
+FunDec.   FunctionDec    ::= "fun" Ident "(" [Arg] ")" ":" RetType "{" [Stm] "}" ;
 FunCall.  FunctionExp    ::= Ident "(" [Exp] ")" ;
 
 

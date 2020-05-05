@@ -166,11 +166,13 @@ BaseType : 'Tupla' '<' ListType '>' { AbsKotlin.Ttupla $3 }
          | 'Bool' { AbsKotlin.Tbool }
          | 'Int' { AbsKotlin.Tint }
          | 'String' { AbsKotlin.Tstring }
+RetType :: { RetType }
+RetType : 'Unit' { AbsKotlin.TRunit }
+        | Type { AbsKotlin.TRtype $1 }
 Type :: { Type }
-Type : 'Unit' { AbsKotlin.Tunit }
-     | BaseType '?' { AbsKotlin.Tnull $1 }
+Type : BaseType '?' { AbsKotlin.Tnullable $1 }
      | BaseType { AbsKotlin.Tnonnull $1 }
-     | '(' ListType ')' '->' Type { AbsKotlin.Tfun $2 $5 }
+     | '(' ListType ')' '->' RetType { AbsKotlin.Tfun $2 $5 }
 ListType :: { [Type] }
 ListType : {- empty -} { [] }
          | Type { (:[]) $1 }
@@ -210,7 +212,7 @@ Dec : FunctionDec { AbsKotlin.Dfun $1 }
     | 'var' Ident ':' Type ';' { AbsKotlin.Dvarnull $2 $4 }
     | 'val' Ident ':' Type ';' { AbsKotlin.Dvalnull $2 $4 }
 FunctionDec :: { FunctionDec }
-FunctionDec : 'fun' Ident '(' ListArg ')' ':' Type '{' ListStm '}' { AbsKotlin.FunDec $2 $4 $7 (reverse $9) }
+FunctionDec : 'fun' Ident '(' ListArg ')' ':' RetType '{' ListStm '}' { AbsKotlin.FunDec $2 $4 $7 (reverse $9) }
 FunctionExp :: { FunctionExp }
 FunctionExp : Ident '(' ListExp ')' { AbsKotlin.FunCall $1 $3 }
 Iterable :: { Iterable }

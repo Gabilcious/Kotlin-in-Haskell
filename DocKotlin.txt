@@ -121,10 +121,11 @@ All other symbols are terminals.
   |  |  **|**  | ``Bool``
   |  |  **|**  | ``Int``
   |  |  **|**  | ``String``
-  | //Type// | -> | ``Unit``
-  |  |  **|**  | //BaseType// ``?``
+  | //RetType// | -> | ``Unit``
+  |  |  **|**  | //Type//
+  | //Type// | -> | //BaseType// ``?``
   |  |  **|**  | //BaseType//
-  |  |  **|**  | ``(`` //[Type]// ``)`` ``->`` //Type//
+  |  |  **|**  | ``(`` //[Type]// ``)`` ``->`` //RetType//
   | //[Type]// | -> | **eps**
   |  |  **|**  | //Type//
   |  |  **|**  | //Type// ``,`` //[Type]//
@@ -157,7 +158,7 @@ All other symbols are terminals.
   |  |  **|**  | ``val`` //Ident// ``:`` //Type// ``=`` //Exp// ``;``
   |  |  **|**  | ``var`` //Ident// ``:`` //Type// ``;``
   |  |  **|**  | ``val`` //Ident// ``:`` //Type// ``;``
-  | //FunctionDec// | -> | ``fun`` //Ident// ``(`` //[Arg]// ``)`` ``:`` //Type// ``{`` //[Stm]// ``}``
+  | //FunctionDec// | -> | ``fun`` //Ident// ``(`` //[Arg]// ``)`` ``:`` //RetType// ``{`` //[Stm]// ``}``
   | //FunctionExp// | -> | //Ident// ``(`` //[Exp]// ``)``
   | //Iterable// | -> | //Ident//
   |  |  **|**  | //Exp// ``..`` //Exp//

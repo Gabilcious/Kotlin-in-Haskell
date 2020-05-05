@@ -12,6 +12,7 @@ import ParKotlin
 import PrintKotlin
 import AbsKotlin
 import Interpreter
+import TypeCheck
 
 import ErrM
 
@@ -36,6 +37,7 @@ run v p s = let ts = myLLexer s in case p ts of
                           putStrLn s
                           exitFailure
            Ok  tree -> do putStrLn ""
+                          check tree
                           start tree
 
                           Main.showTree v tree

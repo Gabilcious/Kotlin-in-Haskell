@@ -161,12 +161,16 @@ instance Print AbsKotlin.BaseType where
     AbsKotlin.Tint -> prPrec i 0 (concatD [doc (showString "Int")])
     AbsKotlin.Tstring -> prPrec i 0 (concatD [doc (showString "String")])
 
+instance Print AbsKotlin.RetType where
+  prt i e = case e of
+    AbsKotlin.TRunit -> prPrec i 0 (concatD [doc (showString "Unit")])
+    AbsKotlin.TRtype type_ -> prPrec i 0 (concatD [prt 0 type_])
+
 instance Print AbsKotlin.Type where
   prt i e = case e of
-    AbsKotlin.Tunit -> prPrec i 0 (concatD [doc (showString "Unit")])
-    AbsKotlin.Tnull basetype -> prPrec i 0 (concatD [prt 0 basetype, doc (showString "?")])
+    AbsKotlin.Tnullable basetype -> prPrec i 0 (concatD [prt 0 basetype, doc (showString "?")])
     AbsKotlin.Tnonnull basetype -> prPrec i 0 (concatD [prt 0 basetype])
-    AbsKotlin.Tfun types type_ -> prPrec i 0 (concatD [doc (showString "("), prt 0 types, doc (showString ")"), doc (showString "->"), prt 0 type_])
+    AbsKotlin.Tfun types rettype -> prPrec i 0 (concatD [doc (showString "("), prt 0 types, doc (showString ")"), doc (showString "->"), prt 0 rettype])
   prtList _ [] = concatD []
   prtList _ [x] = concatD [prt 0 x]
   prtList _ (x:xs) = concatD [prt 0 x, doc (showString ","), prt 0 xs]
@@ -226,7 +230,7 @@ instance Print AbsKotlin.Dec where
 
 instance Print AbsKotlin.FunctionDec where
   prt i e = case e of
-    AbsKotlin.FunDec id args type_ stms -> prPrec i 0 (concatD [doc (showString "fun"), prt 0 id, doc (showString "("), prt 0 args, doc (showString ")"), doc (showString ":"), prt 0 type_, doc (showString "{"), prt 0 stms, doc (showString "}")])
+    AbsKotlin.FunDec id args rettype stms -> prPrec i 0 (concatD [doc (showString "fun"), prt 0 id, doc (showString "("), prt 0 args, doc (showString ")"), doc (showString ":"), prt 0 rettype, doc (showString "{"), prt 0 stms, doc (showString "}")])
 
 instance Print AbsKotlin.FunctionExp where
   prt i e = case e of
