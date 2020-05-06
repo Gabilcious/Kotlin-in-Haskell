@@ -63,7 +63,7 @@ data RetType = TRunit | TRtype Type
   deriving (Eq, Ord, Show, Read)
 
 data Type
-    = Tnullable BaseType | Tnonnull BaseType | Tfun [Type] RetType | Tnull | Help Integer
+    = Tnullable BaseType | Tnonnull BaseType | Tfun [Type] RetType | Tnull | Help Integer | HelpRet RetType
   deriving (Eq, Ord, Show, Read)
 
 data Arg = Args Ident Type

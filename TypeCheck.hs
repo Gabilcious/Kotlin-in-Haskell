@@ -43,8 +43,8 @@ failure x = error ("Undefined case: " ++ show x)
 check :: Prog -> IO()
 check prog = do
     let e = E empty
---    -1 index     -2 howManyLoops     -3 depth     -4 main
-    let s = S (fromList [(-1, Help 1), (-2, Help 0), (-3, Help 0), (-4, Help 0)])
+--    -1 index     -2 howManyLoops     -3 depth     -4 main   -5 return expected   -6 return made
+    let s = S (fromList [(-1, Help 1), (-2, Help 0), (-3, Help 0), (-4, Help 0), (-5, HelpRet TRunit), (-6, Help 0)])
     S nsm <- transProg prog e s
     case nsm ! (-4) of
       Help 1 -> return()
@@ -96,8 +96,6 @@ canAssign x y = case (x, y) of
 -- try to do: a = b
 tryAssign :: Type -> Type -> IO(Type)
 tryAssign a b = do
---  putStrLn (show a)
---  putStrLn (show b)
   case canAssign a b of
     True -> return(a)
     False -> error ("Cannot assign " ++ (show b) ++ " to " ++ (show a))
@@ -123,7 +121,8 @@ getIdx :: State -> Integer -> IO(Type)
 getIdx (S sm) index = return(sm ! index)
 
 getVal :: Env -> State -> Ident -> IO(Type)
-getVal (E em) s ident =  case Data.Map.lookup ident em of
+getVal (E em) s ident = do
+  case Data.Map.lookup ident em of
     Nothing -> error ( show ident ++ " is not defined")
     Just (index, _, _) -> getIdx s index
 
@@ -147,16 +146,10 @@ incDepth (S sm) = let
 
 declare :: Env -> State -> Ident -> Type -> Bool -> Exp -> IO(Env, State)
 declare e s ident a const exp = do
-      (ne, ns) <- alloc e s ident const a
-      (nns, b) <- transExp exp ne ns
+      (ns, b) <- transExp exp e s
       _ <- tryAssign a b
+      (ne, nns) <- alloc e ns ident const a
       return(ne, nns)
-
---declareFun :: Env -> State -> Ident -> [Arg] -> [Stm] -> Bool -> IO(Env, State)
---declareFun e s id args stms const = do
---    let (ne, ns) = alloc e s id const
---    let nns = assign ne ns id (VFun args stms ne)
---    return(ne, nns)
 
 transDec :: Dec -> Env -> State -> IO(Env, State)
 transDec x e s = case x of
@@ -172,13 +165,26 @@ transFunctionDec x e s@(S sm) = case x of
   FunDec (Ident "main") [] TRunit stms -> do
       case sm ! (-4) of
         Help 0 -> do
-          let ns = S (insert (-4) (Help 1) sm)
-          let nns = incDepth ns
-          (_, _, v) <- doStms stms e nns
+          let ns@(S nsm) = S (insert (-4) (Help 1) sm)
+          let nns = S (insert (-5) (HelpRet TRunit) nsm)
+          let nnns = incDepth nns
+          (_, _, v) <- doStms stms e nnns
           return (e, ns)
         otherwise -> error "Main was previously declared"
   FunDec (Ident "main") _ _ _ -> error "Type of main shoud be: () -> Unit"
---  FunDec ident args type_ stms -> declareFun e s ident type_
+  FunDec ident args ret stms -> do
+      let t = Prelude.map (\(Args _ x) -> x) args
+      (ne, ns) <- alloc e s ident True (Tfun t ret)
+      let nns@(S nnsm) = incDepth ns
+      let nnns@(S nnnsm) = S (insert (-5) (HelpRet ret) nnsm)
+      let nnnns = S (insert (-6) (Help 0) nnnsm)
+--      TODO: expected return
+      (_, S retSm, v) <- doStms stms ne nnnns
+      case (ret, retSm ! (-6)) of
+        (TRunit, _) -> return (ne, ns)
+        (_, Help 0) -> error "Function should return something"
+        orherwise -> return (ne, ns)
+
 
 --transArrayDecHelper :: Env -> State -> [Stm] -> Ident -> Integer -> Integer -> [Value] -> IO(State, [Value])
 --transArrayDecHelper e s stms it size expected vals = case size < expected of
@@ -269,7 +275,10 @@ transStm x e s@(S sm)  = case x of
       return(e, s, TRtype t)
   Sblock stms -> do
       let ns = incDepth s
-      (_, nns, t) <- doStms stms e ns
+      (_, S nnsm, t) <- doStms stms e ns
+      case nnsm ! (-6) of
+        Help 1 -> return (e, S (insert (-6) (Help 1) sm), t)
+        otherwise -> return (e, s, t)
       return(e, s, t)
 --  Sfor ident iterable stms -> do
 --      let (ne, ns) = alloc e s ident True
@@ -293,9 +302,13 @@ transStm x e s@(S sm)  = case x of
         Help x | x == 0 -> error "Cannot perform continue without a loop"
                | otherwise -> return(e, s, TRunit)
   Sretexp exp -> do
-      (ns, t) <- transExp exp e s
-      return(e, ns, TRtype t)
-  Sret -> return(e, s, TRunit)
+      (ns@(S nsm), t) <- transExp exp e s
+      case nsm ! (-5) of
+        HelpRet (TRtype x) | canAssign x t -> return(e, S (insert (-6) (Help 1) sm), TRtype t)
+        HelpRet x -> error ("Function is expected to return " ++ show x ++ " not " ++ show t)
+  Sret -> case sm ! (-5) of
+      HelpRet TRunit -> return(e, S (insert (-6) (Help 1) sm), TRunit)
+      HelpRet x -> error ("Function is expected to return " ++ show x ++ " not " ++ show TRunit)
   Sif exp stms -> do
       (ns, t) <- transExp exp e s
       case t of
@@ -309,9 +322,11 @@ transStm x e s@(S sm)  = case x of
       case t of
         Tnonnull Tbool -> do
           let nns = incDepth ns
-          doStms stms1 e nns
-          (_,_,t) <- doStms stms2 e ns
-          return (e, s, t)
+          (_,S a,t) <- doStms stms1 e nns
+          (_,S b,t) <- doStms stms2 e ns
+          case (a ! (-6), b ! (-6)) of
+            (Help 1,Help 1) -> return (e, S (insert (-6) (Help 1) sm), t)
+            otherwise -> return (e, s, t)
         otherwise -> error ("Wrong expresion inside if statement: " ++ show t)
   Sprint exp -> do
       (ns, t) <- transExp exp e s
@@ -346,10 +361,11 @@ transStm x e s@(S sm)  = case x of
 --        (ne, nns) <- declare eToAdd s ident v False
 --        addArgsHelper at et ne eToEval nns
 --
---transFunctionExp :: FunctionExp -> Env -> State -> IO(State, Value)
+--transFunctionExp :: FunctionExp -> Env -> State -> IO(State, RetType)
 --transFunctionExp x e s = case x of
 --  FunCall ident exps -> do
---      let VFun args stms ne = getVal e s ident
+--      Tfun t ret <- getVal e s ident
+--      case ()
 --      (nne, ns) <- addArgsHelper args exps ne e s
 --      (_, nns, v) <- doStms stms nne ns
 --      return(set go nns, v)
@@ -480,7 +496,7 @@ transExp x e s = case x of
   Etrue -> return(s, Tnonnull Tbool)
   Efalse -> return(s, Tnonnull Tbool)
   Enull -> return(s, Tnull)
---  Ecall functionexp -> failure x
+  Ecall functionexp -> failure x
 --  Eget ident dimexps -> failure x
 --  Elambda args stms -> failure x
 --  Ennass exp -> failure x
