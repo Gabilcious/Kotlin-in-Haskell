@@ -89,9 +89,10 @@ canAssign x y = case (x, y) of
     (Tnonnull _,  Tnull)       -> False
     (Tnullable _, Tnull)       -> True
     (Tnullable a, Tnonnull b)  -> canAssignB a b
-    (Tnullable _, Tnullable _) -> False
+    (Tnullable a, Tnullable b) -> canAssignB a b
     (Tnonnull a,  Tnonnull b)  -> canAssignB a b
-    (Tnonnull a,  Tnullable b) -> canAssignB a b
+    (Tnonnull _,  Tnullable _) -> False
+    otherwise                  -> False
 
 -- try to do: a = b
 tryAssign :: Type -> Type -> IO(Type)
@@ -353,22 +354,27 @@ transStm x e s@(S sm)  = case x of
 -- E X P R E S I O N S --
 -- ------------------- --
 
---addArgsHelper :: [Arg] -> [Exp] -> Env -> Env -> State -> IO(Env, State)
---addArgsHelper args exps eToAdd eToEval s = case (args, exps) of
---    ([], []) -> return(eToAdd, s)
---    (Args ident _:at, exp:et) -> do
---        (ns, v) <- transExp exp eToEval s
---        (ne, nns) <- declare eToAdd s ident v False
---        addArgsHelper at et ne eToEval nns
---
---transFunctionExp :: FunctionExp -> Env -> State -> IO(State, RetType)
---transFunctionExp x e s = case x of
---  FunCall ident exps -> do
---      Tfun t ret <- getVal e s ident
---      case ()
---      (nne, ns) <- addArgsHelper args exps ne e s
---      (_, nns, v) <- doStms stms nne ns
---      return(set go nns, v)
+expToType :: [Exp] -> [Type] -> Env -> State -> IO()
+expToType exps types e s = case (types, exps) of
+    ([], []) -> return()
+    (a:ttail, exp:etail) -> do
+        (ns, b) <- transExp exp e s
+        tryAssign a b
+        expToType etail ttail e ns
+
+
+transFunctionExp :: FunctionExp -> Env -> State -> IO(State, Type)
+transFunctionExp x e s = case x of
+  FunCall ident exps -> do
+      Tfun t ret <- getVal e s ident
+      case (length t, length exps) of
+          (expected, passed) | expected == passed -> do
+              expToType exps t e s
+              case ret of
+                TRunit -> return(s, Tunit)
+                TRtype x -> return(s,x)
+                             | otherwise  -> error ("Passed " ++ show passed ++ " arguments, when " ++ show ident ++ " expects " ++ show expected)
+
 --
 --
 --transDimExp :: DimExp -> Env -> State -> IO(State, Value)
@@ -496,7 +502,7 @@ transExp x e s = case x of
   Etrue -> return(s, Tnonnull Tbool)
   Efalse -> return(s, Tnonnull Tbool)
   Enull -> return(s, Tnull)
-  Ecall functionexp -> failure x
+  Ecall functionexp -> transFunctionExp functionexp e s
 --  Eget ident dimexps -> failure x
 --  Elambda args stms -> failure x
 --  Ennass exp -> failure x
