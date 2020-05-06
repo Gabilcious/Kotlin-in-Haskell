@@ -13,5 +13,5 @@ return ;
 }
 
 fun main() : Unit {
- var x: String = g(null);
+ var x: Tupla<Int,String?> = Tupla(8,null);
 }

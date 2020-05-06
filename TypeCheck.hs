@@ -375,6 +375,13 @@ transFunctionExp x e s = case x of
                 TRtype x -> return(s,x)
                              | otherwise  -> error ("Passed " ++ show passed ++ " arguments, when " ++ show ident ++ " expects " ++ show expected)
 
+transEtuplaHelper :: [Exp] -> Env -> State -> IO(State, [Type])
+transEtuplaHelper exps e s = case exps of
+  [] -> return(s, [])
+  h:tail -> do
+      (ns, t) <- transExp h e s
+      (nns, ts) <- transEtuplaHelper tail e ns
+      return(nns, t:ts)
 --
 --
 --transDimExp :: DimExp -> Env -> State -> IO(State, Value)
@@ -396,13 +403,7 @@ transFunctionExp x e s = case x of
 --
 --
 --
---transEtuplaHelper :: [Exp] -> Env -> State -> IO(State, [Value])
---transEtuplaHelper exps e s = case exps of
---  [] -> return(s, [])
---  h:t -> do
---      (ns, nv) <- transExp h e s
---      (nns, nvs) <- transEtuplaHelper t e ns
---      return(nns, nv:nvs)
+
 
 transHelper :: Exp -> Exp -> OpAssign -> Env -> State -> IO(State, Type)
 transHelper exp1 exp2 op e s = do
@@ -494,9 +495,9 @@ transExp x e s = case x of
         Tnonnull Tint  -> return(s, t)
         otherwise      -> error ("Cannot post-decrement " ++ show t)
   EPdec _ -> error "Only variable shlould be post-decremented"
---  Etupla exps -> do
---      (ns, vs) <- transEtuplaHelper exps e s
---      return(ns, VTupla vs)
+  Etupla exps -> do
+      (ns, list) <- transEtuplaHelper exps e s
+      return(ns, Tnonnull (Ttupla list))
   Eint integer -> return(s, Tnonnull Tint)
   Estring string -> return(s, Tnonnull Tstring)
   Etrue -> return(s, Tnonnull Tbool)
