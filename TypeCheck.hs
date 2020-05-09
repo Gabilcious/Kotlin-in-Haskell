@@ -48,9 +48,9 @@ check prog = do
     S nsm <- transProg prog e s
     case nsm ! (-4) of
       Help 1 -> return()
-      otherwise -> error "Main was not found"
+      _ -> error "Main was not found"
 
-transProg :: Prog -> Env -> State -> IO(State)
+transProg :: Prog -> Env -> State -> IO State
 transProg x e@(E em) s@(S sm) = case x of
   Program [] -> do
       putStrLn ""
@@ -58,7 +58,7 @@ transProg x e@(E em) s@(S sm) = case x of
       putStrLn ""
       putStrLn (Data.Map.Internal.Debug.showTree em)
       putStrLn (Data.Map.Internal.Debug.showTree sm)
-      return(s)
+      return s
   Program (h:t) -> do
       (ne, ns) <- transInst h e s
       transProg (Program t) ne ns
@@ -78,8 +78,8 @@ transInst x = case x of
 canAssignB :: BaseType -> BaseType -> Bool
 canAssignB x y = case (x, y) of
     (a, b) | a == b       -> True
-    (Ttupla a, Ttupla b)  -> Prelude.foldl (&&) True (zipWith canAssign a b)
-    otherwise             -> False
+    (Ttupla a, Ttupla b)  -> Prelude.foldl and True (zipWith canAssign a b)
+    _                     -> False
 
 canAssign :: Type -> Type -> Bool
 canAssign x y = case (x, y) of
@@ -92,14 +92,14 @@ canAssign x y = case (x, y) of
     (Tnullable a, Tnullable b) -> canAssignB a b
     (Tnonnull a,  Tnonnull b)  -> canAssignB a b
     (Tnonnull _,  Tnullable _) -> False
-    otherwise                  -> False
+    _                          -> False
 
 -- try to do: a = b
-tryAssign :: Type -> Type -> IO(Type)
-tryAssign a b = do
-  case canAssign a b of
-    True -> return(a)
-    False -> error ("Cannot assign " ++ (show b) ++ " to " ++ (show a))
+tryAssign :: Type -> Type -> IO Type
+tryAssign a b = if canAssign a b then
+    return a
+  else
+    error ("Cannot assign " ++ show b ++ " to " ++ show a)
 
 -- TODO: gorliwośc ifa usunac
 alloc :: Env -> State -> Ident -> Bool -> Type -> IO(Env, State)
@@ -108,31 +108,27 @@ alloc (E em) (S sm) ident const t = do
     let Help depth = sm ! (-3)
     case ident of
       Ident "main" -> error "Main is keyword"
-      otherwise ->
-          case Data.Map.lookup ident em of
-            Just (_, _, d)  | d == depth -> error (show ident ++ " was previously declared in this scope")
-            otherwise -> do
+      _ -> case Data.Map.lookup ident em of
+          Just (_, _, d)  | d == depth -> error (show ident ++ " was previously declared in this scope")
+          _ -> do
               let Help index = sm ! (-1)
               let ne = E (insert ident (index, const, depth) em)
               let nsm = insert (-1) (Help (index+1)) sm
               let nns = S (insert index  t nsm)
               return(ne, nns)
 
-getIdx :: State -> Integer -> IO(Type)
+getIdx :: State -> Integer -> IO Type
 getIdx (S sm) index = return(sm ! index)
 
-getVal :: Env -> State -> Ident -> IO(Type)
-getVal (E em) s ident = do
-  case Data.Map.lookup ident em of
+getVal :: Env -> State -> Ident -> IO Type
+getVal (E em) s ident = case Data.Map.lookup ident em of
     Nothing -> error ( show ident ++ " is not defined")
     Just (index, _, _) -> getIdx s index
 
-assertNotConst :: Env -> Ident -> IO()
+assertNotConst :: Env -> Ident -> IO
 assertNotConst e@(E em) ident = do
     let (_, const, _) = em ! ident
-    case const of
-      True -> error ("Val cannot be reasigned")
-      False -> return()
+    when const $ error "Val cannot be reasigned"
 
 incDepth :: State -> State
 incDepth (S sm) = let
@@ -163,7 +159,7 @@ transDec x e s = case x of
 
 transFunctionDec :: FunctionDec -> Env -> State -> IO(Env, State)
 transFunctionDec x e s@(S sm) = case x of
-  FunDec (Ident "main") [] TRunit stms -> do
+  FunDec (Ident "main") [] TRunit stms ->
       case sm ! (-4) of
         Help 0 -> do
           let ns@(S nsm) = S (insert (-4) (Help 1) sm)
@@ -171,7 +167,7 @@ transFunctionDec x e s@(S sm) = case x of
           let nnns = incDepth nns
           (_, _, v) <- doStms stms e nnns
           return (e, ns)
-        otherwise -> error "Main was previously declared"
+        _ -> error "Main was previously declared"
   FunDec (Ident "main") _ _ _ -> error "Type of main shoud be: () -> Unit"
   FunDec ident args ret stms -> do
       let t = Prelude.map (\(Args _ x) -> x) args
@@ -179,7 +175,6 @@ transFunctionDec x e s@(S sm) = case x of
       let nns@(S nnsm) = incDepth ns
       let nnns@(S nnnsm) = S (insert (-5) (HelpRet ret) nnsm)
       let nnnns = S (insert (-6) (Help 0) nnnsm)
---      TODO: expected return
       (_, S retSm, v) <- doStms stms ne nnnns
       case (ret, retSm ! (-6)) of
         (TRunit, _) -> return (ne, ns)
@@ -279,7 +274,7 @@ transStm x e s@(S sm)  = case x of
       (_, S nnsm, t) <- doStms stms e ns
       case nnsm ! (-6) of
         Help 1 -> return (e, S (insert (-6) (Help 1) sm), t)
-        otherwise -> return (e, s, t)
+        _ -> return (e, s, t)
       return(e, s, t)
 --  Sfor ident iterable stms -> do
 --      let (ne, ns) = alloc e s ident True
@@ -290,7 +285,7 @@ transStm x e s@(S sm)  = case x of
       let Help index = sm ! (-2)
       let nsm = insert (-2) (Help (index+1)) sm
       (_, S nnsm, rt) <- transStm (Sif exp stms) e (S nsm)
-      let nnnsm = insert (-2) (Help (index)) nnsm
+      let nnnsm = insert (-2) (Help index) nnsm
       return(e, s, rt)
   Sbreak -> do
       loops <- getIdx s (-2)
@@ -317,7 +312,7 @@ transStm x e s@(S sm)  = case x of
           let nns = incDepth ns
           (_,_,t) <- doStms stms e nns
           return (e, s, t)
-        otherwise -> error ("Wrong expresion inside if statement: " ++ show t)
+        _ -> error ("Wrong expresion inside if statement: " ++ show t)
   Sifelse exp stms1 stms2 -> do
       (ns, t) <- transExp exp e s
       case t of
@@ -327,18 +322,18 @@ transStm x e s@(S sm)  = case x of
           (_,S b,t) <- doStms stms2 e ns
           case (a ! (-6), b ! (-6)) of
             (Help 1,Help 1) -> return (e, S (insert (-6) (Help 1) sm), t)
-            otherwise -> return (e, s, t)
-        otherwise -> error ("Wrong expresion inside if statement: " ++ show t)
+            _ -> return (e, s, t)
+        _ -> error ("Wrong expresion inside if statement: " ++ show t)
   Sprint exp -> do
       (ns, t) <- transExp exp e s
       case t of
-        Tnullable Tint -> return(e, s, TRunit)
-        Tnonnull Tint -> return(e, s, TRunit)
+        Tnullable Tint    -> return(e, s, TRunit)
+        Tnonnull Tint     -> return(e, s, TRunit)
         Tnullable Tstring -> return(e, s, TRunit)
-        Tnonnull Tstring -> return(e, s, TRunit)
-        Tnullable Tbool -> return(e, s, TRunit)
-        Tnonnull Tbool -> return(e, s, TRunit)
-        otherwise -> error ("Cannot print " ++ show t)
+        Tnonnull Tstring  -> return(e, s, TRunit)
+        Tnullable Tbool   -> return(e, s, TRunit)
+        Tnonnull Tbool    -> return(e, s, TRunit)
+        _ -> error ("Cannot print " ++ show t)
   Sprintln exp -> transStm (Sprint exp) e s
 --  Snotnull exp stms -> do
 --      (ns, v) <- transExp exp e s
@@ -412,14 +407,14 @@ transHelper exp1 exp2 op e s = do
     t <- transOpAssign op a b
     return(nns, t)
 
-transBoolHelper :: Exp -> Exp -> [Char] -> Env -> State -> Integer -> IO(State, Type)
+transBoolHelper :: Exp -> Exp -> String -> Env -> State -> Integer -> IO(State, Type)
 transBoolHelper exp1 exp2 op e s boolInt = do
     (ns, a) <- transExp exp1 e s
     (nns, b) <- transExp exp2 e ns
     case (a, b, boolInt) of
-      (Tnonnull Tint, Tnonnull Tint, 2)  -> return(nns, Tnonnull Tbool)
+      (Tnonnull Tint, Tnonnull Tint, 2)   -> return(nns, Tnonnull Tbool)
       (Tnonnull Tbool, Tnonnull Tbool, 1) -> return(nns, Tnonnull Tbool)
-      otherwise -> error ("Cannot perform " ++ op ++ " on " ++ show a ++ " and " ++ show b)
+      _ -> error ("Cannot perform " ++ op ++ " on " ++ show a ++ " and " ++ show b)
 
 
 transExp :: Exp -> Env -> State -> IO(State, Type)
@@ -437,16 +432,17 @@ transExp x e s = case x of
           (Tnonnull x, Tnull, _, _) -> return(ns, Tnullable x)
           (_, _, True, _) -> return(ns, a)
           (_, _, _, True) -> return(ns, b)
-          otherwise -> error ("Return expressions have different types: " ++ show a ++ " and " ++ show b)
-        otherwise -> error ("Wrong expresion inside if statement: " ++ show t)
+          _ -> error ("Return expressions have different types: " ++ show a ++ " and " ++ show b)
+        _ -> error ("Wrong expresion inside if statement: " ++ show t)
   Eor exp1 exp2 -> transBoolHelper exp1 exp2 "||" e s 1
   Eand exp1 exp2 -> transBoolHelper exp1 exp2 "&&" e s 1
   Eeq exp1 exp2 -> do
     (ns, a) <- transExp exp1 e s
     (nns, b) <- transExp exp2 e ns
-    case (canAssign a b) || (canAssign b a) of
-      True -> return(s, Tnonnull Tbool)
-      False -> error ("Cannot compare " ++ show a ++ " and " ++ show b)
+    if canAssign a b || canAssign b a then
+      return(s, Tnonnull Tbool)
+    else
+      error ("Cannot compare " ++ show a ++ " and " ++ show b)
   Eneq exp1 exp2 -> transExp (Eeq exp1 exp2) e s
   El exp1 exp2 -> transBoolHelper exp1 exp2 "<" e s 2
   Eg exp1 exp2 -> transBoolHelper exp1 exp2 ">" e s 2
@@ -461,48 +457,48 @@ transExp x e s = case x of
       (ns, t) <- transExp exp e s
       case t of
         Tnonnull Tint  -> return(ns, t)
-        otherwise      -> error ("Cannot negate " ++ show t)
+        _              -> error ("Cannot negate " ++ show t)
   Elneg exp -> do
       (ns, t) <- transExp exp e s
       case t of
         Tnonnull Tbool  -> return(ns, t)
-        otherwise       -> error ("Cannot negate " ++ show t)
+        _               -> error ("Cannot negate " ++ show t)
   Einc (Evar ident) -> do
       t <- getVal e s ident
       assertNotConst e ident
       case t of
         Tnonnull Tint  -> return(s, t)
-        otherwise      -> error ("Cannot increment " ++ show t)
+        _              -> error ("Cannot increment " ++ show t)
   Einc _ -> error "Only variable shlould be incremented"
   Edec (Evar ident) -> do
       t <- getVal e s ident
       assertNotConst e ident
       case t of
         Tnonnull Tint  -> return(s, t)
-        otherwise      -> error ("Cannot decrement " ++ show t)
+        _              -> error ("Cannot decrement " ++ show t)
   Edec _ -> error "Only variable shlould be decremented"
   EPinc (Evar ident) -> do
       t <- getVal e s ident
       assertNotConst e ident
       case t of
         Tnonnull Tint  -> return(s, t)
-        otherwise      -> error ("Cannot post-increment " ++ show t)
+        _              -> error ("Cannot post-increment " ++ show t)
   EPinc _ -> error "Only variable shlould be post-incremented"
   EPdec (Evar ident) -> do
       t <- getVal e s ident
       assertNotConst e ident
       case t of
         Tnonnull Tint  -> return(s, t)
-        otherwise      -> error ("Cannot post-decrement " ++ show t)
+        _              -> error ("Cannot post-decrement " ++ show t)
   EPdec _ -> error "Only variable shlould be post-decremented"
   Etupla exps -> do
       (ns, list) <- transEtuplaHelper exps e s
       return(ns, Tnonnull (Ttupla list))
-  Eint integer -> return(s, Tnonnull Tint)
-  Estring string -> return(s, Tnonnull Tstring)
-  Etrue -> return(s, Tnonnull Tbool)
-  Efalse -> return(s, Tnonnull Tbool)
-  Enull -> return(s, Tnull)
+  Eint integer      -> return(s, Tnonnull Tint)
+  Estring string    -> return(s, Tnonnull Tstring)
+  Etrue             -> return(s, Tnonnull Tbool)
+  Efalse            -> return(s, Tnonnull Tbool)
+  Enull             -> return(s, Tnull)
   Ecall functionexp -> transFunctionExp functionexp e s
 --  Eget ident dimexps -> failure x
 --  Elambda args stms -> failure x
@@ -521,28 +517,28 @@ transOpAssign x a b = case x of
         Tnonnull Tint     -> return(Tnonnull Tint)
         Tnullable Tstring -> return(Tnullable Tstring)
         Tnonnull Tstring  -> return(Tnonnull Tstring)
-        otherwise         -> error ("Cannot add " ++ show a ++ " to " ++ show b)
+        _                 -> error ("Cannot add " ++ show a ++ " to " ++ show b)
   OpAssign3 -> do
       t <- tryAssign a b
       case t of
         Tnullable Tint    -> return(Tnullable Tint)
         Tnonnull Tint     -> return(Tnonnull Tint)
-        otherwise         -> error ("Cannot subtrack " ++ show b ++ " from " ++ show a)
+        _                 -> error ("Cannot subtrack " ++ show b ++ " from " ++ show a)
   OpAssign4 -> do
       t <- tryAssign a b
       case t of
         Tnullable Tint    -> return(Tnullable Tint)
         Tnonnull Tint     -> return(Tnonnull Tint)
-        otherwise         -> error ("Cannot multiply " ++ show a ++ " with " ++ show b)
+        _                 -> error ("Cannot multiply " ++ show a ++ " with " ++ show b)
   OpAssign5 -> do
       t <- tryAssign a b
       case t of
         Tnullable Tint    -> return(Tnullable Tint)
         Tnonnull Tint     -> return(Tnonnull Tint)
-        otherwise         -> error ("Cannot divide " ++ show a ++ " by " ++ show b)
+        _                 -> error ("Cannot divide " ++ show a ++ " by " ++ show b)
   OpAssign6 -> do
       t <- tryAssign a b
       case t of
         Tnullable Tint    -> return(Tnullable Tint)
         Tnonnull Tint     -> return(Tnonnull Tint)
-        otherwise         -> error ("Cannot calcule modulation of " ++ show a ++ " by " ++ show b)
+        _                 -> error ("Cannot calcule modulation of " ++ show a ++ " by " ++ show b)
