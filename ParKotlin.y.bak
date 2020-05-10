@@ -168,7 +168,7 @@ BaseType : 'Tupla' '<' ListType '>' { AbsKotlin.Ttupla $3 }
          | 'Bool' { AbsKotlin.Tbool }
          | 'Int' { AbsKotlin.Tint }
          | 'String' { AbsKotlin.Tstring }
-         | 'Array' '<' Type '>' { AbsKotlin.Tarray $3 }
+         | 'Array' '<' ListType '>' { AbsKotlin.Tarray $3 }
 RetType :: { RetType }
 RetType : 'Unit' { AbsKotlin.TRunit }
         | Type { AbsKotlin.TRtype $1 }

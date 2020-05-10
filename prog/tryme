@@ -7,11 +7,14 @@
 // czy transExp wgl zmienia env? - nie powinno
 // Funkcja zmienia env podczas deklaracji swoj
 
+fun g(x: String):String {
+  return "mama";
+}
 
-var a: Int? = 10;
+val a: Array<Int> = [4..100];
 
 fun main() : Unit {
-   for(i in 1..a) {
-       println (i);
-   }
+  for (i in [1..10]) {
+    println (a[i]);
+  }
 }

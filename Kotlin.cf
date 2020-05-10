@@ -24,6 +24,8 @@ Einc.     Exp8      ::=  "++" Exp12 ;
 Edec.     Exp8      ::=  "--" Exp12 ;
 EPinc.    Exp9      ::=  Exp12 "++" ;
 EPdec.    Exp9      ::=  Exp12 "--" ;
+Eiter.    Exp10     ::=  "[" Iterable "]" ;
+Earray.   Exp10     ::=  "Array" "(" Exp "," Exp ")" ;
 Etupla.   Exp10     ::=  "Tupla" "(" [Exp] ")" ;
 Eint.     Exp10     ::=  Integer ;
 Estring.  Exp10     ::=  String ;
@@ -46,10 +48,11 @@ rules     OpAssign  ::=  "=" | "+=" | "-=" | "*=" | "/=" | "%=" ;
 
 -- types       
 
-Ttupla.     BaseType  ::= "Tupla""<" [Type] ">" ;
+Ttupla.     BaseType  ::= "Tupla" "<" [Type] ">" ;
 Tbool.      BaseType  ::= "Bool" ;
 Tint.       BaseType  ::= "Int" ;
 Tstring.    BaseType  ::= "String" ;
+Tarray.     BaseType  ::= "Array" "<" Type ">" ;
 
 TRunit.     RetType   ::=  "Unit" ;
 TRtype.     RetType   ::= Type ;
@@ -73,7 +76,7 @@ Sdec.     Stm  ::=  Dec ;
 Sexp.     Stm  ::=  Exp ";" ;
 Sblock.   Stm  ::=  "run" "{" [Stm] "}" ;
 
-Sfor.     Stm  ::=  "for" "(" Ident "in" Iterable ")" "{" [Stm] "}" ;
+Sfor.     Stm  ::=  "for" "(" Ident "in" Exp ")" "{" [Stm] "}" ;
 Swhile.   Stm  ::=  "while" "(" Exp ")" "{" [Stm] "}" ;
 Sbreak.   Stm  ::=  "break" ";" ;
 Scont.    Stm  ::=  "continue" ";" ;
@@ -106,7 +109,6 @@ terminator Inst "" ;
 -- declaration
 
 Dfun.     Dec  ::=  FunctionDec ;
-Darray.   Dec  ::=  ArrayDec ;
 Dvar.     Dec  ::=  "var" Ident ":" Type "=" Exp ";" ;
 Dval.     Dec  ::=  "val" Ident ":" Type "=" Exp ";" ;
 Dvarnull. Dec  ::=  "var" Ident ":" Type ";" ;
@@ -123,18 +125,12 @@ FunCall.  FunctionExp    ::= Ident "(" [Exp] ")" ;
 
 -- iterable
 
-Itarray.  Iterable  ::=  Ident ;
 Itrange.  Iterable  ::=  Exp ".." Exp ;
 Itup.     Iterable  ::=  Exp "until" Exp ;
 Itdown.   Iterable  ::=  Exp "downTo" Exp ;
 Itupst.   Iterable  ::=  Exp "until" Exp "step" Exp ;
 Itdownst. Iterable  ::=  Exp "downTo" Exp "step" Exp ;
 
-
--- array
-
-ArrDec.   ArrayDec ::=  "val" Ident "=" "Array" "(" Exp "," Exp ")" ";" ; 
-ArrItDec. ArrayDec ::=  "val" Ident "=" "[" Iterable "]" ";" ; 
 
 
 -- Comment

@@ -68,7 +68,7 @@ transBaseType x = case x of
   Tbool -> failure x
   Tint -> failure x
   Tstring -> failure x
-  Tarray type_ -> failure x
+  Tarray types -> failure x
 transRetType :: RetType -> Result
 transRetType x = case x of
   TRunit -> failure x
