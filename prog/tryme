@@ -8,10 +8,10 @@
 // Funkcja zmienia env podczas deklaracji swoj
 
 
-fun g(i: Int?) : Unit {
-return ;
-}
+var a: Int? = 10;
 
 fun main() : Unit {
- var x: Tupla<Int,String?> = Tupla(8,null);
+   for(i in 1..a) {
+       println (i);
+   }
 }

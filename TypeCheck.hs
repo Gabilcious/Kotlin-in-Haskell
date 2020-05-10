@@ -78,7 +78,7 @@ transInst x = case x of
 canAssignB :: BaseType -> BaseType -> Bool
 canAssignB x y = case (x, y) of
     (a, b) | a == b       -> True
-    (Ttupla a, Ttupla b)  -> Prelude.foldl and True (zipWith canAssign a b)
+    (Ttupla a, Ttupla b)  -> Prelude.foldl (&&) True (zipWith canAssign a b)
     _                     -> False
 
 canAssign :: Type -> Type -> Bool
@@ -102,9 +102,9 @@ tryAssign a b = if canAssign a b then
     error ("Cannot assign " ++ show b ++ " to " ++ show a)
 
 -- TODO: gorliwośc ifa usunac
-alloc :: Env -> State -> Ident -> Bool -> Type -> IO(Env, State)
+-- TODO: keyword if for run... tablica
+alloc :: Env -> State -> Ident -> Bool -> Type -> IO (Env, State)
 alloc (E em) (S sm) ident const t = do
---check if can be declared
     let Help depth = sm ! (-3)
     case ident of
       Ident "main" -> error "Main is keyword"
@@ -125,7 +125,7 @@ getVal (E em) s ident = case Data.Map.lookup ident em of
     Nothing -> error ( show ident ++ " is not defined")
     Just (index, _, _) -> getIdx s index
 
-assertNotConst :: Env -> Ident -> IO
+assertNotConst :: Env -> Ident -> IO ()
 assertNotConst e@(E em) ident = do
     let (_, const, _) = em ! ident
     when const $ error "Val cannot be reasigned"
@@ -141,14 +141,14 @@ incDepth (S sm) = let
 -- D E C L A R A T I O N S --
 -- ----------------------- --
 
-declare :: Env -> State -> Ident -> Type -> Bool -> Exp -> IO(Env, State)
+declare :: Env -> State -> Ident -> Type -> Bool -> Exp -> IO (Env, State)
 declare e s ident a const exp = do
       (ns, b) <- transExp exp e s
       _ <- tryAssign a b
       (ne, nns) <- alloc e ns ident const a
       return(ne, nns)
 
-transDec :: Dec -> Env -> State -> IO(Env, State)
+transDec :: Dec -> Env -> State -> IO (Env, State)
 transDec x e s = case x of
   Dfun functiondec -> transFunctionDec functiondec e s
 --  Darray arraydec -> transArrayDec arraydec e s
@@ -157,7 +157,7 @@ transDec x e s = case x of
   Dvarnull ident type_ -> declare e s ident type_ False Enull
   Dvalnull ident type_ -> declare e s ident type_ True Enull
 
-transFunctionDec :: FunctionDec -> Env -> State -> IO(Env, State)
+transFunctionDec :: FunctionDec -> Env -> State -> IO (Env, State)
 transFunctionDec x e s@(S sm) = case x of
   FunDec (Ident "main") [] TRunit stms ->
       case sm ! (-4) of
@@ -217,17 +217,41 @@ transFunctionDec x e s@(S sm) = case x of
 --      (True, _) -> return(nnns, Prelude.map (\x -> VInt x) [a,b..c])
 --      (False, True) -> return(nnns, Prelude.map (\x -> VInt x) [a,b..(c-1)])
 --      (False, False) -> return(nnns, Prelude.map (\x -> VInt x) [a,b..(c+1)])
---
---transIterable :: Iterable -> Env -> State -> IO(State, [Value])
---transIterable x e s = case x of
---  Itarray ident -> do
---      let VArray list = getVal e s ident
---      return(s, list)
---  Itrange exp1 exp2 -> transIterableHelper e s exp1 exp2 (Eint 1) True
---  Itup exp1 exp2 -> transIterableHelper e s exp1 exp2 (Eint 1) False
---  Itdown exp1 exp2 -> transIterableHelper e s exp1 exp2 (Eint (-1)) False
---  Itupst exp1 exp2 exp3 -> transIterableHelper e s exp1 exp2 exp3 False
---  Itdownst exp1 exp2 exp3 -> transIterableHelper e s exp1 exp2 (Eneg exp3) False
+
+transIterable :: Iterable -> Env -> State -> IO (State, Type)
+transIterable x e s = case x of
+  Itrange exp1 exp2 -> do
+      (ns, t1) <- transExp exp1 e s
+      (nns, t2) <- transExp exp2 e ns
+      case (t1, t2) of
+        (Tnonnull Tint, Tnonnull Tint) -> return (nns, Tnonnull Tint)
+        _ -> error ("Iterable shlould be <integer>..<integer>, not <" ++ show t1 ++ ">..<" ++ show t2 ++ ">")
+  Itup exp1 exp2 -> do
+      (ns, t1) <- transExp exp1 e s
+      (nns, t2) <- transExp exp2 e ns
+      case (t1, t2) of
+        (Tnonnull Tint, Tnonnull Tint) -> return (nns, Tnonnull Tint)
+        _ -> error ("Iterable shlould be <integer> until <integer>, not <" ++ show t1 ++ "> until <" ++ show t2 ++ ">")
+  Itdown exp1 exp2 -> do
+      (ns, t1) <- transExp exp1 e s
+      (nns, t2) <- transExp exp2 e ns
+      case (t1, t2) of
+        (Tnonnull Tint, Tnonnull Tint) -> return (nns, Tnonnull Tint)
+        _ -> error ("Iterable shlould be <integer> downTo <integer>, not <" ++ show t1 ++ "> downTo <" ++ show t2 ++ ">")
+  Itupst exp1 exp2 exp3 -> do
+      (ns, t1) <- transExp exp1 e s
+      (nns, t2) <- transExp exp2 e ns
+      (nnns, t3) <- transExp exp2 e nns
+      case (t1, t2, t3) of
+        (Tnonnull Tint, Tnonnull Tint, Tnonnull Tint) -> return (nnns, Tnonnull Tint)
+        _ -> error ("Iterable shlould be <integer> until <integer> step <integer>, not <" ++ show t1 ++ "> until <" ++ show t2 ++ "> step <" ++ show t3 ++ ">")
+  Itdownst exp1 exp2 exp3 -> do
+      (ns, t1) <- transExp exp1 e s
+      (nns, t2) <- transExp exp2 e ns
+      (nnns, t3) <- transExp exp2 e nns
+      case (t1, t2, t3) of
+        (Tnonnull Tint, Tnonnull Tint, Tnonnull Tint) -> return (nnns, Tnonnull Tint)
+        _ -> error ("Iterable shlould be <integer> downTo <integer> step <integer>, not <" ++ show t1 ++ "> downTo <" ++ show t2 ++ "> step <" ++ show t3 ++ ">")
 
 
 
@@ -237,31 +261,18 @@ transFunctionDec x e s@(S sm) = case x of
 -- S T A T E M E N T S --
 -- ------------------- --
 
-doStmsHelper :: [Stm] -> Env -> State -> RetType -> IO(Env, State, RetType)
+doStmsHelper :: [Stm] -> Env -> State -> RetType -> IO (Env, State, RetType)
 doStmsHelper stms e s typ = case stms of
     [] -> return(e, s, typ)
     h:t -> do
         (ne, ns, ntyp) <- transStm h e s
         doStmsHelper t ne ns ntyp
 
-doStms :: [Stm] -> Env -> State -> IO(Env, State, RetType)
+doStms :: [Stm] -> Env -> State -> IO (Env, State, RetType)
 doStms stms e s = doStmsHelper stms e s TRunit
 
 
---doFor :: Ident -> [Value] -> [Stm] -> Value -> Env -> State -> IO(State, Value)
---doFor ident list stms v e s = case list of
---    [] -> return(s, v)
---    h:t -> do
---      let ns = assign e s ident h
---      (_, nns, nv) <- doStms stms e ns
---      case get nns of
---              x | x == ret  -> return(ns, v)
---                | x == bre  -> return(set go ns, v)
---                | x == cont -> doFor ident t stms nv e (set go nns)
---                | x == go   -> doFor ident t stms nv e nns
-
-
-transStm :: Stm -> Env -> State -> IO(Env, State, RetType)
+transStm :: Stm -> Env -> State -> IO (Env, State, RetType)
 transStm x e s@(S sm)  = case x of
   Sdec dec -> do
       (ne, se) <- transDec dec e s
@@ -276,17 +287,14 @@ transStm x e s@(S sm)  = case x of
         Help 1 -> return (e, S (insert (-6) (Help 1) sm), t)
         _ -> return (e, s, t)
       return(e, s, t)
---  Sfor ident iterable stms -> do
---      let (ne, ns) = alloc e s ident True
---      (nns, list) <- transIterable iterable ne ns
---      (nnns, v) <- doFor ident list stms VUnit ne nns
---      return(e, nnns, v)
+  Sfor ident iterable stms -> do
+      (ns, t) <- transIterable iterable e s
+      (ne, nns) <- alloc e ns ident True t
+      (_, _, _) <- transStm (Sblock stms) ne nns
+      return(e, s, TRunit)
   Swhile exp stms -> do
-      let Help index = sm ! (-2)
-      let nsm = insert (-2) (Help (index+1)) sm
-      (_, S nnsm, rt) <- transStm (Sif exp stms) e (S nsm)
-      let nnnsm = insert (-2) (Help index) nnsm
-      return(e, s, rt)
+      (_, _, _) <- transStm (Sif exp stms) e s
+      return(e, s, TRunit)
   Sbreak -> do
       loops <- getIdx s (-2)
       case loops of
@@ -309,8 +317,7 @@ transStm x e s@(S sm)  = case x of
       (ns, t) <- transExp exp e s
       case t of
         Tnonnull Tbool -> do
-          let nns = incDepth ns
-          (_,_,t) <- doStms stms e nns
+          (_,_,t) <- transStm (Sblock stms) e ns
           return (e, s, t)
         _ -> error ("Wrong expresion inside if statement: " ++ show t)
   Sifelse exp stms1 stms2 -> do
@@ -349,7 +356,7 @@ transStm x e s@(S sm)  = case x of
 -- E X P R E S I O N S --
 -- ------------------- --
 
-expToType :: [Exp] -> [Type] -> Env -> State -> IO()
+expToType :: [Exp] -> [Type] -> Env -> State -> IO ()
 expToType exps types e s = case (types, exps) of
     ([], []) -> return()
     (a:ttail, exp:etail) -> do
@@ -358,7 +365,7 @@ expToType exps types e s = case (types, exps) of
         expToType etail ttail e ns
 
 
-transFunctionExp :: FunctionExp -> Env -> State -> IO(State, Type)
+transFunctionExp :: FunctionExp -> Env -> State -> IO (State, Type)
 transFunctionExp x e s = case x of
   FunCall ident exps -> do
       Tfun t ret <- getVal e s ident
@@ -370,7 +377,7 @@ transFunctionExp x e s = case x of
                 TRtype x -> return(s,x)
                              | otherwise  -> error ("Passed " ++ show passed ++ " arguments, when " ++ show ident ++ " expects " ++ show expected)
 
-transEtuplaHelper :: [Exp] -> Env -> State -> IO(State, [Type])
+transEtuplaHelper :: [Exp] -> Env -> State -> IO (State, [Type])
 transEtuplaHelper exps e s = case exps of
   [] -> return(s, [])
   h:tail -> do
@@ -400,14 +407,14 @@ transEtuplaHelper exps e s = case exps of
 --
 
 
-transHelper :: Exp -> Exp -> OpAssign -> Env -> State -> IO(State, Type)
+transHelper :: Exp -> Exp -> OpAssign -> Env -> State -> IO (State, Type)
 transHelper exp1 exp2 op e s = do
     (ns, a) <- transExp exp1 e s
     (nns, b) <- transExp exp2 e ns
     t <- transOpAssign op a b
     return(nns, t)
 
-transBoolHelper :: Exp -> Exp -> String -> Env -> State -> Integer -> IO(State, Type)
+transBoolHelper :: Exp -> Exp -> String -> Env -> State -> Integer -> IO (State, Type)
 transBoolHelper exp1 exp2 op e s boolInt = do
     (ns, a) <- transExp exp1 e s
     (nns, b) <- transExp exp2 e ns
@@ -417,7 +424,7 @@ transBoolHelper exp1 exp2 op e s boolInt = do
       _ -> error ("Cannot perform " ++ op ++ " on " ++ show a ++ " and " ++ show b)
 
 
-transExp :: Exp -> Env -> State -> IO(State, Type)
+transExp :: Exp -> Env -> State -> IO (State, Type)
 transExp x e s = case x of
   Eassign exp1@(Evar ident) opassign exp2 -> do
       assertNotConst e ident
@@ -507,7 +514,7 @@ transExp x e s = case x of
       val <- getVal e s ident
       return(s, val)
 
-transOpAssign :: OpAssign -> Type -> Type -> IO(Type)
+transOpAssign :: OpAssign -> Type -> Type -> IO Type
 transOpAssign x a b = case x of
   OpAssign1 -> tryAssign a b
   OpAssign2 -> do
