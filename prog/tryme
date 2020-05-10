@@ -11,10 +11,15 @@ fun g(x: String):String {
   return "mama";
 }
 
-val a: Array<Int> = [4..100];
+val a: Array<Array<Int>> = Array(10, {x: Int -> [x..x+5];});
 
 fun main() : Unit {
-  for (i in [1..10]) {
-    println (a[i]);
+  g!!;
+  for (x in a) {
+    for (j in [0 until 5]) {
+       print (x[j]);
+       continue;
+    }
+    println ("");
   }
 }

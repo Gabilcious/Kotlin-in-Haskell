@@ -35,7 +35,7 @@ Enull.    Exp10     ::=  "null" ;
 Ecall.    Exp10     ::=  FunctionExp ;
 Eget.     Exp10     ::=  Ident [DimExp] ;
 Elambda.  Exp10     ::=  "{"  [Arg] "->" [Stm] "}" ;
-Ennass.   Exp11     ::=  Exp11 "!!" ;
+Ennass.   Exp11     ::=  Exp12 "!!" ;
 Evar.     Exp12     ::=  Ident ;
 
 coercions Exp 12 ;

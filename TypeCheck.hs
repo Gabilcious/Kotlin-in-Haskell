@@ -41,8 +41,8 @@ failure x = error ("Undefined case: " ++ show x)
 check :: Prog -> IO()
 check prog = do
     let e = E empty
---    -1 index     -2 howManyLoops     -3 depth     -4 main   -5 return expected   -6 return made
-    let s = S (fromList [(-1, Help 1), (-2, Help 0), (-3, Help 0), (-4, Help 0), (-5, HelpRet TRunit), (-6, Help 0)])
+--    -1 index     -2 howManyLoops     -3 depth     -4 main   -5 return expected   -6 return made    -8 lambda count
+    let s = S (fromList [(-1, Help 1), (-2, Help 0), (-3, Help 0), (-4, Help 0), (-5, HelpRet TRunit), (-6, Help 0), (-7, Help 0)])
     S nsm <- transProg prog e s
     case nsm ! (-4) of
       Help 1 -> return()
@@ -133,6 +133,16 @@ incDepth :: State -> State
 incDepth (S sm) = let
     Help depth = sm ! (-3)
     in S (insert (-3) (Help (depth+1)) sm)
+
+incLambda :: State -> State
+incLambda (S sm) = let
+    Help depth = sm ! (-7)
+    in S (insert (-7) (Help (depth+1)) sm)
+
+incLoop :: State -> State
+incLoop (S sm) = let
+    Help depth = sm ! (-2)
+    in S (insert (-2) (Help (depth+1)) sm)
 
 
 
@@ -266,7 +276,8 @@ transStm x e s@(S sm)  = case x of
         _ -> return (e, s, t)
       return(e, s, t)
   Sfor ident exp stms -> do
-      (ns, v) <- transExp exp e s
+      let ns = incLoop s
+      (ns, v) <- transExp exp e ns
       case v of
         Tnonnull (Tarray t) -> do
           (ne, nns) <- alloc e ns ident True t
@@ -274,7 +285,8 @@ transStm x e s@(S sm)  = case x of
           return(e, s, TRunit)
         _ -> error "Loop for can only go through nonull iterable elements"
   Swhile exp stms -> do
-      (_, _, _) <- transStm (Sif exp stms) e s
+      let ns = incLoop s
+      (_, _, _) <- transStm (Sif exp stms) e ns
       return(e, s, TRunit)
   Sbreak -> do
       loops <- getIdx s (-2)
@@ -288,12 +300,14 @@ transStm x e s@(S sm)  = case x of
                | otherwise -> return(e, s, TRunit)
   Sretexp exp -> do
       (ns@(S nsm), t) <- transExp exp e s
-      case nsm ! (-5) of
-        HelpRet (TRtype x) | canAssign x t -> return(e, S (insert (-6) (Help 1) sm), TRtype t)
-        HelpRet x -> error ("Function is expected to return " ++ show x ++ " not " ++ show t)
-  Sret -> case sm ! (-5) of
-      HelpRet TRunit -> return(e, S (insert (-6) (Help 1) sm), TRunit)
-      HelpRet x -> error ("Function is expected to return " ++ show x ++ " not " ++ show TRunit)
+      case (sm ! (-7), nsm ! (-5)) of
+        (Help 0, HelpRet (TRtype x)) | canAssign x t -> return(e, S (insert (-6) (Help 1) sm), TRtype t)
+        (Help 0, HelpRet x) -> error ("Function is expected to return " ++ show x ++ " not " ++ show t)
+        _ -> error "Return is not allowed inside lambda body"
+  Sret -> case (sm ! (-7), sm ! (-5)) of
+      (Help 0, HelpRet TRunit) -> return(e, S (insert (-6) (Help 1) sm), TRunit)
+      (Help 0, HelpRet x) -> error ("Function is expected to return " ++ show x ++ " not " ++ show TRunit)
+      _ -> error "Return is not allowed inside lambda body"
   Sif exp stms -> do
       (ns, t) <- transExp exp e s
       case t of
@@ -337,23 +351,6 @@ transStm x e s@(S sm)  = case x of
 -- E X P R E S I O N S --
 -- ------------------- --
 
---transArrayDecHelper :: Env -> State -> [Stm] -> Ident -> Integer -> Integer -> [Value] -> IO(State, [Value])
---transArrayDecHelper e s stms it size expected vals = case size < expected of
---    True -> do
---      (ne, ns) <- declare e s it (VInt size) False
---      (nne, nns, v) <- doStms stms ne ns
---      transArrayDecHelper nne (set go nns) stms it (size+1) expected (v:vals)
---    False -> return(s, reverse vals)
---
---transArrayDec :: ArrayDec -> Env -> State -> IO(Env, State)
---transArrayDec x e s = case x of
---  ArrDec ident (Eint size) exp -> do
---      (ns, VFun [Args it _] stms eFun) <- transExp exp e s
---      (nns, list) <- transArrayDecHelper e ns stms it 0 size []
---      declare e nns ident (VArray list) True
---  ArrItDec ident iterable -> do
---      (ns, list) <- transIterable iterable e s
---      declare e ns ident (VArray list) True
 
 expToType :: [Exp] -> [Type] -> Env -> State -> IO ()
 expToType exps types e s = case (types, exps) of
@@ -486,7 +483,15 @@ transExp x e s = case x of
         _              -> error ("Cannot post-decrement " ++ show t)
   EPdec _ -> error "Only variable shlould be post-decremented"
   Eiter iterable -> transIterable iterable e s
---  Earray (Eint size) exp -> failure x
+  Earray exp1 exp2 -> do
+      (ns, t1) <- transExp exp1 e s
+      (nns, t2) <- transExp exp2 e ns
+      case (t1, t2) of
+          (Tnonnull Tint, Tfun [Tnonnull Tint] (TRtype t)) -> return (nns, Tnonnull (Tarray t))
+          (Tnonnull Tint, Tfun [Tnonnull Tint] _) -> error "Lambda should not return Unit"
+          (Tnonnull Tint, Tfun _ _) -> error "Lambda should take only one nonnullable Integer as argument"
+          (Tnonnull Tint, _) -> error "Second arg of Array constructor should be function"
+          _ -> error "Size of array should be nonnullable Integer"
   Etupla exps -> do
       (ns, list) <- transEtuplaHelper exps e s
       return(ns, Tnonnull (Ttupla list))
@@ -499,8 +504,14 @@ transExp x e s = case x of
   Eget ident dimexps -> do
       t <- getVal e s ident
       transGetExp t dimexps e s
---  Elambda args stms -> failure x
---  Ennass exp -> failure x
+  Elambda args stms -> do
+    let ns = incDepth s
+    let nns = incLambda ns
+    let t = Prelude.map (\(Args _ x) -> x) args
+    (ne, nnns) <- addArgsHelper args e nns
+    (_, _, rt) <- doStms stms ne nnns
+    return (s, Tfun t rt)
+--  Ennass (Ident ident) -> do
   Evar ident -> do
       val <- getVal e s ident
       return(s, val)

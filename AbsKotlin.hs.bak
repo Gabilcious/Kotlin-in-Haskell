@@ -59,7 +59,7 @@ data OpAssign
   deriving (Eq, Ord, Show, Read)
 
 data BaseType
-    = Ttupla [Type] | Tbool | Tint | Tstring | Tarray [Type]
+    = Ttupla [Type] | Tbool | Tint | Tstring | Tarray Type
   deriving (Eq, Ord, Show, Read)
 
 data RetType = TRunit | TRtype Type
