@@ -331,13 +331,9 @@ transStm x e s@(S sm)  = case x of
   Sprint exp -> do
       (ns, t) <- transExp exp e s
       case t of
-        Tnullable Tint    -> return(e, s, TRunit)
-        Tnonnull Tint     -> return(e, s, TRunit)
-        Tnullable Tstring -> return(e, s, TRunit)
-        Tnonnull Tstring  -> return(e, s, TRunit)
-        Tnullable Tbool   -> return(e, s, TRunit)
-        Tnonnull Tbool    -> return(e, s, TRunit)
-        _ -> error ("Cannot print " ++ show t)
+        Tfun _ _ -> error ("Cannot print " ++ show t)
+        Tunit    -> error ("Cannot print " ++ show t)
+        _        -> return(e, s, TRunit)
   Sprintln exp -> transStm (Sprint exp) e s
   Snotnull exp stms -> do
       (ns, t) <- transExp exp e s

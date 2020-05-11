@@ -29,7 +29,17 @@ data Value
     | VTupla [Value]
     | VArray [Value]
     | VFun [Arg] [Stm] Env
-  deriving (Eq, Ord, Show, Read)
+  deriving (Eq, Ord, Read)
+
+instance Show Value where
+      show (VNull) = "null"
+      show (VInt i) = show i
+      show (VString s) = s
+      show (VBool b) = show b
+      show (VTupla []) = "()";
+      show (VTupla list) = "(" ++ (foldr1 (\x y -> x ++ "," ++ y) (Prelude.map show list)) ++ ")";
+      show (VArray []) = "[]";
+      show (VArray list) = "[" ++ (foldr1 (\x y -> x ++ "," ++ y) (Prelude.map show list)) ++ "]";
 
 data Env = E (Map Ident (Integer, Bool))
   deriving (Eq, Ord, Show, Read)
@@ -266,19 +276,11 @@ transStm x e s  = case x of
             return(e, nns, v)
   Sprint exp -> do
       (ns, x) <- transExp exp e s
-      case x of
-        VInt v -> putStr (show v)
-        VString v -> putStr v
-        VBool v -> putStr (show v)
-        VNull -> putStr "null"
+      putStr (show x)
       return(e, ns, VUnit)
   Sprintln exp -> do
       (ns, x) <- transExp exp e s
-      case x of
-        VInt v -> putStrLn (show v)
-        VString v -> putStrLn v
-        VBool v -> putStrLn (show v)
-        VNull -> putStrLn "null"
+      putStrLn (show x)
       return(e, ns, VUnit)
   Snotnull exp stms -> do
       (ns, v) <- transExp exp e s

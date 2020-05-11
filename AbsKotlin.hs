@@ -63,6 +63,7 @@ data BaseType
   deriving (Eq, Ord, Read)
 
 instance Show BaseType where
+      show (Ttupla []) = "Tupla<>";
       show (Ttupla list) = "Tupla<" ++ (foldr1 (\x y -> x ++ "," ++ y) (map show list)) ++ ">";
       show (Tbool) = "Bool"
       show (Tint) = "Int"
@@ -83,6 +84,7 @@ data Type
 instance Show Type where
       show (Tnullable bt) = show bt ++ "?"
       show (Tnonnull bt) = show bt
+      show (Tfun [] rt ) = "() -> " ++ show rt
       show (Tfun list rt ) = "(" ++ (foldr1 (\x y -> x ++ "," ++ y) (map show list)) ++ ") -> " ++ show rt
       show (Tnull) = "null"
       show (Tunit) = "Unit"

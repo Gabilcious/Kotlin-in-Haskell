@@ -17,8 +17,5 @@ fun main() : Unit {
     println ("");
 
     val arr_4: Array<Int> = Array(3, {x: Int -> g(x);});
-    for (i in arr_4) {
-        println(i);
-    }
-    println ("");
+    println (arr_4);
 }
