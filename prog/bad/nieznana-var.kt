@@ -1,5 +1,5 @@
 /* Temat:  Nieznana zmienna
- * Result: Ident "..." is not defined
+ * Result: Ident "x" is not defined
  */
 
 fun main() : Unit {

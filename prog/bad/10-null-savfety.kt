@@ -1,5 +1,5 @@
 /* Temat:  Próba przypisania null do zmiennej nonnull
- * Result: Cannot assign null to nonnullable
+ * Result: Cannot assign null to String
  */
 
 fun main() : Unit {

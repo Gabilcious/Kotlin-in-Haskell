@@ -215,33 +215,33 @@ transIterable x e s = case x of
       (nns, t2) <- transExp exp2 e ns
       case (t1, t2) of
         (Tnonnull Tint, Tnonnull Tint) -> return (nns, Tnonnull (Tarray (Tnonnull Tint)))
-        _ -> error ("Iterable shlould be <integer>..<integer>, not <" ++ show t1 ++ ">..<" ++ show t2 ++ ">")
+        _ -> error ("Iterable shlould be <Int>..<Int>, not <" ++ show t1 ++ ">..<" ++ show t2 ++ ">")
   Itup exp1 exp2 -> do
       (ns, t1) <- transExp exp1 e s
       (nns, t2) <- transExp exp2 e ns
       case (t1, t2) of
         (Tnonnull Tint, Tnonnull Tint) -> return (nns, Tnonnull (Tarray (Tnonnull Tint)))
-        _ -> error ("Iterable shlould be <integer> until <integer>, not <" ++ show t1 ++ "> until <" ++ show t2 ++ ">")
+        _ -> error ("Iterable shlould be <Int> until <Int>, not <" ++ show t1 ++ "> until <" ++ show t2 ++ ">")
   Itdown exp1 exp2 -> do
       (ns, t1) <- transExp exp1 e s
       (nns, t2) <- transExp exp2 e ns
       case (t1, t2) of
         (Tnonnull Tint, Tnonnull Tint) -> return (nns, Tnonnull (Tarray (Tnonnull Tint)))
-        _ -> error ("Iterable shlould be <integer> downTo <integer>, not <" ++ show t1 ++ "> downTo <" ++ show t2 ++ ">")
+        _ -> error ("Iterable shlould be <Int> downTo <Int>, not <" ++ show t1 ++ "> downTo <" ++ show t2 ++ ">")
   Itupst exp1 exp2 exp3 -> do
       (ns, t1) <- transExp exp1 e s
       (nns, t2) <- transExp exp2 e ns
       (nnns, t3) <- transExp exp2 e nns
       case (t1, t2, t3) of
         (Tnonnull Tint, Tnonnull Tint, Tnonnull Tint) -> return (nns, Tnonnull (Tarray (Tnonnull Tint)))
-        _ -> error ("Iterable shlould be <integer> until <integer> step <integer>, not <" ++ show t1 ++ "> until <" ++ show t2 ++ "> step <" ++ show t3 ++ ">")
+        _ -> error ("Iterable shlould be <Int> until <Int> step <Int>, not <" ++ show t1 ++ "> until <" ++ show t2 ++ "> step <" ++ show t3 ++ ">")
   Itdownst exp1 exp2 exp3 -> do
       (ns, t1) <- transExp exp1 e s
       (nns, t2) <- transExp exp2 e ns
       (nnns, t3) <- transExp exp2 e nns
       case (t1, t2, t3) of
         (Tnonnull Tint, Tnonnull Tint, Tnonnull Tint) -> return (nns, Tnonnull (Tarray (Tnonnull Tint)))
-        _ -> error ("Iterable shlould be <integer> downTo <integer> step <integer>, not <" ++ show t1 ++ "> downTo <" ++ show t2 ++ "> step <" ++ show t3 ++ ">")
+        _ -> error ("Iterable shlould be <Int> downTo <Int> step <Int>, not <" ++ show t1 ++ "> downTo <" ++ show t2 ++ "> step <" ++ show t3 ++ ">")
 
 
 
@@ -285,7 +285,7 @@ transStm x e s@(S sm)  = case x of
           (ne, nns) <- alloc e ns ident True t
           (_, _, _) <- transStm (Sblock stms) ne nns
           return(e, s, TRunit)
-        _ -> error "Loop for can only go through nonull iterable elements"
+        _ -> error "Loop for can only go through nonnull Array"
   Swhile exp stms -> do
       let ns = incLoop s
       (_, _, _) <- transStm (Sif exp stms) e ns
@@ -351,7 +351,7 @@ transStm x e s@(S sm)  = case x of
        (ns, t) <- transExp exp e s
        case t of
          Tnonnull Tbool -> return(e, s, TRunit)
-         _ -> error "Assertion argument should be nonnullable Bool"
+         _ -> error "Assertion argument should be Bool"
 
 
 
@@ -398,8 +398,8 @@ transGetExp t dims e s = case (t, dims) of
         (ns, _type) <- transExp exp e s
         case _type of
             Tnonnull Tint -> transGetExp nt tail e ns
-            _ -> error ("Index of array should be nonnullable Integer, not " ++ show _type)
-    _ -> error (show t ++ " is not a nonnullable array")
+            _ -> error ("Index of array should be Int, not " ++ show _type)
+    _ -> error (show t ++ " is not an Array")
 
 transHelper :: Exp -> Exp -> OpAssign -> Env -> State -> IO (State, Type)
 transHelper exp1 exp2 op e s = do
@@ -499,9 +499,9 @@ transExp x e s = case x of
       case (t1, t2) of
           (Tnonnull Tint, Tfun [Tnonnull Tint] (TRtype t)) -> return (nns, Tnonnull (Tarray t))
           (Tnonnull Tint, Tfun [Tnonnull Tint] _) -> error "Lambda should not return Unit"
-          (Tnonnull Tint, Tfun _ _) -> error "Lambda should take only one nonnullable Integer as argument"
+          (Tnonnull Tint, Tfun _ _) -> error "Lambda should take only one Int as argument"
           (Tnonnull Tint, _) -> error "Second arg of Array constructor should be function"
-          _ -> error "Size of array should be nonnullable Integer"
+          _ -> error "Size of array should be Int"
   Etupla exps -> do
       (ns, list) <- transEtuplaHelper exps e s
       return(ns, Tnonnull (Ttupla list))

@@ -1,5 +1,5 @@
 /* Temat:  Za dużo argumentów przy wywowływaniu funkcji
- * Result: Passed ... arguments, when Ident "..." expects ...
+ * Result: Passed 2 arguments, when Ident "fib" expects 1
  */
 
 fun fib(d: Int) : Int {

@@ -1,5 +1,5 @@
 /* Temat:  Zły typ w if / assert
- * Result: Wrong expresion inside if statement: ...
+ * Result: Wrong expresion inside if statement: Int
  */
 
 fun main() : Unit {

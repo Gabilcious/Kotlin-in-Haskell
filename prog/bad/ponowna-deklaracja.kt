@@ -1,5 +1,5 @@
 /* Temat:  Próba ponownego zadeklarowania zmiennej
- * Result: Ident "..." was previously declared in this scope
+ * Result: Ident "x" was previously declared in this scope
  */
 
 fun main() : Unit {

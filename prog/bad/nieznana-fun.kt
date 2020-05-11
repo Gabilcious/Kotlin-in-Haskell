@@ -1,5 +1,5 @@
 /* Temat:  Nieznana funkcja
- * Result: Ident "..." is not defined
+ * Result: Ident "sleep" is not defined
  */
 
 fun main() : Unit {

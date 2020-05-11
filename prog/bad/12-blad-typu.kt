@@ -1,5 +1,5 @@
 /* Temat:  Próba przypisania złego typu do zmiennej
- * Result: Cannot assign ... to ...
+ * Result: Cannot assign String to Int
  */
 
 fun main() : Unit {

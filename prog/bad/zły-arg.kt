@@ -1,5 +1,5 @@
 /* Temat:  Wywołanie funkcji ze złym argumentem
- * Result: Cannot assign ... to ...
+ * Result: Cannot assign Int? to Int
  */
 
 fun fib(d: Int) : Int {

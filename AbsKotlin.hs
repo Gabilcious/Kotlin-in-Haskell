@@ -60,14 +60,32 @@ data OpAssign
 
 data BaseType
     = Ttupla [Type] | Tbool | Tint | Tstring | Tarray Type
-  deriving (Eq, Ord, Show, Read)
+  deriving (Eq, Ord, Read)
+
+instance Show BaseType where
+      show (Ttupla list) = "Tupla<" ++ (foldr1 (\x y -> x ++ "," ++ y) (map show list)) ++ ">";
+      show (Tbool) = "Bool"
+      show (Tint) = "Int"
+      show (Tstring) = "String"
+      show (Tarray t) = "Array<" ++ show t ++ ">"
 
 data RetType = TRunit | TRtype Type
-  deriving (Eq, Ord, Show, Read)
+  deriving (Eq, Ord, Read)
+
+instance Show RetType where
+      show (TRunit) = "Unit"
+      show (TRtype t) = show t
 
 data Type
     = Tnullable BaseType | Tnonnull BaseType | Tfun [Type] RetType | Tnull | Help Integer | HelpRet RetType | Tunit
-  deriving (Eq, Ord, Show, Read)
+  deriving (Eq, Ord, Read)
+
+instance Show Type where
+      show (Tnullable bt) = show bt ++ "?"
+      show (Tnonnull bt) = show bt
+      show (Tfun list rt ) = "(" ++ (foldr1 (\x y -> x ++ "," ++ y) (map show list)) ++ ") -> " ++ show rt
+      show (Tnull) = "null"
+      show (Tunit) = "Unit"
 
 data Arg = Args Ident Type
   deriving (Eq, Ord, Show, Read)

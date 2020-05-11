@@ -1,5 +1,5 @@
 /* Temat:  Operacja na złych zmiennych
- * Result: Cannot compare ... and ...
+ * Result: Cannot compare Int and Bool
  */
 
 fun fib(d: Int) : Int {

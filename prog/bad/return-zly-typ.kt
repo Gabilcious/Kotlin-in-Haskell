@@ -1,5 +1,5 @@
 /* Temat:  Zły typ zwracanej wartosci
- * Result: Function is expected to return ... not ...
+ * Result: Function is expected to return Unit not Int
  */
 
 fun main() : Unit {
