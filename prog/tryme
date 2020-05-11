@@ -14,12 +14,14 @@ fun g(x: String):String {
 val a: Array<Array<Int>> = Array(10, {x: Int -> [x..x+5];});
 
 fun main() : Unit {
-  g!!;
-  for (x in a) {
+  for (main in a) {
     for (j in [0 until 5]) {
        print (x[j]);
        continue;
     }
     println ("");
   }
+
+  val a: String? = null;
+  println( g(a!!) );
 }

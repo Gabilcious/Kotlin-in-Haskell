@@ -5,11 +5,11 @@ fun main() : Unit {
     var y: Int?;
 
     x?.let {    // x: Int
-        f(x);
+        f(it);
         println ("Reachable");
     }
     y?.let {
-        f(y);
+        f(it);
         println ("Unreachable");
     }
 

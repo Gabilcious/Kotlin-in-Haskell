@@ -29,6 +29,9 @@ data Env = E (Map Ident (Integer, Bool, Integer))
 data State = S (Map Integer Type)
   deriving (Eq, Ord, Show, Read)
 
+isReserved :: String -> Bool
+isReserved ident = elem ident ["main", "run", "do", "while", "for", "it", "if", "else", "fun"]
+
 failure x = error ("Undefined case: " ++ show x)
 
 
@@ -101,20 +104,27 @@ tryAssign a b = if canAssign a b then
     error ("Cannot assign " ++ show b ++ " to " ++ show a)
 
 -- TODO: gorliwośc ifa usunac
--- TODO: keyword if for run... tablica
 alloc :: Env -> State -> Ident -> Bool -> Type -> IO (Env, State)
-alloc (E em) (S sm) ident const t = do
+alloc (E em) (S sm) ident@(Ident name) const t = do
     let Help depth = sm ! (-3)
-    case ident of
-      Ident "main" -> error "Main is keyword"
-      _ -> case Data.Map.lookup ident em of
-          Just (_, _, d)  | d == depth -> error (show ident ++ " was previously declared in this scope")
-          _ -> do
-              let Help index = sm ! (-1)
-              let ne = E (insert ident (index, const, depth) em)
-              let nsm = insert (-1) (Help (index+1)) sm
-              let nns = S (insert index  t nsm)
-              return(ne, nns)
+    if isReserved name then error (show name ++ " is a keyword")
+    else case Data.Map.lookup ident em of
+      Just (_, _, d)  | d == depth -> error (show ident ++ " was previously declared in this scope")
+      _ -> do
+        let Help index = sm ! (-1)
+        let ne = E (insert ident (index, const, depth) em)
+        let nsm = insert (-1) (Help (index+1)) sm
+        let nns = S (insert index  t nsm)
+        return(ne, nns)
+
+forceAlloc :: Env -> State -> Ident -> Bool -> Type -> IO (Env, State)
+forceAlloc (E em) (S sm) ident const t = do
+    let Help depth = sm ! (-3)
+    let Help index = sm ! (-1)
+    let ne = E (insert ident (index, const, depth) em)
+    let nsm = insert (-1) (Help (index+1)) sm
+    let nns = S (insert index  t nsm)
+    return(ne, nns)
 
 getIdx :: State -> Integer -> IO Type
 getIdx (S sm) index = return(sm ! index)
@@ -337,11 +347,14 @@ transStm x e s@(S sm)  = case x of
         Tnonnull Tbool    -> return(e, s, TRunit)
         _ -> error ("Cannot print " ++ show t)
   Sprintln exp -> transStm (Sprint exp) e s
---  Snotnull exp stms -> do
---      (ns, v) <- transExp exp e s
---      case v of
---        VNull -> return(e, ns, VUnit)
---        _ -> transStm (Sblock stms) e s
+  Snotnull exp stms -> do
+      (ns, t) <- transExp exp e s
+      case t of
+        Tnullable bt -> do
+          (ne, ns) <- forceAlloc e s (Ident "it") True (Tnonnull bt)
+          transStm (Sblock stms) ne ns
+        _ -> transStm (Sblock stms) e s
+      return (e, s, TRunit)
 
 
 
@@ -511,7 +524,11 @@ transExp x e s = case x of
     (ne, nnns) <- addArgsHelper args e nns
     (_, _, rt) <- doStms stms ne nnns
     return (s, Tfun t rt)
---  Ennass (Ident ident) -> do
+  Ennass (Evar ident) -> do
+      t <- getVal e s ident
+      case t of
+        Tnullable bt -> return (s, Tnonnull bt)
+        _ -> return (s, t)
   Evar ident -> do
       val <- getVal e s ident
       return(s, val)
