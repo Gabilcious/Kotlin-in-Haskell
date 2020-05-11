@@ -1,7 +1,9 @@
+/* Temat:  Próba przypisania złego typu do zmiennej
+ * Result: Cannot assign ... to ...
+ */
+
 fun main() : Unit {
-    val x: Int = 10;
-    // run {
-    	val x: String = "mama";
-	// }
+    var x: Int = 10;
+    x = "V1";
 	println(x);
 }

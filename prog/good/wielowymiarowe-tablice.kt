@@ -1,5 +1,5 @@
 val a: Array<Array<Int>> = Array(
-        10,
+        7,
         { x: Int ->
             [x..x+5]; }
 );

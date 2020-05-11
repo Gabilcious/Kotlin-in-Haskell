@@ -1,4 +1,6 @@
-// Błąd do naprawienia jeśli uda się rozwinąć język do oryginalnego kotlina w tej kwestii
+/* Temat:  Brak średnika
+ * Result: Nie parsuje się
+ */
 
 fun main() : Unit {
     println("Hello world!")

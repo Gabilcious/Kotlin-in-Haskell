@@ -13,5 +13,5 @@ fun main() : Unit {
         i;
     };
     
-    println(sqr(16));  // 4
+    assert(sqr(16) == 4);
 }

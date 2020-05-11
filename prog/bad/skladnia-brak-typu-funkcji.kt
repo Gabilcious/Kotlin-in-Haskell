@@ -1,4 +1,6 @@
-// Błąd do naprawienia jeśli uda się rozwinąć język do mądrego automatycznego typowania jeśli jest taka możliwość
+/* Temat:  Brak typu funkcji / zmiennej
+ * Result: Nie parsuje się
+ */
 
 fun main() {
     println("Hello world!");

@@ -1,5 +1,9 @@
-fun fibb(d: Int) : Int {
-    return fibb (d - 1) + fibb (d - 2);
+/* Temat:  Za dużo argumentów przy wywowływaniu funkcji
+ * Result: Passed ... arguments, when Ident "..." expects ...
+ */
+
+fun fib(d: Int) : Int {
+    return fib (d - 1) + fib (d - 2);
 }
 
 fun main() : Unit {
