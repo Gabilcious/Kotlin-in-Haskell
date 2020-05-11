@@ -53,13 +53,7 @@ check prog = do
 
 transProg :: Prog -> Env -> State -> IO State
 transProg x e@(E em) s@(S sm) = case x of
-  Program [] -> do
-      putStrLn ""
-      putStrLn ""
-      putStrLn ""
-      putStrLn (Data.Map.Internal.Debug.showTree em)
-      putStrLn (Data.Map.Internal.Debug.showTree sm)
-      return s
+  Program [] -> return s
   Program (h:t) -> do
       (ne, ns) <- transInst h e s
       transProg (Program t) ne ns
@@ -169,7 +163,6 @@ declare e s ident a const exp = do
 transDec :: Dec -> Env -> State -> IO (Env, State)
 transDec x e s = case x of
   Dfun functiondec -> transFunctionDec functiondec e s
---  Darray arraydec -> transArrayDec arraydec e s
   Dvar ident t exp -> declare e s ident t False exp
   Dval ident type_ exp -> declare e s ident type_ True exp
   Dvarnull ident type_ -> declare e s ident type_ False Enull

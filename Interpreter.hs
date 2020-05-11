@@ -54,12 +54,7 @@ start prog = do
 
 transProg :: Prog -> Env -> State -> IO()
 transProg x e@(E em) s@(S sm) = case x of
-  Program [] -> do
-      putStrLn ""
-      putStrLn ""
-      putStrLn ""
-      putStrLn (Data.Map.Internal.Debug.showTree em)
-      putStrLn (Data.Map.Internal.Debug.showTree sm)
+  Program [] -> return ()
   Program (h:t) -> do
       (ne, ns) <- transInst h e s
       transProg (Program t) ne ns
@@ -135,8 +130,6 @@ declareFun e s id args stms const = do
 transDec :: Dec -> Env -> State -> IO(Env, State)
 transDec x e s = case x of
   Dfun functiondec -> transFunctionDec functiondec e s
-  --TODO: add array dec
-  --Darray arraydec -> transArrayDec arraydec e s
   Dvar ident type_ exp -> do
       (ns, val) <- transExp exp e s
       declare e ns ident val False
@@ -277,7 +270,7 @@ transStm x e s  = case x of
         VInt v -> putStr (show v)
         VString v -> putStr v
         VBool v -> putStr (show v)
-        VNull -> putStrLn "null"
+        VNull -> putStr "null"
       return(e, ns, VUnit)
   Sprintln exp -> do
       (ns, x) <- transExp exp e s

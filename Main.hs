@@ -27,7 +27,7 @@ putStrV v s = when (v > 1) $ putStrLn s
 
 
 runFile :: Verbosity -> ParseFun Prog -> FilePath -> IO ()
-runFile v p f = putStrLn f >> readFile f >>= run v p
+runFile v p f = readFile f >>= run v p
 
 run :: Verbosity -> ParseFun Prog -> String -> IO ()
 run v p s = let ts = myLLexer s in case p ts of
@@ -36,11 +36,8 @@ run v p s = let ts = myLLexer s in case p ts of
                           putStrV v $ show ts
                           putStrLn s
                           exitFailure
-           Ok  tree -> do putStrLn ""
-                          check tree
+           Ok  tree -> do check tree
                           start tree
-
-                          Main.showTree v tree
                           exitSuccess
 
 
