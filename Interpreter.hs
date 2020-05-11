@@ -285,6 +285,10 @@ transStm x e s  = case x of
       case v of
         VNull -> return(e, ns, VUnit)
         _ -> transStm (Sblock stms) e s
+  Sassert exp -> do
+      (ns, VBool b) <- transExp exp e s
+      if b then return(e, ns, VUnit)
+      else error "Assertion fail"
 
 
 

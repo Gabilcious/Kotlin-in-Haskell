@@ -347,6 +347,11 @@ transStm x e s@(S sm)  = case x of
           transStm (Sblock stms) ne ns
         _ -> transStm (Sblock stms) e s
       return (e, s, TRunit)
+  Sassert exp -> do
+       (ns, t) <- transExp exp e s
+       case t of
+         Tnonnull Tbool -> return(e, s, TRunit)
+         _ -> error "Assertion argument should be nonnullable Bool"
 
 
 

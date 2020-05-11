@@ -145,7 +145,7 @@ Exp10 : '[' Iterable ']' { AbsKotlin.Eiter $2 }
       | '{' ListArg '->' ListStm '}' { AbsKotlin.Elambda $2 (reverse $4) }
       | Exp11 { $1 }
 Exp11 :: { Exp }
-Exp11 : Exp11 '!!' { AbsKotlin.Ennass $1 } | Exp12 { $1 }
+Exp11 : Exp12 '!!' { AbsKotlin.Ennass $1 } | Exp12 { $1 }
 Exp12 :: { Exp }
 Exp12 : Ident { AbsKotlin.Evar $1 } | '(' Exp ')' { $2 }
 ListExp :: { [Exp] }

@@ -52,29 +52,30 @@ import ErrM
   'Unit' { PT _ (TS _ 37) }
   '[' { PT _ (TS _ 38) }
   ']' { PT _ (TS _ 39) }
-  'break' { PT _ (TS _ 40) }
-  'continue' { PT _ (TS _ 41) }
-  'downTo' { PT _ (TS _ 42) }
-  'else' { PT _ (TS _ 43) }
-  'false' { PT _ (TS _ 44) }
-  'for' { PT _ (TS _ 45) }
-  'fun' { PT _ (TS _ 46) }
-  'if' { PT _ (TS _ 47) }
-  'in' { PT _ (TS _ 48) }
-  'null' { PT _ (TS _ 49) }
-  'print' { PT _ (TS _ 50) }
-  'println' { PT _ (TS _ 51) }
-  'return' { PT _ (TS _ 52) }
-  'run' { PT _ (TS _ 53) }
-  'step' { PT _ (TS _ 54) }
-  'true' { PT _ (TS _ 55) }
-  'until' { PT _ (TS _ 56) }
-  'val' { PT _ (TS _ 57) }
-  'var' { PT _ (TS _ 58) }
-  'while' { PT _ (TS _ 59) }
-  '{' { PT _ (TS _ 60) }
-  '||' { PT _ (TS _ 61) }
-  '}' { PT _ (TS _ 62) }
+  'assert' { PT _ (TS _ 40) }
+  'break' { PT _ (TS _ 41) }
+  'continue' { PT _ (TS _ 42) }
+  'downTo' { PT _ (TS _ 43) }
+  'else' { PT _ (TS _ 44) }
+  'false' { PT _ (TS _ 45) }
+  'for' { PT _ (TS _ 46) }
+  'fun' { PT _ (TS _ 47) }
+  'if' { PT _ (TS _ 48) }
+  'in' { PT _ (TS _ 49) }
+  'null' { PT _ (TS _ 50) }
+  'print' { PT _ (TS _ 51) }
+  'println' { PT _ (TS _ 52) }
+  'return' { PT _ (TS _ 53) }
+  'run' { PT _ (TS _ 54) }
+  'step' { PT _ (TS _ 55) }
+  'true' { PT _ (TS _ 56) }
+  'until' { PT _ (TS _ 57) }
+  'val' { PT _ (TS _ 58) }
+  'var' { PT _ (TS _ 59) }
+  'while' { PT _ (TS _ 60) }
+  '{' { PT _ (TS _ 61) }
+  '||' { PT _ (TS _ 62) }
+  '}' { PT _ (TS _ 63) }
   L_integ  { PT _ (TI $$) }
   L_quoted { PT _ (TL $$) }
   L_ident  { PT _ (TV $$) }
@@ -201,6 +202,7 @@ Stm : Dec { AbsKotlin.Sdec $1 }
     | 'print' '(' Exp ')' ';' { AbsKotlin.Sprint $3 }
     | 'println' '(' Exp ')' ';' { AbsKotlin.Sprintln $3 }
     | Exp '?.let' '{' ListStm '}' { AbsKotlin.Snotnull $1 (reverse $4) }
+    | 'assert' '(' Exp ')' ';' { AbsKotlin.Sassert $3 }
 ListStm :: { [Stm] }
 ListStm : {- empty -} { [] } | ListStm Stm { flip (:) $1 $2 }
 Inst :: { Inst }

@@ -87,6 +87,7 @@ data Stm
     | Sprint Exp
     | Sprintln Exp
     | Snotnull Exp [Stm]
+    | Sassert Exp
   deriving (Eq, Ord, Show, Read)
 
 data Inst = Idec Dec

@@ -97,6 +97,7 @@ transStm x = case x of
   Sprint exp -> failure x
   Sprintln exp -> failure x
   Snotnull exp stms -> failure x
+  Sassert exp -> failure x
 transInst :: Inst -> Result
 transInst x = case x of
   Idec dec -> failure x

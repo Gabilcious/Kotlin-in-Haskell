@@ -92,6 +92,8 @@ Sprintln. Stm  ::=  "println" "(" Exp ")" ";" ;
 
 Snotnull. Stm  ::=  Exp "?.let" "{" [Stm] "}" ;
 
+Sassert.  Stm  ::=  "assert" "(" Exp ")" ";" ;
+
 terminator Stm "" ;
 
 

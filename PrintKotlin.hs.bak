@@ -129,7 +129,7 @@ instance Print AbsKotlin.Exp where
     AbsKotlin.Ecall functionexp -> prPrec i 10 (concatD [prt 0 functionexp])
     AbsKotlin.Eget id dimexps -> prPrec i 10 (concatD [prt 0 id, prt 0 dimexps])
     AbsKotlin.Elambda args stms -> prPrec i 10 (concatD [doc (showString "{"), prt 0 args, doc (showString "->"), prt 0 stms, doc (showString "}")])
-    AbsKotlin.Ennass exp -> prPrec i 11 (concatD [prt 11 exp, doc (showString "!!")])
+    AbsKotlin.Ennass exp -> prPrec i 11 (concatD [prt 12 exp, doc (showString "!!")])
     AbsKotlin.Evar id -> prPrec i 12 (concatD [prt 0 id])
   prtList _ [] = concatD []
   prtList _ [x] = concatD [prt 0 x]

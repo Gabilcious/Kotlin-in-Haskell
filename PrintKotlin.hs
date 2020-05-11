@@ -207,6 +207,7 @@ instance Print AbsKotlin.Stm where
     AbsKotlin.Sprint exp -> prPrec i 0 (concatD [doc (showString "print"), doc (showString "("), prt 0 exp, doc (showString ")"), doc (showString ";")])
     AbsKotlin.Sprintln exp -> prPrec i 0 (concatD [doc (showString "println"), doc (showString "("), prt 0 exp, doc (showString ")"), doc (showString ";")])
     AbsKotlin.Snotnull exp stms -> prPrec i 0 (concatD [prt 0 exp, doc (showString "?.let"), doc (showString "{"), prt 0 stms, doc (showString "}")])
+    AbsKotlin.Sassert exp -> prPrec i 0 (concatD [doc (showString "assert"), doc (showString "("), prt 0 exp, doc (showString ")"), doc (showString ";")])
   prtList _ [] = concatD []
   prtList _ (x:xs) = concatD [prt 0 x, prt 0 xs]
 
