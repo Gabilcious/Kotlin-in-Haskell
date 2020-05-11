@@ -242,7 +242,6 @@ transStm x e s  = case x of
       (nns, VArray list) <- transExp exp ne ns
       (nnns, v) <- doFor ident list stms VUnit ne nns
       return(e, nnns, v)
-
   Swhile exp stms -> do
       (_, ns, v) <- transStm (Sifelse exp stms [Sbreak]) e s
       case get ns of
@@ -262,7 +261,7 @@ transStm x e s  = case x of
         True -> do
             (_, nns, v) <- doStms stms e ns
             return(e, nns, v)
-        False -> return(e, s ,VUnit)
+        False -> return(e, ns ,VUnit)
   Sifelse exp stms1 stms2 -> do
       (ns, VBool v) <- transExp exp e s
       case v of
@@ -372,8 +371,10 @@ transExp x e s = case x of
         False -> transExp exp3 e s
   Eor exp1 exp2 -> do
       (ns, VBool a) <- transExp exp1 e s
-      (nns, VBool b) <- transExp exp2 e ns
-      return(nns, VBool (a || b))
+      if a then return (ns, VBool True)
+      else do
+        (nns, VBool b) <- transExp exp2 e ns
+        return(nns, VBool (a || b))
   Eand exp1 exp2 -> do
       (ns, VBool a) <- transExp exp1 e s
       (nns, VBool b) <- transExp exp2 e ns

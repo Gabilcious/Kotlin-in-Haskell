@@ -103,7 +103,6 @@ tryAssign a b = if canAssign a b then
   else
     error ("Cannot assign " ++ show b ++ " to " ++ show a)
 
--- TODO: gorliwośc ifa usunac
 alloc :: Env -> State -> Ident -> Bool -> Type -> IO (Env, State)
 alloc (E em) (S sm) ident@(Ident name) const t = do
     let Help depth = sm ! (-3)
