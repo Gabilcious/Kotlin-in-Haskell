@@ -4,8 +4,10 @@ val a: Array<Array<Int>> = Array(
             [x..x+5]; }
 );
 
+val n: Int = 5;
+
 val b: Array<Array<Int?>> = Array(
-        5,
+        n,
         { x: Int ->
             Array(5, {y: Int ->
                                 var ret : Int?;

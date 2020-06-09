@@ -414,10 +414,12 @@ transExp x e s = case x of
   Eiter iterable -> do
       (ns, vs) <- transIterable iterable e s
       return(ns, VArray vs)
-  Earray (Eint size) exp -> do
-       (ns, VFun [Args it _] stms eFun) <- transExp exp e s
-       (nns, vs) <- transArray e ns stms it 0 size []
-       return(nns, VArray vs)
+--      TODO: zmienic array by przyjmowalo tez ident
+  Earray size exp -> do
+      (ns, VInt v) <- transExp size e s
+      (nns, VFun [Args it _] stms eFun) <- transExp exp e ns
+      (nnns, vs) <- transArray e nns stms it 0 v []
+      return(nnns, VArray vs)
   Etupla exps -> do
       (ns, vs) <- transEtuplaHelper exps e s
       return(ns, VTupla vs)
