@@ -12,9 +12,17 @@ val b: Array<Array<Int?>> = Array(
         }
 );
 
+fun foo(): Int {
+    assert(10==19);
+    return 0;
+}
+// TODO: println(b[4]/10);
 
 fun main(): Unit {
-   //b[10]=15; // TODO
-    //val x: Int = b[10];
-    println(b[-10]);
+    for (i in [1..10]) {
+        if (true) {
+            val a: Int = 10/0; // TODO return 10/0;
+            foo();
+        }
+    }
 }

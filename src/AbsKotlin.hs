@@ -46,6 +46,11 @@ data Exp
     | Evar Ident
   deriving (Eq, Ord, Show, Read)
 
+instance Show Exp where
+      show (Eassign e1 op e2) = show e1 ++ show op ++ show e2
+      show (Eeq e1 e2) = show e1 ++ show e2
+      -- TODO: continue
+
 data DimExp = Dim Exp
   deriving (Eq, Ord, Show, Read)
 
@@ -63,8 +68,8 @@ data BaseType
   deriving (Eq, Ord, Read)
 
 instance Show BaseType where
-      show (Ttupla []) = "Tupla<>";
-      show (Ttupla list) = "Tupla<" ++ (foldr1 (\x y -> x ++ "," ++ y) (map show list)) ++ ">";
+      show (Ttupla []) = "Tupla<>"
+      show (Ttupla list) = "Tupla<" ++ (foldr1 (\x y -> x ++ "," ++ y) (map show list)) ++ ">"
       show (Tbool) = "Bool"
       show (Tint) = "Int"
       show (Tstring) = "String"

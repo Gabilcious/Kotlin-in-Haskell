@@ -49,8 +49,6 @@ data Env = E (Map Ident (Integer, Bool))
 data State = S (Map Integer Value)
   deriving (Eq, Ord, Show, Read)
 
-failure x = error ("Undefined case: " ++ show x)
-
 
 
 
@@ -59,10 +57,12 @@ failure x = error ("Undefined case: " ++ show x)
 -- ------------- --
 
 start :: Prog -> IO()
-start prog = do
-    let e = E empty
-    let s = S (fromList [(-1, VInt 1), (-2, go)])
-    transProg prog e s
+start prog = catch (
+    do
+      let e = E empty
+      let s = S (fromList [(-1, VInt 1), (-2, go)])
+      transProg prog e s) $ \ex -> do
+          throw $ AssertionFailed ("Error has occured:\n\t" ++ show (ex :: SomeException) )
 
 transProg :: Prog -> Env -> State -> IO()
 transProg x e@(E em) s@(S sm) = case x of
@@ -142,24 +142,28 @@ declareFun e s id args stms const = do
 transDec :: Dec -> Env -> State -> IO(Env, State)
 transDec x e s = case x of
   Dfun functiondec -> transFunctionDec functiondec e s
-  Dvar ident type_ exp -> do
+  Dvar ident@(Ident name) type_ exp -> catch (do
       (ns, val) <- transExp exp e s
-      declare e ns ident val False
-  Dval ident type_ exp -> do
+      declare e ns ident val False) $ \ex -> do
+         throwIO $ AssertionFailed ("in declaration " ++ name ++ ":\n\t" ++ show (ex :: SomeException) )
+  Dval ident@(Ident name) type_ exp -> catch (do
       (ns, val) <- transExp exp e s
-      declare e ns ident val True
-  Dvarnull ident type_ -> do
+      declare e ns ident val True) $ \ex -> do
+         throwIO $ AssertionFailed ("in declaration " ++ name ++ ":\n\t" ++ show (ex :: SomeException) )
+  Dvarnull ident@(Ident name) type_ -> catch (do
       (ns, val) <- transExp Enull e s
-      declare e ns ident val False
-  Dvalnull ident type_ -> do
+      declare e ns ident val False) $ \ex -> do
+         throwIO $ AssertionFailed ("in declaration " ++ name ++ ":\n\t" ++ show (ex :: SomeException) )
+  Dvalnull ident@(Ident name) type_ -> catch (do
       (ns, val) <- transExp Enull e s
-      declare e ns ident val True
+      declare e ns ident val True ) $ \ex -> do -- TODO: remove this "do"
+         throwIO $ AssertionFailed ("in declaration " ++ name ++ ":\n\t" ++ show (ex :: SomeException) )
 
 transFunctionDec :: FunctionDec -> Env -> State -> IO(Env, State)
 transFunctionDec x e s = case x of
   FunDec (Ident "main") _ _ stms -> do
       (_, ns, v) <- catch (doStms stms e s) $ \ex -> do
-              throw $ AssertionFailed ("\nin function: main:\n\t" ++ show (ex :: SomeException) )
+              throw $ AssertionFailed ("in function main:\n\t" ++ show (ex :: SomeException) )
       return (e, set go ns)
   FunDec ident args type_ stms -> declareFun e s ident args stms True
 
@@ -240,35 +244,40 @@ transStm x e s  = case x of
   Sexp exp -> do
       (ns, v) <- transExp exp e s
       return(e, ns, v)
-  Sblock stms -> do
+  Sblock stms -> catch (do
       (_, ns, v) <- doStms stms e s
-      return(e, ns, v)
-  Sfor ident exp stms -> do
+      return(e, ns, v) ) $ \ex -> do
+           throwIO $ AssertionFailed ("in block statemenet:\n\t" ++ show (ex :: SomeException) )
+  Sfor ident exp stms -> catch (do
       let (ne, ns) = alloc e s ident True
       (nns, VArray list) <- transExp exp ne ns
       (nnns, v) <- doFor ident list stms VUnit ne nns
-      return(e, nnns, v)
-  Swhile exp stms -> do
+      return(e, nnns, v) ) $ \ex -> do
+             throwIO $ AssertionFailed ("in for statemenet:\n\t" ++ show (ex :: SomeException) )
+  Swhile exp stms -> catch (do
       (_, ns, v) <- transStm (Sifelse exp stms [Sbreak]) e s
       case get ns of
         x | x == ret  -> return(e, ns, v)
           | x == bre  -> return(e, set go ns, v)
           | x == cont -> transStm (Swhile exp stms) e (set go ns)
-          | x == go   -> transStm (Swhile exp stms) e ns
+          | x == go   -> transStm (Swhile exp stms) e ns ) $ \ex -> do
+             throwIO $ AssertionFailed ("in while statemenet:\n\t" ++ show (ex :: SomeException) )
   Sbreak -> return(e, set bre s, VUnit)
   Scont -> return(e, set cont s, VUnit)
-  Sretexp exp -> do
+  Sretexp exp -> catch (do
       (ns, v) <- transExp exp e s
-      return(e, set ret ns, v)
+      return(e, set ret ns, v) ) $ \ex -> do
+         throwIO $ AssertionFailed ("in return statemenet:\n\t" ++ show (ex :: SomeException) )
   Sret -> return(e, set ret s, VUnit)
-  Sif exp stms -> do
+  Sif exp stms -> catch (do
       (ns, VBool v) <- transExp exp e s
       case v of
         True -> do
             (_, nns, v) <- doStms stms e ns
             return(e, nns, v)
-        False -> return(e, ns ,VUnit)
-  Sifelse exp stms1 stms2 -> do
+        False -> return(e, ns ,VUnit) ) $ \ex -> do
+            throwIO $ AssertionFailed ("in if statemenet:\n\t" ++ show (ex :: SomeException) )
+  Sifelse exp stms1 stms2 -> catch (do
       (ns, VBool v) <- transExp exp e s
       case v of
         True -> do
@@ -276,27 +285,29 @@ transStm x e s  = case x of
             return(e, nns, v)
         False -> do
             (_, nns, v) <- doStms stms2 e ns
-            return(e, nns, v)
-  Sprint exp -> do
+            return(e, nns, v) ) $ \ex -> do
+        throwIO $ AssertionFailed ("in if-else statemenet:\n\t" ++ show (ex :: SomeException) )
+  Sprint exp -> catch (do
       (ns, x) <- transExp exp e s
       putStr (show x)
-      return(e, ns, VUnit)
-  Sprintln exp -> do
+      return(e, ns, VUnit) ) $ \ex -> do
+         throwIO $ AssertionFailed ("in print statemenet:\n\t" ++ show (ex :: SomeException) )
+  Sprintln exp -> catch (do
       (ns, x) <- transExp exp e s
       putStrLn (show x)
-      return(e, ns, VUnit)
-  Snotnull exp stms -> do
+      return(e, ns, VUnit) ) $ \ex -> do
+         throwIO $ AssertionFailed ("in println statemenet:\n\t" ++ show (ex :: SomeException) )
+  Snotnull exp stms -> catch (do
       (ns, v) <- transExp exp e s
       case v of
         VNull -> return(e, ns, VUnit)
-        _ -> transStm (Sblock stms) e s
+        _ -> transStm (Sblock stms) e s ) $ \ex -> do
+          throwIO $ AssertionFailed ("in !! statemenet:\n\t" ++ show (ex :: SomeException) )
   Sassert exp -> do
-      (ns, VBool b) <- transExp exp e s
+      (ns, VBool b) <- catch (transExp exp e s) $ \ex -> do
+          throwIO $ AssertionFailed ("in assert statemenet:\n\t" ++ show (ex :: SomeException) )
       if b then return(e, ns, VUnit)
-      else do
---          putStrLn "Assertion failed"
-          -- TODO throw i putStr
-          throwIO (AssertionFailed "Assertion failed")
+      else throwIO $ AssertionFailed ("Assertion failed " ++ show exp)
 
 
 
@@ -316,11 +327,13 @@ addArgsHelper args exps eToAdd eToEval s = case (args, exps) of
 
 transFunctionExp :: FunctionExp -> Env -> State -> IO(State, Value)
 transFunctionExp x e s = case x of
-  FunCall ident exps -> do
+  FunCall ident@(Ident name) exps -> catch (do
       let VFun args stms ne = getVal e s ident
       (nne, ns) <- addArgsHelper args exps ne e s
       (_, nns, v) <- doStms stms nne ns
-      return(set go nns, v)
+      return(set go nns, v))
+       $ \ex -> do
+           throw $ AssertionFailed ("in function " ++ name ++ " call:\n\t" ++ show (ex :: SomeException) )
 
 
 transDimExp :: DimExp -> Env -> State -> IO(State, Value)
@@ -333,13 +346,13 @@ transGetExpHelper v dims e s = case (v,dims) of
     (VArray list, h:t) -> do
       (ns, VInt idx) <- transDimExp h e s
       case fromIntegral idx  of
-        index | index < 0 -> throwIO $ AssertionFailed ("index: " ++ show index ++ " is negative")
-              | index >= length list -> throwIO $ AssertionFailed ("index: " ++ show index ++ " is out of bound")
+        index | index < 0 -> throwIO $ AssertionFailed ("index " ++ show index ++ " is negative")
+              | index >= length list -> throwIO $ AssertionFailed ("index " ++ show index ++ " is out of bound")
               | otherwise -> transGetExpHelper (list !! index) t e ns
 
 transGetExp :: Ident -> [DimExp] -> Env -> State -> IO(State, Value)
 transGetExp ident@(Ident name) dimexps e s = catch (transGetExpHelper (getVal e s ident) dimexps e s) $ \ex -> do
-    throw $ AssertionFailed ("in array: " ++ name ++ " " ++ show (ex :: SomeException) )
+    throw $ AssertionFailed ("in array " ++ name ++ ":\n\t" ++ show (ex :: SomeException) )
 
 
 
@@ -441,7 +454,7 @@ transExp x e s = case x of
   Ennass exp -> do
       (ns, v) <- transExp exp e s
       case v of
-        VNull -> error "Null pointer exeption"
+        VNull -> throw $ AssertionFailed ("Null pointer exeption")
         _ -> return(ns,v)
   Evar ident -> return(s, getVal e s ident)
 
@@ -456,7 +469,7 @@ transOpAssign x a b = case x of
   OpAssign4 -> case (a, b) of
     (VInt va, VInt vb) -> VInt (va * vb)
   OpAssign5 -> case (a, b) of
-    (VInt va, VInt 0) -> error "Cannot divide by 0"
+    (VInt va, VInt 0) -> throw $ AssertionFailed ("cannot divide by 0")
     (VInt va, VInt vb) -> VInt (div va  vb)
   OpAssign6 -> case (a, b) of
     (VInt va, VInt vb) -> VInt (mod va vb)
