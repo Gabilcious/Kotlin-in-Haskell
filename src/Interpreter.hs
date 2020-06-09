@@ -6,6 +6,8 @@ import System.IO ( stdin, hGetContents )
 import System.Environment ( getArgs, getProgName )
 import System.Exit ( exitFailure, exitSuccess )
 import Control.Monad (when)
+import Control.Exception
+import GHC.IO.Exception
 
 import LexKotlin
 import ParKotlin
@@ -156,7 +158,8 @@ transDec x e s = case x of
 transFunctionDec :: FunctionDec -> Env -> State -> IO(Env, State)
 transFunctionDec x e s = case x of
   FunDec (Ident "main") _ _ stms -> do
-      (_, ns, v) <- doStms stms e s
+      (_, ns, v) <- catch (doStms stms e s) $ \ex -> do
+              throw $ AssertionFailed ("\nin function: main:\n\t" ++ show (ex :: SomeException) )
       return (e, set go ns)
   FunDec ident args type_ stms -> declareFun e s ident args stms True
 
@@ -290,7 +293,10 @@ transStm x e s  = case x of
   Sassert exp -> do
       (ns, VBool b) <- transExp exp e s
       if b then return(e, ns, VUnit)
-      else error "Assertion fail"
+      else do
+--          putStrLn "Assertion failed"
+          -- TODO throw i putStr
+          throwIO (AssertionFailed "Assertion failed")
 
 
 
@@ -327,12 +333,14 @@ transGetExpHelper v dims e s = case (v,dims) of
     (VArray list, h:t) -> do
       (ns, VInt idx) <- transDimExp h e s
       case fromIntegral idx  of
-        index | index < 0 -> error "Negative index"
-              | index >= length list -> error "Array Index Out of Bound"
+        index | index < 0 -> throwIO $ AssertionFailed ("index: " ++ show index ++ " is negative")
+              | index >= length list -> throwIO $ AssertionFailed ("index: " ++ show index ++ " is out of bound")
               | otherwise -> transGetExpHelper (list !! index) t e ns
 
 transGetExp :: Ident -> [DimExp] -> Env -> State -> IO(State, Value)
-transGetExp ident dimexps e s = transGetExpHelper (getVal e s ident) dimexps e s
+transGetExp ident@(Ident name) dimexps e s = catch (transGetExpHelper (getVal e s ident) dimexps e s) $ \ex -> do
+    throw $ AssertionFailed ("in array: " ++ name ++ " " ++ show (ex :: SomeException) )
+
 
 
 
@@ -414,7 +422,6 @@ transExp x e s = case x of
   Eiter iterable -> do
       (ns, vs) <- transIterable iterable e s
       return(ns, VArray vs)
---      TODO: zmienic array by przyjmowalo tez ident
   Earray size exp -> do
       (ns, VInt v) <- transExp size e s
       (nns, VFun [Args it _] stms eFun) <- transExp exp e ns

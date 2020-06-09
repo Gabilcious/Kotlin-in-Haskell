@@ -1,27 +1,20 @@
-var w :Int =1;
+val n: Int = 5;
 
-fun f(d:Int) : Unit {
-    if (d>1) {w =w *d; f(d-1);}
-}
+val b: Array<Array<Int?>> = Array(
+        n,
+        { x: Int ->
+            Array(5, {y: Int ->
+                var ret : Int?;
+                if (x + y != 4) { ret = y; }
+                ret;
+            }
+            );
+        }
+);
 
 
-fun fib(d: Int) : Int {
-    if (d == 1 || d == 2) {
-        return 1;
-    }
-    return fib (d - 1) + fib (d - 2);
-}
 fun main(): Unit {
-    println(fib(4));
-    f(4);
-    println(w);
-    w = 1;
-    f(3);
-    println(w);
-    w = 1;
-    f(2);
-    println(w);
-    w = 1;
-    f(1);
-    println(w);
+   //b[10]=15; // TODO
+    //val x: Int = b[10];
+    println(b[-10]);
 }
