@@ -189,12 +189,12 @@ transFunctionDec x e s@(S sm) = case x of
   FunDec (Ident "main") _ _ _ -> error "Type of main shoud be: () -> Unit"
   FunDec ident args ret stms -> do
       let t = Prelude.map (\(Args _ x) -> x) args
-      (xe, xs) <- alloc e s ident True (Tfun t ret)
-      (ne, ns) <- addArgsHelper args xe xs
+      (ne, ns) <- alloc e s ident True (Tfun t ret)
       let nns@(S nnsm) = incDepth ns
       let nnns@(S nnnsm) = S (insert (-5) (HelpRet ret) nnsm)
       let nnnns = S (insert (-6) (Help 0) nnnsm)
-      (_, S retSm, v) <- doStms stms ne nnnns
+      (re, rs) <- addArgsHelper args ne nnnns
+      (_, S retSm, v) <- doStms stms re rs
       case (ret, retSm ! (-6)) of
         (TRunit, _) -> return (ne, ns)
         (_, Help 0) -> error "Function should return something"
@@ -373,7 +373,7 @@ transFunctionExp x e s = case x of
       Tfun t ret <- getVal e s ident
       case (length t, length exps) of
           (expected, passed) | expected == passed -> do
-              expToType exps t e s
+              expToType exps t e s --TODO tu jtestem
               case ret of
                 TRunit -> return(s, Tunit)
                 TRtype x -> return(s,x)
