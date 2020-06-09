@@ -128,36 +128,34 @@ is v s = v == get s
 -- ----------------------- --
 
 declare :: Env -> State -> Ident -> Value -> Bool -> IO(Env, State)
-declare e s id val const = do
+declare e s id@(Ident name) val const = catch (do
     let (ne, ns) = alloc e s id const
     let nns = assign ne ns id val
-    return(ne, nns)
+    return(ne, nns)) $ \ex -> do -- TODO: remove this "do"
+        throwIO $ AssertionFailed ("in declaration " ++ name ++ ":\n\t" ++ show (ex :: SomeException) )
 
 declareFun :: Env -> State -> Ident -> [Arg] -> [Stm] -> Bool -> IO(Env, State)
-declareFun e s id args stms const = do
+declareFun e s id@(Ident name) args stms const = catch (do
     let (ne, ns) = alloc e s id const
     let nns = assign ne ns id (VFun args stms ne)
-    return(ne, nns)
+    return(ne, nns)) $ \ex -> do
+        throwIO $ AssertionFailed ("in declaration " ++ name ++ ":\n\t" ++ show (ex :: SomeException) )
 
 transDec :: Dec -> Env -> State -> IO(Env, State)
 transDec x e s = case x of
   Dfun functiondec -> transFunctionDec functiondec e s
-  Dvar ident@(Ident name) type_ exp -> catch (do
+  Dvar ident@(Ident name) type_ exp -> do
       (ns, val) <- transExp exp e s
-      declare e ns ident val False) $ \ex -> do
-         throwIO $ AssertionFailed ("in declaration " ++ name ++ ":\n\t" ++ show (ex :: SomeException) )
-  Dval ident@(Ident name) type_ exp -> catch (do
+      declare e ns ident val False
+  Dval ident@(Ident name) type_ exp -> do
       (ns, val) <- transExp exp e s
-      declare e ns ident val True) $ \ex -> do
-         throwIO $ AssertionFailed ("in declaration " ++ name ++ ":\n\t" ++ show (ex :: SomeException) )
-  Dvarnull ident@(Ident name) type_ -> catch (do
+      declare e ns ident val True
+  Dvarnull ident@(Ident name) type_ -> do
       (ns, val) <- transExp Enull e s
-      declare e ns ident val False) $ \ex -> do
-         throwIO $ AssertionFailed ("in declaration " ++ name ++ ":\n\t" ++ show (ex :: SomeException) )
-  Dvalnull ident@(Ident name) type_ -> catch (do
+      declare e ns ident val False
+  Dvalnull ident@(Ident name) type_ -> do
       (ns, val) <- transExp Enull e s
-      declare e ns ident val True ) $ \ex -> do -- TODO: remove this "do"
-         throwIO $ AssertionFailed ("in declaration " ++ name ++ ":\n\t" ++ show (ex :: SomeException) )
+      declare e ns ident val True
 
 transFunctionDec :: FunctionDec -> Env -> State -> IO(Env, State)
 transFunctionDec x e s = case x of

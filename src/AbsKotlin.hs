@@ -46,10 +46,10 @@ data Exp
     | Evar Ident
   deriving (Eq, Ord, Show, Read)
 
-instance Show Exp where
-      show (Eassign e1 op e2) = show e1 ++ show op ++ show e2
-      show (Eeq e1 e2) = show e1 ++ show e2
-      -- TODO: continue
+--instance Show Exp where
+--      show (Eassign e1 op e2) = show e1 ++ show op ++ show e2
+--      show (Eeq e1 e2) = show e1 ++ show e2
+--      -- TODO: continue
 
 data DimExp = Dim Exp
   deriving (Eq, Ord, Show, Read)

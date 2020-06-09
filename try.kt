@@ -1,4 +1,4 @@
-val n: Int = 5;
+val n: Int = -1;
 
 val b: Array<Array<Int?>> = Array(
         n,
@@ -21,8 +21,7 @@ fun foo(): Int {
 fun main(): Unit {
     for (i in [1..10]) {
         if (true) {
-            val a: Int = 10/0; // TODO return 10/0;
-            foo();
+            a++;
         }
     }
 }

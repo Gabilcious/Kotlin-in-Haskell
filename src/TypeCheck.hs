@@ -6,6 +6,8 @@ import System.IO ( stdin, hGetContents )
 import System.Environment ( getArgs, getProgName )
 import System.Exit ( exitFailure, exitSuccess )
 import Control.Monad (when)
+import Control.Exception
+import GHC.IO.Exception
 
 import LexKotlin
 import ParKotlin
@@ -42,14 +44,15 @@ failure x = error ("Undefined case: " ++ show x)
 -- ------------- --
 
 check :: Prog -> IO()
-check prog = do
+check prog = catch (do
     let e = E empty
 --    -1 index     -2 howManyLoops     -3 depth     -4 main   -5 return expected   -6 return made    -8 lambda count
     let s = S (fromList [(-1, Help 1), (-2, Help 0), (-3, Help 0), (-4, Help 0), (-5, HelpRet TRunit), (-6, Help 0), (-7, Help 0)])
     S nsm <- transProg prog e s
     case nsm ! (-4) of
       Help 1 -> return()
-      _ -> error "Main was not found"
+      _ -> throwIO $ AssertionFailed "Main was not found") $ \ex -> do
+    throw $ AssertionFailed ("Error has occured:\n\t" ++ show (ex :: SomeException) )
 
 transProg :: Prog -> Env -> State -> IO State
 transProg x e@(E em) s@(S sm) = case x of
@@ -95,14 +98,14 @@ tryAssign :: Type -> Type -> IO Type
 tryAssign a b = if canAssign a b then
     return a
   else
-    error ("Cannot assign " ++ show b ++ " to " ++ show a)
+    throwIO $ AssertionFailed ("Got " ++ show b ++ " when " ++ show a ++ " is expected")
 
 alloc :: Env -> State -> Ident -> Bool -> Type -> IO (Env, State)
 alloc (E em) (S sm) ident@(Ident name) const t = do
     let Help depth = sm ! (-3)
-    if isReserved name then error (show name ++ " is a keyword")
+    if isReserved name then throwIO $ AssertionFailed (show name ++ " is a keyword")
     else case Data.Map.lookup ident em of
-      Just (_, _, d)  | d == depth -> error (show ident ++ " was previously declared in this scope")
+      Just (_, _, d)  | d == depth -> throwIO $ AssertionFailed  (show ident ++ " was previously declared in this scope")
       _ -> do
         let Help index = sm ! (-1)
         let ne = E (insert ident (index, const, depth) em)
@@ -124,13 +127,13 @@ getIdx (S sm) index = return(sm ! index)
 
 getVal :: Env -> State -> Ident -> IO Type
 getVal (E em) s ident = case Data.Map.lookup ident em of
-    Nothing -> error ( show ident ++ " is not defined")
+    Nothing -> throwIO $ AssertionFailed ( show ident ++ " is not defined")
     Just (index, _, _) -> getIdx s index
 
 assertNotConst :: Env -> Ident -> IO ()
 assertNotConst e@(E em) ident = do
     let (_, const, _) = em ! ident
-    when const $ error "Val cannot be reasigned"
+    when const (throwIO $ AssertionFailed  "Val cannot be reasigned")
 
 incDepth :: State -> State
 incDepth (S sm) = let
@@ -154,11 +157,12 @@ incLoop (S sm) = let
 -- ----------------------- --
 
 declare :: Env -> State -> Ident -> Type -> Bool -> Exp -> IO (Env, State)
-declare e s ident a const exp = do
+declare e s ident@(Ident name) a const exp = catch (do
       (ns, b) <- transExp exp e s
       _ <- tryAssign a b
       (ne, nns) <- alloc e ns ident const a
-      return(ne, nns)
+      return(ne, nns)) $ \ex -> do -- TODO: remove this "do"
+           throwIO $ AssertionFailed ("in declaration " ++ name ++ ":\n\t" ++ show (ex :: SomeException) )
 
 transDec :: Dec -> Env -> State -> IO (Env, State)
 transDec x e s = case x of
@@ -179,15 +183,16 @@ transFunctionDec :: FunctionDec -> Env -> State -> IO (Env, State)
 transFunctionDec x e s@(S sm) = case x of
   FunDec (Ident "main") [] TRunit stms ->
       case sm ! (-4) of
-        Help 0 -> do
+        Help 0 -> catch (do
           let ns@(S nsm) = S (insert (-4) (Help 1) sm)
           let nns = S (insert (-5) (HelpRet TRunit) nsm)
           let nnns = incDepth nns
           (_, _, v) <- doStms stms e nnns
-          return (e, ns)
-        _ -> error "Main was previously declared"
-  FunDec (Ident "main") _ _ _ -> error "Type of main shoud be: () -> Unit"
-  FunDec ident args ret stms -> do
+          return (e, ns)) $ \ex -> do
+                  throwIO $ AssertionFailed ("in function main:\n\t" ++ show (ex :: SomeException) )
+        _ -> throwIO $ AssertionFailed "Main was previously declared"
+  FunDec (Ident "main") _ _ _ -> throwIO $ AssertionFailed "Type of main shoud be: () -> Unit"
+  FunDec ident@(Ident name) args ret stms -> catch (do
       let t = Prelude.map (\(Args _ x) -> x) args
       (ne, ns) <- alloc e s ident True (Tfun t ret)
       let nns@(S nnsm) = incDepth ns
@@ -197,8 +202,9 @@ transFunctionDec x e s@(S sm) = case x of
       (_, S retSm, v) <- doStms stms re rs
       case (ret, retSm ! (-6)) of
         (TRunit, _) -> return (ne, ns)
-        (_, Help 0) -> error "Function should return something"
-        orherwise -> return (ne, ns)
+        (_, Help 0) -> throwIO $ AssertionFailed "Function should return something"
+        orherwise -> return (ne, ns)) $ \ex -> do
+                   throwIO $ AssertionFailed ("in function " ++ name ++ ":\n\t" ++ show (ex :: SomeException) )
 
 
 
@@ -215,33 +221,33 @@ transIterable x e s = case x of
       (nns, t2) <- transExp exp2 e ns
       case (t1, t2) of
         (Tnonnull Tint, Tnonnull Tint) -> return (nns, Tnonnull (Tarray (Tnonnull Tint)))
-        _ -> error ("Iterable shlould be <Int>..<Int>, not <" ++ show t1 ++ ">..<" ++ show t2 ++ ">")
+        _ -> throwIO $ AssertionFailed ("Iterable shlould be <Int>..<Int>, not <" ++ show t1 ++ ">..<" ++ show t2 ++ ">")
   Itup exp1 exp2 -> do
       (ns, t1) <- transExp exp1 e s
       (nns, t2) <- transExp exp2 e ns
       case (t1, t2) of
         (Tnonnull Tint, Tnonnull Tint) -> return (nns, Tnonnull (Tarray (Tnonnull Tint)))
-        _ -> error ("Iterable shlould be <Int> until <Int>, not <" ++ show t1 ++ "> until <" ++ show t2 ++ ">")
+        _ -> throwIO $ AssertionFailed ("Iterable shlould be <Int> until <Int>, not <" ++ show t1 ++ "> until <" ++ show t2 ++ ">")
   Itdown exp1 exp2 -> do
       (ns, t1) <- transExp exp1 e s
       (nns, t2) <- transExp exp2 e ns
       case (t1, t2) of
         (Tnonnull Tint, Tnonnull Tint) -> return (nns, Tnonnull (Tarray (Tnonnull Tint)))
-        _ -> error ("Iterable shlould be <Int> downTo <Int>, not <" ++ show t1 ++ "> downTo <" ++ show t2 ++ ">")
+        _ -> throwIO $ AssertionFailed ("Iterable shlould be <Int> downTo <Int>, not <" ++ show t1 ++ "> downTo <" ++ show t2 ++ ">")
   Itupst exp1 exp2 exp3 -> do
       (ns, t1) <- transExp exp1 e s
       (nns, t2) <- transExp exp2 e ns
       (nnns, t3) <- transExp exp2 e nns
       case (t1, t2, t3) of
         (Tnonnull Tint, Tnonnull Tint, Tnonnull Tint) -> return (nns, Tnonnull (Tarray (Tnonnull Tint)))
-        _ -> error ("Iterable shlould be <Int> until <Int> step <Int>, not <" ++ show t1 ++ "> until <" ++ show t2 ++ "> step <" ++ show t3 ++ ">")
+        _ -> throwIO $ AssertionFailed ("Iterable shlould be <Int> until <Int> step <Int>, not <" ++ show t1 ++ "> until <" ++ show t2 ++ "> step <" ++ show t3 ++ ">")
   Itdownst exp1 exp2 exp3 -> do
       (ns, t1) <- transExp exp1 e s
       (nns, t2) <- transExp exp2 e ns
       (nnns, t3) <- transExp exp2 e nns
       case (t1, t2, t3) of
         (Tnonnull Tint, Tnonnull Tint, Tnonnull Tint) -> return (nns, Tnonnull (Tarray (Tnonnull Tint)))
-        _ -> error ("Iterable shlould be <Int> downTo <Int> step <Int>, not <" ++ show t1 ++ "> downTo <" ++ show t2 ++ "> step <" ++ show t3 ++ ">")
+        _ -> throwIO $ AssertionFailed ("Iterable shlould be <Int> downTo <Int> step <Int>, not <" ++ show t1 ++ "> downTo <" ++ show t2 ++ "> step <" ++ show t3 ++ ">")
 
 
 
@@ -267,9 +273,10 @@ transStm x e s@(S sm)  = case x of
   Sdec dec -> do
       (ne, se) <- transDec dec e s
       return(ne, se, TRunit)
-  Sexp exp -> do
+  Sexp exp -> catch (do
       (_, t) <- transExp exp e s
-      return(e, s, TRtype t)
+      return(e, s, TRtype t)) $ \ex -> do
+             throwIO $ AssertionFailed ("in statement (" ++ show exp ++"):\n\t" ++ show (ex :: SomeException) )
   Sblock stms -> do
       let ns = incDepth s
       (_, S nnsm, t) <- doStms stms e ns
@@ -277,7 +284,7 @@ transStm x e s@(S sm)  = case x of
         Help 1 -> return (e, S (insert (-6) (Help 1) sm), t)
         _ -> return (e, s, t)
       return(e, s, t)
-  Sfor ident exp stms -> do
+  Sfor ident exp stms -> catch (do
       let ns = incLoop s
       (ns, v) <- transExp exp e ns
       case v of
@@ -285,69 +292,75 @@ transStm x e s@(S sm)  = case x of
           (ne, nns) <- alloc e ns ident True t
           (_, _, _) <- transStm (Sblock stms) ne nns
           return(e, s, TRunit)
-        _ -> error "Loop for can only go through nonnull Array"
-  Swhile exp stms -> do
+        _ -> throwIO $ AssertionFailed "Loop for can only go through nonnull Array") $ \ex -> do
+                     throwIO $ AssertionFailed ("in for statement:\n\t" ++ show (ex :: SomeException) )
+  Swhile exp stms -> catch (do
       let ns = incLoop s
       (_, _, _) <- transStm (Sif exp stms) e ns
-      return(e, s, TRunit)
+      return(e, s, TRunit)) $ \ex -> do
+            throwIO $ AssertionFailed ("in while statement:\n\t" ++ show (ex :: SomeException) )
   Sbreak -> do
       loops <- getIdx s (-2)
       case loops of
-        Help x | x == 0 -> error "Cannot perform break without a loop"
+        Help x | x == 0 -> throwIO $ AssertionFailed "Cannot perform break without a loop"
                | otherwise -> return(e, s, TRunit)
   Scont -> do
       loops <- getIdx s (-2)
       case loops of
-        Help x | x == 0 -> error "Cannot perform continue without a loop"
+        Help x | x == 0 -> throwIO $ AssertionFailed "Cannot perform continue without a loop"
                | otherwise -> return(e, s, TRunit)
   Sretexp exp -> do
       (ns@(S nsm), t) <- transExp exp e s
       case (sm ! (-7), nsm ! (-5)) of
         (Help 0, HelpRet (TRtype x)) | canAssign x t -> return(e, S (insert (-6) (Help 1) sm), TRtype t)
-        (Help 0, HelpRet x) -> error ("Function is expected to return " ++ show x ++ " not " ++ show t)
-        _ -> error "Return is not allowed inside lambda body"
+        (Help 0, HelpRet x) -> throwIO $ AssertionFailed ("Function is expected to return " ++ show x ++ " not " ++ show t)
+        _ -> throwIO $ AssertionFailed "Return is not allowed inside lambda body"
   Sret -> case (sm ! (-7), sm ! (-5)) of
       (Help 0, HelpRet TRunit) -> return(e, S (insert (-6) (Help 1) sm), TRunit)
       (Help 0, HelpRet x) -> error ("Function is expected to return " ++ show x ++ " not " ++ show TRunit)
-      _ -> error "Return is not allowed inside lambda body"
+      _ -> throwIO $ AssertionFailed "Return is not allowed inside lambda body"
   Sif exp stms -> do
       (ns, t) <- transExp exp e s
       case t of
-        Tnonnull Tbool -> do
+        Tnonnull Tbool -> catch (do
           (_,_,t) <- transStm (Sblock stms) e ns
-          return (e, s, t)
-        _ -> error ("Wrong expresion inside if statement: " ++ show t)
+          return (e, s, t)) $ \ex -> do
+               throwIO $ AssertionFailed ("in if statement:\n\t" ++ show (ex :: SomeException) )
+        _ -> throwIO $ AssertionFailed ("Wrong expresion inside if statement: " ++ show t)
   Sifelse exp stms1 stms2 -> do
       (ns, t) <- transExp exp e s
       case t of
-        Tnonnull Tbool -> do
+        Tnonnull Tbool -> catch (do
           let nns = incDepth ns
           (_,S a,t) <- doStms stms1 e nns
           (_,S b,t) <- doStms stms2 e ns
           case (a ! (-6), b ! (-6)) of
             (Help 1,Help 1) -> return (e, S (insert (-6) (Help 1) sm), t)
-            _ -> return (e, s, t)
-        _ -> error ("Wrong expresion inside if statement: " ++ show t)
+            _ -> return (e, s, t)) $ \ex -> do
+                         throwIO $ AssertionFailed ("in if-else statement:\n\t" ++ show (ex :: SomeException) )
+        _ -> throwIO $ AssertionFailed ("Wrong expresion inside if statement: " ++ show t)
   Sprint exp -> do
-      (ns, t) <- transExp exp e s
+      (ns, t) <- catch (transExp exp e s) $ \ex -> do
+              throwIO $ AssertionFailed ("in print statement:\n\t" ++ show (ex :: SomeException) )
       case t of
-        Tfun _ _ -> error ("Cannot print " ++ show t)
-        Tunit    -> error ("Cannot print " ++ show t)
+        Tfun _ _ -> throwIO $ AssertionFailed ("Cannot print " ++ show t)
+        Tunit    -> throwIO $ AssertionFailed ("Cannot print " ++ show t)
         _        -> return(e, s, TRunit)
   Sprintln exp -> transStm (Sprint exp) e s
-  Snotnull exp stms -> do
+  Snotnull exp stms -> catch (do
       (ns, t) <- transExp exp e s
       case t of
         Tnullable bt -> do
           (ne, ns) <- forceAlloc e s (Ident "it") True (Tnonnull bt)
           transStm (Sblock stms) ne ns
         _ -> transStm (Sblock stms) e s
-      return (e, s, TRunit)
+      return (e, s, TRunit)) $ \ex -> do
+            throwIO $ AssertionFailed ("in !! statement:\n\t" ++ show (ex :: SomeException) )
   Sassert exp -> do
        (ns, t) <- transExp exp e s
        case t of
          Tnonnull Tbool -> return(e, s, TRunit)
-         _ -> error "Assertion argument should be Bool"
+         _ -> throwIO $ AssertionFailed "Assertion argument should be Bool"
 
 
 
@@ -373,11 +386,11 @@ transFunctionExp x e s = case x of
       Tfun t ret <- getVal e s ident
       case (length t, length exps) of
           (expected, passed) | expected == passed -> do
-              expToType exps t e s --TODO tu jtestem
+              expToType exps t e s
               case ret of
                 TRunit -> return(s, Tunit)
                 TRtype x -> return(s,x)
-                             | otherwise  -> error ("Passed " ++ show passed ++ " arguments, when " ++ show ident ++ " expects " ++ show expected)
+                             | otherwise  -> throwIO $ AssertionFailed ("Passed " ++ show passed ++ " arguments, when " ++ show ident ++ " expects " ++ show expected)
 
 transEtuplaHelper :: [Exp] -> Env -> State -> IO (State, [Type])
 transEtuplaHelper exps e s = case exps of
@@ -394,7 +407,7 @@ transGetExp t dims e s = case (t, dims) of
         (ns, _type) <- transExp exp e s
         case _type of
             Tnonnull Tint -> transGetExp nt tail e ns
-            _ -> error ("Index of array should be Int, not " ++ show _type)
+            _ -> throwIO $ AssertionFailed ("Index of array should be Int, not " ++ show _type)
     _ -> error (show t ++ " is not an Array")
 
 transHelper :: Exp -> Exp -> OpAssign -> Env -> State -> IO (State, Type)
@@ -411,7 +424,7 @@ transBoolHelper exp1 exp2 op e s boolInt = do
     case (a, b, boolInt) of
       (Tnonnull Tint, Tnonnull Tint, 2)   -> return(nns, Tnonnull Tbool)
       (Tnonnull Tbool, Tnonnull Tbool, 1) -> return(nns, Tnonnull Tbool)
-      _ -> error ("Cannot perform " ++ op ++ " on " ++ show a ++ " and " ++ show b)
+      _ -> throwIO $ AssertionFailed ("Cannot perform " ++ op ++ " on " ++ show a ++ " and " ++ show b)
 
 
 transExp :: Exp -> Env -> State -> IO (State, Type)
@@ -429,8 +442,8 @@ transExp x e s = case x of
           (Tnonnull x, Tnull, _, _) -> return(ns, Tnullable x)
           (_, _, True, _) -> return(ns, a)
           (_, _, _, True) -> return(ns, b)
-          _ -> error ("Return expressions have different types: " ++ show a ++ " and " ++ show b)
-        _ -> error ("Wrong expresion inside if statement: " ++ show t)
+          _ -> throwIO $ AssertionFailed ("Return expressions have different types: " ++ show a ++ " and " ++ show b)
+        _ -> throwIO $ AssertionFailed ("Wrong expresion inside if statement: " ++ show t)
   Eor exp1 exp2 -> transBoolHelper exp1 exp2 "||" e s 1
   Eand exp1 exp2 -> transBoolHelper exp1 exp2 "&&" e s 1
   Eeq exp1 exp2 -> do
@@ -439,7 +452,7 @@ transExp x e s = case x of
     if canAssign a b || canAssign b a then
       return(s, Tnonnull Tbool)
     else
-      error ("Cannot compare " ++ show a ++ " and " ++ show b)
+      throwIO $ AssertionFailed ("Cannot compare " ++ show a ++ " and " ++ show b)
   Eneq exp1 exp2 -> transExp (Eeq exp1 exp2) e s
   El exp1 exp2 -> transBoolHelper exp1 exp2 "<" e s 2
   Eg exp1 exp2 -> transBoolHelper exp1 exp2 ">" e s 2
@@ -454,50 +467,50 @@ transExp x e s = case x of
       (ns, t) <- transExp exp e s
       case t of
         Tnonnull Tint  -> return(ns, t)
-        _              -> error ("Cannot negate " ++ show t)
+        _              -> throwIO $ AssertionFailed ("Cannot negate " ++ show t)
   Elneg exp -> do
       (ns, t) <- transExp exp e s
       case t of
         Tnonnull Tbool  -> return(ns, t)
-        _               -> error ("Cannot negate " ++ show t)
+        _               -> throwIO $ AssertionFailed ("Cannot negate " ++ show t)
   Einc (Evar ident) -> do
       t <- getVal e s ident
       assertNotConst e ident
       case t of
         Tnonnull Tint  -> return(s, t)
-        _              -> error ("Cannot increment " ++ show t)
-  Einc _ -> error "Only variable shlould be incremented"
+        _              -> throwIO $ AssertionFailed ("Cannot increment " ++ show t)
+  Einc _ -> throwIO $ AssertionFailed "Only variable shlould be incremented"
   Edec (Evar ident) -> do
       t <- getVal e s ident
       assertNotConst e ident
       case t of
         Tnonnull Tint  -> return(s, t)
-        _              -> error ("Cannot decrement " ++ show t)
-  Edec _ -> error "Only variable shlould be decremented"
+        _              -> throwIO $ AssertionFailed ("Cannot decrement " ++ show t)
+  Edec _ -> throwIO $ AssertionFailed "Only variable shlould be decremented"
   EPinc (Evar ident) -> do
       t <- getVal e s ident
       assertNotConst e ident
       case t of
         Tnonnull Tint  -> return(s, t)
-        _              -> error ("Cannot post-increment " ++ show t)
-  EPinc _ -> error "Only variable shlould be post-incremented"
+        _              -> throwIO $ AssertionFailed ("Cannot post-increment " ++ show t)
+  EPinc _ -> throwIO $ AssertionFailed "Only variable shlould be post-incremented"
   EPdec (Evar ident) -> do
       t <- getVal e s ident
       assertNotConst e ident
       case t of
         Tnonnull Tint  -> return(s, t)
-        _              -> error ("Cannot post-decrement " ++ show t)
-  EPdec _ -> error "Only variable shlould be post-decremented"
+        _              -> throwIO $ AssertionFailed ("Cannot post-decrement " ++ show t)
+  EPdec _ -> throwIO $ AssertionFailed "Only variable shlould be post-decremented"
   Eiter iterable -> transIterable iterable e s
   Earray exp1 exp2 -> do
       (ns, t1) <- transExp exp1 e s
       (nns, t2) <- transExp exp2 e ns
       case (t1, t2) of
           (Tnonnull Tint, Tfun [Tnonnull Tint] (TRtype t)) -> return (nns, Tnonnull (Tarray t))
-          (Tnonnull Tint, Tfun [Tnonnull Tint] _) -> error "Lambda should not return Unit"
-          (Tnonnull Tint, Tfun _ _) -> error "Lambda should take only one Int as argument"
-          (Tnonnull Tint, _) -> error "Second arg of Array constructor should be function"
-          _ -> error "Size of array should be Int"
+          (Tnonnull Tint, Tfun [Tnonnull Tint] _) -> throwIO $ AssertionFailed "Lambda should not return Unit"
+          (Tnonnull Tint, Tfun _ _) -> throwIO $ AssertionFailed "Lambda should take only one Int as argument"
+          (Tnonnull Tint, _) -> throwIO $ AssertionFailed "Second arg of Array constructor should be function"
+          _ -> throwIO $ AssertionFailed "Size of array should be Int"
   Etupla exps -> do
       (ns, list) <- transEtuplaHelper exps e s
       return(ns, Tnonnull (Ttupla list))
@@ -537,28 +550,28 @@ transOpAssign x a b = case x of
         Tnonnull Tint     -> return(Tnonnull Tint)
         Tnullable Tstring -> return(Tnullable Tstring)
         Tnonnull Tstring  -> return(Tnonnull Tstring)
-        _                 -> error ("Cannot add " ++ show a ++ " to " ++ show b)
+        _                 -> throwIO $ AssertionFailed ("Cannot add " ++ show a ++ " to " ++ show b)
   OpAssign3 -> do
       t <- tryAssign a b
       case t of
         Tnullable Tint    -> return(Tnullable Tint)
         Tnonnull Tint     -> return(Tnonnull Tint)
-        _                 -> error ("Cannot subtrack " ++ show b ++ " from " ++ show a)
+        _                 -> throwIO $ AssertionFailed ("Cannot subtrack " ++ show b ++ " from " ++ show a)
   OpAssign4 -> do
       t <- tryAssign a b
       case t of
         Tnullable Tint    -> return(Tnullable Tint)
         Tnonnull Tint     -> return(Tnonnull Tint)
-        _                 -> error ("Cannot multiply " ++ show a ++ " with " ++ show b)
+        _                 -> throwIO $ AssertionFailed ("Cannot multiply " ++ show a ++ " with " ++ show b)
   OpAssign5 -> do
       t <- tryAssign a b
       case t of
         Tnullable Tint    -> return(Tnullable Tint)
         Tnonnull Tint     -> return(Tnonnull Tint)
-        _                 -> error ("Cannot divide " ++ show a ++ " by " ++ show b)
+        _                 -> throwIO $ AssertionFailed ("Cannot divide " ++ show a ++ " by " ++ show b)
   OpAssign6 -> do
       t <- tryAssign a b
       case t of
         Tnullable Tint    -> return(Tnullable Tint)
         Tnonnull Tint     -> return(Tnonnull Tint)
-        _                 -> error ("Cannot calcule modulation of " ++ show a ++ " by " ++ show b)
+        _                 -> throwIO $ AssertionFailed ("Cannot calcule modulation of " ++ show a ++ " by " ++ show b)
