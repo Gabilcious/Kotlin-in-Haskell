@@ -131,14 +131,14 @@ declare :: Env -> State -> Ident -> Value -> Bool -> IO(Env, State)
 declare e s id@(Ident name) val const = catch (do
     let (ne, ns) = alloc e s id const
     let nns = assign ne ns id val
-    return(ne, nns)) $ \ex -> do -- TODO: remove this "do"
+    return(ne, nns)) $ \ex ->
         throwIO $ AssertionFailed ("in declaration " ++ name ++ ":\n\t" ++ show (ex :: SomeException) )
 
 declareFun :: Env -> State -> Ident -> [Arg] -> [Stm] -> Bool -> IO(Env, State)
 declareFun e s id@(Ident name) args stms const = catch (do
     let (ne, ns) = alloc e s id const
     let nns = assign ne ns id (VFun args stms ne)
-    return(ne, nns)) $ \ex -> do
+    return(ne, nns)) $ \ex ->
         throwIO $ AssertionFailed ("in declaration " ++ name ++ ":\n\t" ++ show (ex :: SomeException) )
 
 transDec :: Dec -> Env -> State -> IO(Env, State)
@@ -160,7 +160,7 @@ transDec x e s = case x of
 transFunctionDec :: FunctionDec -> Env -> State -> IO(Env, State)
 transFunctionDec x e s = case x of
   FunDec (Ident "main") _ _ stms -> do
-      (_, ns, v) <- catch (doStms stms e s) $ \ex -> do
+      (_, ns, v) <- catch (doStms stms e s) $ \ex ->
               throw $ AssertionFailed ("in function main:\n\t" ++ show (ex :: SomeException) )
       return (e, set go ns)
   FunDec ident args type_ stms -> declareFun e s ident args stms True
@@ -244,13 +244,13 @@ transStm x e s  = case x of
       return(e, ns, v)
   Sblock stms -> catch (do
       (_, ns, v) <- doStms stms e s
-      return(e, ns, v) ) $ \ex -> do
+      return(e, ns, v) ) $ \ex ->
            throwIO $ AssertionFailed ("in block statemenet:\n\t" ++ show (ex :: SomeException) )
   Sfor ident exp stms -> catch (do
       let (ne, ns) = alloc e s ident True
       (nns, VArray list) <- transExp exp ne ns
       (nnns, v) <- doFor ident list stms VUnit ne nns
-      return(e, nnns, v) ) $ \ex -> do
+      return(e, nnns, v) ) $ \ex ->
              throwIO $ AssertionFailed ("in for statemenet:\n\t" ++ show (ex :: SomeException) )
   Swhile exp stms -> catch (do
       (_, ns, v) <- transStm (Sifelse exp stms [Sbreak]) e s
@@ -258,13 +258,13 @@ transStm x e s  = case x of
         x | x == ret  -> return(e, ns, v)
           | x == bre  -> return(e, set go ns, v)
           | x == cont -> transStm (Swhile exp stms) e (set go ns)
-          | x == go   -> transStm (Swhile exp stms) e ns ) $ \ex -> do
+          | x == go   -> transStm (Swhile exp stms) e ns ) $ \ex ->
              throwIO $ AssertionFailed ("in while statemenet:\n\t" ++ show (ex :: SomeException) )
   Sbreak -> return(e, set bre s, VUnit)
   Scont -> return(e, set cont s, VUnit)
   Sretexp exp -> catch (do
       (ns, v) <- transExp exp e s
-      return(e, set ret ns, v) ) $ \ex -> do
+      return(e, set ret ns, v) ) $ \ex ->
          throwIO $ AssertionFailed ("in return statemenet:\n\t" ++ show (ex :: SomeException) )
   Sret -> return(e, set ret s, VUnit)
   Sif exp stms -> catch (do
@@ -273,7 +273,7 @@ transStm x e s  = case x of
         True -> do
             (_, nns, v) <- doStms stms e ns
             return(e, nns, v)
-        False -> return(e, ns ,VUnit) ) $ \ex -> do
+        False -> return(e, ns ,VUnit) ) $ \ex ->
             throwIO $ AssertionFailed ("in if statemenet:\n\t" ++ show (ex :: SomeException) )
   Sifelse exp stms1 stms2 -> catch (do
       (ns, VBool v) <- transExp exp e s
@@ -283,26 +283,26 @@ transStm x e s  = case x of
             return(e, nns, v)
         False -> do
             (_, nns, v) <- doStms stms2 e ns
-            return(e, nns, v) ) $ \ex -> do
+            return(e, nns, v) ) $ \ex ->
         throwIO $ AssertionFailed ("in if-else statemenet:\n\t" ++ show (ex :: SomeException) )
   Sprint exp -> catch (do
       (ns, x) <- transExp exp e s
       putStr (show x)
-      return(e, ns, VUnit) ) $ \ex -> do
+      return(e, ns, VUnit) ) $ \ex ->
          throwIO $ AssertionFailed ("in print statemenet:\n\t" ++ show (ex :: SomeException) )
   Sprintln exp -> catch (do
       (ns, x) <- transExp exp e s
       putStrLn (show x)
-      return(e, ns, VUnit) ) $ \ex -> do
+      return(e, ns, VUnit) ) $ \ex ->
          throwIO $ AssertionFailed ("in println statemenet:\n\t" ++ show (ex :: SomeException) )
   Snotnull exp stms -> catch (do
       (ns, v) <- transExp exp e s
       case v of
         VNull -> return(e, ns, VUnit)
-        _ -> transStm (Sblock stms) e s ) $ \ex -> do
-          throwIO $ AssertionFailed ("in !! statemenet:\n\t" ++ show (ex :: SomeException) )
+        _ -> transStm (Sblock stms) e s ) $ \ex ->
+          throwIO $ AssertionFailed ("in ?? statemenet:\n\t" ++ show (ex :: SomeException) )
   Sassert exp -> do
-      (ns, VBool b) <- catch (transExp exp e s) $ \ex -> do
+      (ns, VBool b) <- catch (transExp exp e s) $ \ex ->
           throwIO $ AssertionFailed ("in assert statemenet:\n\t" ++ show (ex :: SomeException) )
       if b then return(e, ns, VUnit)
       else throwIO $ AssertionFailed ("Assertion failed " ++ show exp)
@@ -330,7 +330,7 @@ transFunctionExp x e s = case x of
       (nne, ns) <- addArgsHelper args exps ne e s
       (_, nns, v) <- doStms stms nne ns
       return(set go nns, v))
-       $ \ex -> do
+       $ \ex ->
            throw $ AssertionFailed ("in function " ++ name ++ " call:\n\t" ++ show (ex :: SomeException) )
 
 
@@ -349,7 +349,7 @@ transGetExpHelper v dims e s = case (v,dims) of
               | otherwise -> transGetExpHelper (list !! index) t e ns
 
 transGetExp :: Ident -> [DimExp] -> Env -> State -> IO(State, Value)
-transGetExp ident@(Ident name) dimexps e s = catch (transGetExpHelper (getVal e s ident) dimexps e s) $ \ex -> do
+transGetExp ident@(Ident name) dimexps e s = catch (transGetExpHelper (getVal e s ident) dimexps e s) $ \ex ->
     throw $ AssertionFailed ("in array " ++ name ++ ":\n\t" ++ show (ex :: SomeException) )
 
 

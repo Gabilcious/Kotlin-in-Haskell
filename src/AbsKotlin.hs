@@ -4,7 +4,11 @@
 module AbsKotlin where
 
 newtype Ident = Ident String
-  deriving (Eq, Ord, Show, Read)
+  deriving (Eq, Ord, Read)
+
+instance Show Ident where
+    show(Ident name) = name
+
 
 data Prog = Program [Inst]
   deriving (Eq, Ord, Show, Read)
@@ -76,6 +80,7 @@ instance Show Exp where
       show (Etrue) = "true"
       show (Efalse) = "false"
       show (Enull) = "null"
+      show (Ecall (FunCall id [])) = show id ++ "()"
       show (Ecall (FunCall id args)) = show id ++ "(" ++ (foldr1 (\x y -> x ++ "," ++ y) (map show args)) ++ ")"
       show (Eget id dims) = show id ++ (foldr1 (\x y -> x ++ "," ++ y) (map show dims))
       show (Elambda a stms) = "/lambda" -- TODO
