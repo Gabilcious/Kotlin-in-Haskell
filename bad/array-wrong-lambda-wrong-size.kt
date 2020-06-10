@@ -1,5 +1,9 @@
-/* Temat:  Kontruktor Array jest wywoływany bez poprawnego size
- * Result: Size of array should be Int
+/* Temat:  Kontruktor Array jest wywolywany bez poprawnego size
+ * Result:
+ * interpreter: Error has occured:
+ *      in function main:
+ *      in declaration arr:
+ *      Size of array should be Int
  */
 
 fun main() : Unit {

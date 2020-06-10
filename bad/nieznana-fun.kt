@@ -1,5 +1,9 @@
 /* Temat:  Nieznana funkcja
- * Result: Ident "sleep" is not defined
+ * Result:
+ * interpreter: Error has occured:
+ *      in function main:
+ *      in statement (sleep(10)):
+ *      sleep is not defined
  */
 
 fun main() : Unit {

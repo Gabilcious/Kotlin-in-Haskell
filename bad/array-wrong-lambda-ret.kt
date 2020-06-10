@@ -1,5 +1,8 @@
-/* Temat:  Lambda przekazywana w prametrze konstruktora Array zwraca zły typ
- * Result: Lambda should not return Unit
+/* Temat:  Lambda przekazywana w prametrze konstruktora Array zwraca zly typ
+ * Result: interpreter: Error has occured:
+ *      in function main:
+ *      in declaration arr:
+ *      Lambda should not return Unit
  */
 
 fun main() : Unit {

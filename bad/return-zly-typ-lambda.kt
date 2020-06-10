@@ -1,6 +1,10 @@
-/* Temat:  Zły typ zwracanej wartosci w lambdzie
- *         (zauważmy, że w lambdzie typ wykrywany jest automatycznie, więc to przypisanie się nie uda)
- * Result: Cannot assign (Int,String) -> Int? to (Int,String) -> Int
+/* Temat:  Zly typ zwracanej wartosci w lambdzie
+ *         (zauwazmy, że w lambdzie typ wykrywany jest automatycznie, więc to przypisanie sie nie uda)
+ * Result:
+ * interpreter: Error has occured:
+ *      in function main:
+ *      in declaration foo:
+ *      Got (Int,String) -> Int? when (Int,String) -> Int is expected
  */
 
 fun main() : Unit {

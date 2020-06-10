@@ -1,5 +1,9 @@
-/* Temat:  Próba użycia złego typu w iterable
- * Result: Iterable should be <Int>..<Int>, not <Bool>..<Bool>
+/* Temat:  Proba użycia zlego typu w iterable
+ * Result:
+ * interpreter: Error has occured:
+ *      in function main:
+ *      in for statement:
+ *      Iterable shlould be <Int>..<Int>, not <Bool>..<Bool>
  */
 
 fun main() : Unit {

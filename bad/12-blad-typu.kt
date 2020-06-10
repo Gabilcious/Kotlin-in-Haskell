@@ -1,5 +1,9 @@
-/* Temat:  Próba przypisania złego typu do zmiennej
- * Result: Cannot assign String to Int
+/* Temat:  Proba przypisania zlego typu do zmiennej
+ * Result:
+ * interpreter: Error has occured:
+ *      in function main:
+ *      in statement ((x="V1")):
+ *      Got String when Int is expected
  */
 
 fun main() : Unit {

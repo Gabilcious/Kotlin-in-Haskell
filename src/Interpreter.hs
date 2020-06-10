@@ -109,7 +109,7 @@ assignArray e@(E em) s@(S sm) id dims val = do
     let (index, _) = (em ! id)
     let VArray v = (sm ! index)
     nv <- assignArrayHelper e s v dims val
-    return(S (insert index val sm)) -- TODO
+    return(S (insert index nv sm))
 
 alloc :: Env -> State -> Ident -> Bool -> (Env, State)
 alloc (E em) (S sm) ident const = let
@@ -259,6 +259,20 @@ doFor ident list stms v e s = case list of
                 | x == cont -> doFor ident t stms nv e (set go nns)
                 | x == go   -> doFor ident t stms nv e nns
 
+doWhile :: Exp -> [Stm] -> Env -> State -> IO(Env, State, Value)
+doWhile exp stms e s = do
+    (ns, VBool vb) <- transExp exp e s
+    (_, nns, v) <- case vb of
+       True -> do
+          (_, nns, v) <- doStms stms e ns
+          return(e, nns, v)
+       False -> do
+          return(e, ns, VUnit)
+    case get nns of
+        x | x == ret  -> return(e, nns, v)
+          | x == bre  -> return(e, set go nns, v)
+          | x == cont -> doWhile exp stms e (set go nns)
+          | x == go   -> doWhile exp stms e nns
 
 transStm :: Stm -> Env -> State -> IO(Env, State, Value)
 transStm x e s  = case x of
@@ -279,13 +293,7 @@ transStm x e s  = case x of
       (nnns, v) <- doFor ident list stms VUnit ne nns
       return(e, nnns, v) ) $ \ex ->
              throwIO $ AssertionFailed ("in for statemenet:\n\t" ++ show (ex :: SomeException) )
-  Swhile exp stms -> catch (do
-      (_, ns, v) <- transStm (Sifelse exp stms [Sbreak]) e s
-      case get ns of
-        x | x == ret  -> return(e, ns, v)
-          | x == bre  -> return(e, set go ns, v)
-          | x == cont -> transStm (Swhile exp stms) e (set go ns)
-          | x == go   -> transStm (Swhile exp stms) e ns ) $ \ex ->
+  Swhile exp stms -> catch (doWhile exp stms e s) $ \ex ->
              throwIO $ AssertionFailed ("in while statemenet:\n\t" ++ show (ex :: SomeException) )
   Sbreak -> return(e, set bre s, VUnit)
   Scont -> return(e, set cont s, VUnit)
@@ -500,7 +508,7 @@ transOpAssign x a b = case x of
   OpAssign4 -> case (a, b) of
     (VInt va, VInt vb) -> VInt (va * vb)
   OpAssign5 -> case (a, b) of
-    (VInt va, VInt 0) -> throw $ AssertionFailed ("cannot divide by 0")
+    (VInt va, VInt 0) -> throw $ AssertionFailed ("Cannot divide by 0")
     (VInt va, VInt vb) -> VInt (div va  vb)
   OpAssign6 -> case (a, b) of
     (VInt va, VInt vb) -> VInt (mod va vb)

@@ -1,5 +1,9 @@
-/* Temat:  Próba przejścia forem przez Array, które może być nullerm
- * Result: Loop for can only go through nonull iterable elements
+/* Temat:  Proba przejscia forem przez Array, ktore może byc nullerm
+ * Result:
+ * interpreter: Error has occured:
+ *      in function main:
+ *      in for statement:
+ *      Loop for can only go through nonnull Array
  */
 
 fun main() : Unit {

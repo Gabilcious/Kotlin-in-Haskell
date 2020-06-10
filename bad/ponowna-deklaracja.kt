@@ -1,5 +1,9 @@
-/* Temat:  Próba ponownego zadeklarowania zmiennej
- * Result: Ident "x" was previously declared in this scope
+/* Temat:  Proba ponownego zadeklarowania zmiennej
+ * Result:
+ * interpreter: Error has occured:
+ *      in function main:
+ *      in declaration x:
+ *      x was previously declared in this scope
  */
 
 fun main() : Unit {

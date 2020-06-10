@@ -1,5 +1,7 @@
-/* Temat:  Try to create variable with name which is reserved
- * Result: Type of main shoud be: () -> Unit
+/* Temat:  Zly typ funkcji main
+ * Result:
+ * interpreter: Error has occured:
+ *      Type of main shoud be: () -> Unit
  */
 
 fun main() : Int { }

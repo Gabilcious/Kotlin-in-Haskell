@@ -1,5 +1,9 @@
 /* Temat:  Return w lambdzie
- * Result: Return is not allowed inside lambda body
+ * Result:
+ * interpreter: Error has occured:
+ *      in function main:
+ *      in declaration foo:
+ *      Return is not allowed inside lambda body
  */
 
 fun main() : Unit {

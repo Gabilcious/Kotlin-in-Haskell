@@ -1,5 +1,8 @@
-/* Temat:  Zły typ w if / assert
- * Result: Wrong expresion inside if statement: Int
+/* Temat:  Zly typ w if / assert
+ * Result:
+ * interpreter: Error has occured:
+ *      in function main:
+ *      Wrong expresion inside if statement: (2+2) is not Bool but Int
  */
 
 fun main() : Unit {

@@ -1,5 +1,9 @@
-/* Temat:  Wywołanie funkcji ze złym argumentem
- * Result: Cannot assign Int? to Int
+/* Temat:  Wywolanie funkcji ze zlym argumentem
+ * Result:
+ * interpreter: Error has occured:
+ *      in function main:
+ *      in print statement:
+ *      Got Int? when Int is expected
  */
 
 fun fib(d: Int) : Int {

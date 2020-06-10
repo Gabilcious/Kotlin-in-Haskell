@@ -1,5 +1,9 @@
-/* Temat:  Za dużo argumentów przy wywowływaniu funkcji
- * Result: Passed 2 arguments, when Ident "fib" expects 1
+/* Temat:  Za duzo argumentow przy wywowlywaniu funkcji
+ * Result:
+ * interpreter: Error has occured:
+ *      in function main:
+ *      in print statement:
+ *      Passed 2 arguments, when fib expects 1
  */
 
 fun fib(d: Int) : Int {

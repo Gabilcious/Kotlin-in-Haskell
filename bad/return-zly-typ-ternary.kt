@@ -1,5 +1,9 @@
-/* Temat:  Różne typy zwracanej wartosci w ternary op
- * Result: Return expressions have different types: Bool and String
+/* Temat:  Rozne typy zwracanej wartosci w ternary op
+ * Result:
+ * interpreter: Error has occured:
+ *      in function main:
+ *      in statement (((10<20) ? true : "false")):
+ *      Return expressions have different types: Bool and String
  */
 
 fun main() : Unit {

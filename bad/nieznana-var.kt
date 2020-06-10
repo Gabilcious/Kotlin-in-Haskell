@@ -1,5 +1,9 @@
 /* Temat:  Nieznana zmienna
- * Result: Ident "x" is not defined
+ * Result:
+ * interpreter: Error has occured:
+ *      in function main:
+ *      in print statement:
+ *      x is not defined
  */
 
 fun main() : Unit {

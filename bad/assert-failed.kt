@@ -1,5 +1,8 @@
 /* Temat:  Assert failed
- * Result: Assertion fail
+ * Result:
+ * interpreter: Error has occured:
+ *      in function main:
+ *      Assertion failed (10>20)
  */
 
 

@@ -1,5 +1,7 @@
 /* Temat:  Odpalenie pliku bez main
- * Result: Main was not found
+ * Result:
+ * interpreter: Error has occured:
+ *      Main was not found
  */
 
 fun fib(d: Int) : Int {

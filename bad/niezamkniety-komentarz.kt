@@ -1,4 +1,4 @@
-/* Temat:  Niezamknięty komentarz
+/* Temat:  Niezamkniety komentarz
  * Result: Nie parsuje się
  */
 

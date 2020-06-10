@@ -1,5 +1,9 @@
-/* Temat:  Zły kontruktor wołany dla Array
- * Result: Second arg of Array constructor should be function
+/* Temat:  Zly konstruktor wolany dla Array
+ * Result:
+ * interpreter: Error has occured:
+ *      in function main:
+ *      in declaration arr:
+ *      Second arg of Array constructor should be function
  */
 
 fun main() : Unit {

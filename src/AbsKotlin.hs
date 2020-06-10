@@ -52,7 +52,7 @@ data Exp
 
 instance Show Exp where
       show (Eassign e1 op e2) = "(" ++ show e1 ++ show op ++ show e2 ++ ")"
-      show (Eternary e1 e2 e3) = "(" ++ show e1 ++ show e2 ++ show e3 ++ ")"
+      show (Eternary e1 e2 e3) = "(" ++ show e1 ++ " ? " ++ show e2 ++ " : " ++ show e3 ++ ")"
       show (Eor e1 e2) = "(" ++ show e1 ++ "||" ++ show e2 ++ ")"
       show (Eand e1 e2) = "(" ++ show e1 ++ "&&" ++ show e2 ++ ")"
       show (Eeq e1 e2) = "(" ++ show e1 ++ "==" ++ show e2 ++ ")"
@@ -76,14 +76,14 @@ instance Show Exp where
       show (Earray size stm) = "Array (" ++ show size ++ ", " ++ show stm ++ ")"
       show (Etupla e) = "Tupla (" ++ show e ++ ")"
       show (Eint e) = show e
-      show (Estring e) = e
+      show (Estring e) = "\"" ++ e ++ "\""
       show (Etrue) = "true"
       show (Efalse) = "false"
       show (Enull) = "null"
       show (Ecall (FunCall id [])) = show id ++ "()"
       show (Ecall (FunCall id args)) = show id ++ "(" ++ (foldr1 (\x y -> x ++ "," ++ y) (map show args)) ++ ")"
       show (Eget id dims) = show id ++ (foldr1 (\x y -> x ++  y) (map show dims))
-      show (Elambda a stms) = "/lambda" -- TODO
+      show (Elambda a stms) = "/lambda"
       show (Ennass e) = show e ++"!!"
       show (Evar (Ident name)) = name
 

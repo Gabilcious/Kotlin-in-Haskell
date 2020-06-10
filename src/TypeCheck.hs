@@ -326,7 +326,7 @@ transStm x e s@(S sm)  = case x of
           (_,_,t) <- transStm (Sblock stms) e ns
           return (e, s, t)) $ \ex ->
                throwIO $ AssertionFailed ("in if statement:\n\t" ++ show (ex :: SomeException) )
-        _ -> throwIO $ AssertionFailed ("Wrong expresion inside if statement: " ++ show t)
+        _ -> throwIO $ AssertionFailed ("Wrong expresion inside if statement: " ++ show exp ++ " is not Bool but " ++ show t)
   Sifelse exp stms1 stms2 -> do
       (ns, t) <- transExp exp e s
       case t of
@@ -338,7 +338,7 @@ transStm x e s@(S sm)  = case x of
             (Help 1,Help 1) -> return (e, S (insert (-6) (Help 1) sm), t)
             _ -> return (e, s, t)) $ \ex ->
                          throwIO $ AssertionFailed ("in if-else statement:\n\t" ++ show (ex :: SomeException) )
-        _ -> throwIO $ AssertionFailed ("Wrong expresion inside if statement: " ++ show t)
+        _ -> throwIO $ AssertionFailed ("Wrong expresion inside if statement: " ++ show exp ++ " is not Bool but " ++ show t)
   Sprint exp -> do
       (ns, t) <- catch (transExp exp e s) $ \ex ->
               throwIO $ AssertionFailed ("in print statement:\n\t" ++ show (ex :: SomeException) )
@@ -403,6 +403,7 @@ transEtuplaHelper exps e s = case exps of
 transGetExp :: Type -> [DimExp] -> Env -> State -> IO (State, Type)
 transGetExp t dims e s = do
   case (t, dims) of
+
     (_, []) -> return (s, t)
     (Tnonnull (Tarray nt), Dim exp:tail) -> do
         (ns, _type) <- transExp exp e s
@@ -446,7 +447,7 @@ transExp x e s = case x of
           (_, _, True, _) -> return(ns, a)
           (_, _, _, True) -> return(ns, b)
           _ -> throwIO $ AssertionFailed ("Return expressions have different types: " ++ show a ++ " and " ++ show b)
-        _ -> throwIO $ AssertionFailed ("Wrong expresion inside if statement: " ++ show t)
+        _ -> throwIO $ AssertionFailed ("Wrong expresion inside if statement: " ++ show exp1 ++ " is not Bool but " ++ show t)
   Eor exp1 exp2 -> transBoolHelper exp1 exp2 "||" e s 1
   Eand exp1 exp2 -> transBoolHelper exp1 exp2 "&&" e s 1
   Eeq exp1 exp2 -> do

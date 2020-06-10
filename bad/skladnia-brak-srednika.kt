@@ -1,4 +1,4 @@
-/* Temat:  Brak średnika
+/* Temat:  Brak srednika
  * Result: Nie parsuje się
  */
 

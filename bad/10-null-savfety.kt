@@ -1,5 +1,9 @@
-/* Temat:  Próba przypisania null do zmiennej nonnull
- * Result: Cannot assign null to String
+/* Temat:  Proba przypisania null do zmiennej nonnull
+ * Result:
+ * interpreter: Error has occured:
+ *      in function main:
+ *      in statement ((str_non_null=null)):
+ *      Got null when String is expected
  */
 
 fun main() : Unit {

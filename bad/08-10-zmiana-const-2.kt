@@ -1,5 +1,9 @@
 /* Temat:  Zamiana zmiennej const
- * Result: Val cannot be reassigned
+ * Result:
+ * interpreter: Error has occured:
+ *      in function main:
+ *      in statement ((x="V2")):
+ *      Val cannot be reasigned
  */
 
 fun main() : Unit {

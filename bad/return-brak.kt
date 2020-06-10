@@ -1,5 +1,8 @@
-/* Temat:  Brak return lub return tylko w części branch
- * Result: Function should return something
+/* Temat:  Brak return lub return tylko w czesci branch
+ * Result:
+ * interpreter: Error has occured:
+ *      in function f:
+ *      Function should return something
  */
 
 var b: Bool = true;
