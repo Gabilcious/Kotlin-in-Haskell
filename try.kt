@@ -21,7 +21,8 @@ fun foo(): Int {
 fun main(): Unit {
     for (i in [1..10]) {
         if (true) {
-            a++;
+            assert(10==0);
+            //a++;
         }
     }
 }

@@ -44,15 +44,50 @@ data Exp
     | Elambda [Arg] [Stm]
     | Ennass Exp
     | Evar Ident
-  deriving (Eq, Ord, Show, Read)
+  deriving (Eq, Ord, Read)
 
---instance Show Exp where
---      show (Eassign e1 op e2) = show e1 ++ show op ++ show e2
---      show (Eeq e1 e2) = show e1 ++ show e2
---      -- TODO: continue
+instance Show Exp where
+      show (Eassign e1 op e2) = "(" ++ show e1 ++ show op ++ show e2 ++ ")"
+      show (Eternary e1 e2 e3) = "(" ++ show e1 ++ show e2 ++ show e3 ++ ")"
+      show (Eor e1 e2) = "(" ++ show e1 ++ "||" ++ show e2 ++ ")"
+      show (Eand e1 e2) = "(" ++ show e1 ++ "&&" ++ show e2 ++ ")"
+      show (Eeq e1 e2) = "(" ++ show e1 ++ "==" ++ show e2 ++ ")"
+      show (Eneq e1 e2) = "(" ++ show e1 ++ "!=" ++ show e2 ++ ")"
+      show (El e1 e2) = "(" ++ show e1 ++ "<" ++ show e2 ++ ")"
+      show (Eg e1 e2) = "(" ++ show e1 ++ ">" ++ show e2 ++ ")"
+      show (Ele e1 e2) = "(" ++ show e1 ++ "<=" ++ show e2 ++ ")"
+      show (Ege e1 e2) = "(" ++ show e1 ++ ">=" ++ show e2 ++ ")"
+      show (Eadd e1 e2) = "(" ++ show e1 ++ "+" ++ show e2 ++ ")"
+      show (Esub e1 e2) = "(" ++ show e1 ++ "-" ++ show e2 ++ ")"
+      show (Emul e1 e2) = "(" ++ show e1 ++ "*" ++ show e2 ++ ")"
+      show (Ediv e1 e2) = "(" ++ show e1 ++ "/" ++ show e2 ++ ")"
+      show (Emod e1 e2) = "(" ++ show e1 ++ "%" ++ show e2 ++ ")"
+      show (Eneg e) = "-" ++ show e
+      show (Elneg e) = "!" ++ show e
+      show (Einc e) = "++" ++ show e
+      show (Edec e) = "--" ++ show e
+      show (EPinc e) = show e ++ "++"
+      show (EPdec e) = show e ++ "--"
+      show (Eiter e) = "Iterable (" ++ show e ++ ")"
+      show (Earray size stm) = "Array (" ++ show size ++ ", " ++ show stm ++ ")"
+      show (Etupla e) = "Tupla (" ++ show e ++ ")"
+      show (Eint e) = show e
+      show (Estring e) = e
+      show (Etrue) = "true"
+      show (Efalse) = "false"
+      show (Enull) = "null"
+      show (Ecall (FunCall id args)) = show id ++ "(" ++ (foldr1 (\x y -> x ++ "," ++ y) (map show args)) ++ ")"
+      show (Eget id dims) = show id ++ (foldr1 (\x y -> x ++ "," ++ y) (map show dims))
+      show (Elambda a stms) = "/lambda" -- TODO
+      show (Ennass e) = show e ++"!!"
+      show (Evar (Ident name)) = name
+
 
 data DimExp = Dim Exp
-  deriving (Eq, Ord, Show, Read)
+  deriving (Eq, Ord, Read)
+
+instance Show DimExp where
+      show (Dim e) = "[" ++ show e ++ ""
 
 data OpAssign
     = OpAssign1
@@ -61,7 +96,15 @@ data OpAssign
     | OpAssign4
     | OpAssign5
     | OpAssign6
-  deriving (Eq, Ord, Show, Read)
+  deriving (Eq, Ord, Read)
+
+instance Show OpAssign where
+      show (OpAssign1) = "="
+      show (OpAssign2) = "+="
+      show (OpAssign3) = "-="
+      show (OpAssign4) = "*="
+      show (OpAssign5) = "/="
+      show (OpAssign6) = "%="
 
 data BaseType
     = Ttupla [Type] | Tbool | Tint | Tstring | Tarray Type
