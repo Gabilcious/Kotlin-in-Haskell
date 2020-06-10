@@ -82,7 +82,7 @@ instance Show Exp where
       show (Enull) = "null"
       show (Ecall (FunCall id [])) = show id ++ "()"
       show (Ecall (FunCall id args)) = show id ++ "(" ++ (foldr1 (\x y -> x ++ "," ++ y) (map show args)) ++ ")"
-      show (Eget id dims) = show id ++ (foldr1 (\x y -> x ++ "," ++ y) (map show dims))
+      show (Eget id dims) = show id ++ (foldr1 (\x y -> x ++  y) (map show dims))
       show (Elambda a stms) = "/lambda" -- TODO
       show (Ennass e) = show e ++"!!"
       show (Evar (Ident name)) = name
@@ -92,7 +92,7 @@ data DimExp = Dim Exp
   deriving (Eq, Ord, Read)
 
 instance Show DimExp where
-      show (Dim e) = "[" ++ show e ++ ""
+      show (Dim e) = "[" ++ show e ++ "]"
 
 data OpAssign
     = OpAssign1

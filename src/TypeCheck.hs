@@ -51,7 +51,7 @@ check prog = catch (do
     S nsm <- transProg prog e s
     case nsm ! (-4) of
       Help 1 -> return()
-      _ -> throwIO $ AssertionFailed "Main was not found") $ \ex -> do
+      _ -> throwIO $ AssertionFailed "Main was not found") $ \ex ->
     throw $ AssertionFailed ("Error has occured:\n\t" ++ show (ex :: SomeException) )
 
 transProg :: Prog -> Env -> State -> IO State
@@ -161,7 +161,7 @@ declare e s ident@(Ident name) a const exp = catch (do
       (ns, b) <- transExp exp e s
       _ <- tryAssign a b
       (ne, nns) <- alloc e ns ident const a
-      return(ne, nns)) $ \ex -> do -- TODO: remove this "do"
+      return(ne, nns)) $ \ex ->
            throwIO $ AssertionFailed ("in declaration " ++ name ++ ":\n\t" ++ show (ex :: SomeException) )
 
 transDec :: Dec -> Env -> State -> IO (Env, State)
@@ -188,7 +188,7 @@ transFunctionDec x e s@(S sm) = case x of
           let nns = S (insert (-5) (HelpRet TRunit) nsm)
           let nnns = incDepth nns
           (_, _, v) <- doStms stms e nnns
-          return (e, ns)) $ \ex -> do
+          return (e, ns)) $ \ex ->
                   throwIO $ AssertionFailed ("in function main:\n\t" ++ show (ex :: SomeException) )
         _ -> throwIO $ AssertionFailed "Main was previously declared"
   FunDec (Ident "main") _ _ _ -> throwIO $ AssertionFailed "Type of main shoud be: () -> Unit"
@@ -203,7 +203,7 @@ transFunctionDec x e s@(S sm) = case x of
       case (ret, retSm ! (-6)) of
         (TRunit, _) -> return (ne, ns)
         (_, Help 0) -> throwIO $ AssertionFailed "Function should return something"
-        orherwise -> return (ne, ns)) $ \ex -> do
+        orherwise -> return (ne, ns)) $ \ex ->
                    throwIO $ AssertionFailed ("in function " ++ name ++ ":\n\t" ++ show (ex :: SomeException) )
 
 
@@ -275,7 +275,7 @@ transStm x e s@(S sm)  = case x of
       return(ne, se, TRunit)
   Sexp exp -> catch (do
       (_, t) <- transExp exp e s
-      return(e, s, TRtype t)) $ \ex -> do
+      return(e, s, TRtype t)) $ \ex ->
              throwIO $ AssertionFailed ("in statement (" ++ show exp ++"):\n\t" ++ show (ex :: SomeException) )
   Sblock stms -> do
       let ns = incDepth s
@@ -292,12 +292,12 @@ transStm x e s@(S sm)  = case x of
           (ne, nns) <- alloc e ns ident True t
           (_, _, _) <- transStm (Sblock stms) ne nns
           return(e, s, TRunit)
-        _ -> throwIO $ AssertionFailed "Loop for can only go through nonnull Array") $ \ex -> do
+        _ -> throwIO $ AssertionFailed "Loop for can only go through nonnull Array") $ \ex ->
                      throwIO $ AssertionFailed ("in for statement:\n\t" ++ show (ex :: SomeException) )
   Swhile exp stms -> catch (do
       let ns = incLoop s
       (_, _, _) <- transStm (Sif exp stms) e ns
-      return(e, s, TRunit)) $ \ex -> do
+      return(e, s, TRunit)) $ \ex ->
             throwIO $ AssertionFailed ("in while statement:\n\t" ++ show (ex :: SomeException) )
   Sbreak -> do
       loops <- getIdx s (-2)
@@ -324,7 +324,7 @@ transStm x e s@(S sm)  = case x of
       case t of
         Tnonnull Tbool -> catch (do
           (_,_,t) <- transStm (Sblock stms) e ns
-          return (e, s, t)) $ \ex -> do
+          return (e, s, t)) $ \ex ->
                throwIO $ AssertionFailed ("in if statement:\n\t" ++ show (ex :: SomeException) )
         _ -> throwIO $ AssertionFailed ("Wrong expresion inside if statement: " ++ show t)
   Sifelse exp stms1 stms2 -> do
@@ -336,11 +336,11 @@ transStm x e s@(S sm)  = case x of
           (_,S b,t) <- doStms stms2 e ns
           case (a ! (-6), b ! (-6)) of
             (Help 1,Help 1) -> return (e, S (insert (-6) (Help 1) sm), t)
-            _ -> return (e, s, t)) $ \ex -> do
+            _ -> return (e, s, t)) $ \ex ->
                          throwIO $ AssertionFailed ("in if-else statement:\n\t" ++ show (ex :: SomeException) )
         _ -> throwIO $ AssertionFailed ("Wrong expresion inside if statement: " ++ show t)
   Sprint exp -> do
-      (ns, t) <- catch (transExp exp e s) $ \ex -> do
+      (ns, t) <- catch (transExp exp e s) $ \ex ->
               throwIO $ AssertionFailed ("in print statement:\n\t" ++ show (ex :: SomeException) )
       case t of
         Tfun _ _ -> throwIO $ AssertionFailed ("Cannot print " ++ show t)
@@ -354,7 +354,7 @@ transStm x e s@(S sm)  = case x of
           (ne, ns) <- forceAlloc e s (Ident "it") True (Tnonnull bt)
           transStm (Sblock stms) ne ns
         _ -> transStm (Sblock stms) e s
-      return (e, s, TRunit)) $ \ex -> do
+      return (e, s, TRunit)) $ \ex ->
             throwIO $ AssertionFailed ("in !! statement:\n\t" ++ show (ex :: SomeException) )
   Sassert exp -> do
        (ns, t) <- transExp exp e s
@@ -401,7 +401,8 @@ transEtuplaHelper exps e s = case exps of
       return(nns, t:ts)
 
 transGetExp :: Type -> [DimExp] -> Env -> State -> IO (State, Type)
-transGetExp t dims e s = case (t, dims) of
+transGetExp t dims e s = do
+  case (t, dims) of
     (_, []) -> return (s, t)
     (Tnonnull (Tarray nt), Dim exp:tail) -> do
         (ns, _type) <- transExp exp e s
@@ -431,6 +432,8 @@ transExp :: Exp -> Env -> State -> IO (State, Type)
 transExp x e s = case x of
   Eassign exp1@(Evar ident) opassign exp2 -> do
       assertNotConst e ident
+      transHelper exp1 exp2 opassign e s
+  Eassign exp1@(Eget ident dimexps) opassign exp2 -> do
       transHelper exp1 exp2 opassign e s
   Eternary exp1 exp2 exp3 -> do
       (ns, t) <- transExp exp1 e s

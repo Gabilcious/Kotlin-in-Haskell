@@ -1,4 +1,4 @@
-val n: Int = -1;
+val n: Int = -5;
 
 val b: Array<Array<Int?>> = Array(
         n,
@@ -12,22 +12,14 @@ val b: Array<Array<Int?>> = Array(
         }
 );
 
+val c: Array<Int> = Array(5, { y: Int -> y+10; });
+
 fun foo(): Int {
-//    assert(10==19);
     return 10/0;
 }
-// TODO: println(b[4]/10);
-// TODO: return 10/0 lub var a = 10/0
 
 fun main(): Unit {
-    for (i in [1..10]) {
-        if (true) {
-//            val a: Int = (i/0);
-            println(b[4]/10);
-            //foo();
-//            foo();
-//            assert(10==0);
-            //a++;
-        }
+    if (true) {
+        b[1][2] = 100;
     }
 }

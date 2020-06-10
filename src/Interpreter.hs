@@ -88,6 +88,29 @@ assign (E em) (S sm) id val = let
     (index, _) = (em ! id)
   in S (insert index val sm)
 
+
+assignArrayHelper :: Env -> State -> [Value] -> [DimExp] -> Value -> IO(Value)
+assignArrayHelper e s vals [Dim dim] change = do
+    (ns, VInt idx) <- transExp dim e s
+    nv <- mapM (\(i, v) ->
+       if i == idx then return(change)
+       else return(v)) (zip [0..] vals)
+    return(VArray nv)
+
+assignArrayHelper e s vals (Dim dim:dims) change = do
+    (ns, VInt idx) <- transExp dim e s
+    nv <- mapM (\(i, VArray v) ->
+        if i == idx then assignArrayHelper e ns v dims change
+        else return(VArray v)) (zip [0..] vals)
+    return(VArray nv)
+
+assignArray :: Env -> State -> Ident -> [DimExp] -> Value -> IO(State)
+assignArray e@(E em) s@(S sm) id dims val = do
+    let (index, _) = (em ! id)
+    let VArray v = (sm ! index)
+    nv <- assignArrayHelper e s v dims val
+    return(S (insert index val sm)) -- TODO
+
 alloc :: Env -> State -> Ident -> Bool -> (Env, State)
 alloc (E em) (S sm) ident const = let
     VInt index = sm ! (-1)
@@ -128,34 +151,37 @@ is v s = v == get s
 -- ----------------------- --
 
 declare :: Env -> State -> Ident -> Value -> Bool -> IO(Env, State)
-declare e s id@(Ident name) val const = catch (do
+declare e s id val const = do
     let (ne, ns) = alloc e s id const
     let nns = assign ne ns id val
-    return(ne, nns)) $ \ex ->
-        throwIO $ AssertionFailed ("in declaration " ++ name ++ ":\n\t" ++ show (ex :: SomeException) )
+    return(ne, nns)
 
 declareFun :: Env -> State -> Ident -> [Arg] -> [Stm] -> Bool -> IO(Env, State)
 declareFun e s id@(Ident name) args stms const = catch (do
     let (ne, ns) = alloc e s id const
     let nns = assign ne ns id (VFun args stms ne)
     return(ne, nns)) $ \ex ->
-        throwIO $ AssertionFailed ("in declaration " ++ name ++ ":\n\t" ++ show (ex :: SomeException) )
+               throwIO $ AssertionFailed ("in declaration " ++ name ++ ":\n\t" ++ show (ex :: SomeException) )
 
 transDec :: Dec -> Env -> State -> IO(Env, State)
 transDec x e s = case x of
   Dfun functiondec -> transFunctionDec functiondec e s
-  Dvar ident@(Ident name) type_ exp -> do
+  Dvar ident@(Ident name) type_ exp -> catch (do
       (ns, val) <- transExp exp e s
-      declare e ns ident val False
-  Dval ident@(Ident name) type_ exp -> do
+      declare e ns ident val False) $ \ex ->
+              throwIO $ AssertionFailed ("in declaration " ++ name ++ ":\n\t" ++ show (ex :: SomeException) )
+  Dval ident@(Ident name) type_ exp -> catch (do
       (ns, val) <- transExp exp e s
-      declare e ns ident val True
-  Dvarnull ident@(Ident name) type_ -> do
+      declare e ns ident val True) $ \ex ->
+              throwIO $ AssertionFailed ("in declaration " ++ name ++ ":\n\t" ++ show (ex :: SomeException) )
+  Dvarnull ident@(Ident name) type_ -> catch (do
       (ns, val) <- transExp Enull e s
-      declare e ns ident val False
-  Dvalnull ident@(Ident name) type_ -> do
+      declare e ns ident val False) $ \ex ->
+              throwIO $ AssertionFailed ("in declaration " ++ name ++ ":\n\t" ++ show (ex :: SomeException) )
+  Dvalnull ident@(Ident name) type_ -> catch (do
       (ns, val) <- transExp Enull e s
-      declare e ns ident val True
+      declare e ns ident val True) $ \ex ->
+              throwIO $ AssertionFailed ("in declaration " ++ name ++ ":\n\t" ++ show (ex :: SomeException) )
 
 transFunctionDec :: FunctionDec -> Env -> State -> IO(Env, State)
 transFunctionDec x e s = case x of
@@ -239,9 +265,10 @@ transStm x e s  = case x of
   Sdec dec -> do
       (ne, se) <- transDec dec e s
       return(ne, se, VUnit)
-  Sexp exp -> do
+  Sexp exp -> catch (do
       (ns, v) <- transExp exp e s
-      return(e, ns, v)
+      return(e, ns, v)) $ \ex -> do
+           throwIO $ AssertionFailed ("in statement (" ++ show exp ++"):\n\t" ++ show (ex :: SomeException) )
   Sblock stms -> catch (do
       (_, ns, v) <- doStms stms e s
       return(e, ns, v) ) $ \ex ->
@@ -382,6 +409,10 @@ transExp x e s = case x of
       (ns, val) <- transHelper exp1 exp2 (transOpAssign opassign) e s
       let nns = assign e ns ident val
       return(nns, val)
+  Eassign exp1@(Eget ident dimexps) opassign exp2 -> do
+      (ns, val) <- transHelper exp1 exp2 (transOpAssign opassign) e s
+      nns <- assignArray e ns ident dimexps val
+      return(nns, val)
   Eternary exp1 exp2 exp3 -> do
       (ns, VBool b) <- transExp exp1 e s
       case b of
@@ -435,9 +466,11 @@ transExp x e s = case x of
       return(ns, VArray vs)
   Earray size exp -> do
       (ns, VInt v) <- transExp size e s
-      (nns, VFun [Args it _] stms eFun) <- transExp exp e ns
-      (nnns, vs) <- transArray e nns stms it 0 v []
-      return(nnns, VArray vs)
+      if v < 0 then throwIO $ AssertionFailed ("Array size is nagative: " ++ show v)
+      else do
+        (nns, VFun [Args it _] stms eFun) <- transExp exp e ns
+        (nnns, vs) <- transArray e nns stms it 0 v []
+        return(nnns, VArray vs)
   Etupla exps -> do
       (ns, vs) <- transEtuplaHelper exps e s
       return(ns, VTupla vs)
@@ -452,7 +485,7 @@ transExp x e s = case x of
   Ennass exp -> do
       (ns, v) <- transExp exp e s
       case v of
-        VNull -> throw $ AssertionFailed ("Null pointer exeption")
+        VNull -> throwIO $ AssertionFailed ("Null pointer exeption")
         _ -> return(ns,v)
   Evar ident -> return(s, getVal e s ident)
 
